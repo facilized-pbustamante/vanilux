@@ -4,3 +4,6 @@
 /vanilux-asan
 /test-discovery
 tests/*.o
+
+# Release packages
+*.tar.gz

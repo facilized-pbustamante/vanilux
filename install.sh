@@ -46,31 +46,45 @@ cd "$SCRIPT_DIR"
 
 # ── 1) dependencias ───────────────────────────────────────────────────────────
 say "Instalando dependencias…"
-if   command -v apt-get >/dev/null 2>&1; then
-  $SUDO apt-get update -qq
-  $SUDO apt-get install -y build-essential make pkg-config libgtkmm-3.0-dev papirus-icon-theme
-elif command -v dnf >/dev/null 2>&1; then
-  $SUDO dnf install -y gcc-c++ make pkgconf-pkg-config gtkmm30-devel papirus-icon-theme
-elif command -v pacman >/dev/null 2>&1; then
-  $SUDO pacman -S --needed --noconfirm base-devel gtkmm3 papirus-icon-theme
-elif command -v zypper >/dev/null 2>&1; then
-  $SUDO zypper install -y gcc-c++ make pkg-config gtkmm3-devel papirus-icon-theme
+if [ -x "./$APP" ] && file "./$APP" | grep -qi "ELF.*executable" >/dev/null 2>&1; then
+  PREBUILT=1
+  if   command -v apt-get >/dev/null 2>&1; then
+    $SUDO apt-get update -qq
+    $SUDO apt-get install -y libgtkmm-3.0-1v5 papirus-icon-theme
+  elif command -v dnf >/dev/null 2>&1; then
+    $SUDO dnf install -y gtkmm30 papirus-icon-theme
+  elif command -v pacman >/dev/null 2>&1; then
+    $SUDO pacman -S --needed --noconfirm gtkmm3 papirus-icon-theme
+  elif command -v zypper >/dev/null 2>&1; then
+    $SUDO zypper install -y gtkmm3 papirus-icon-theme
+  fi
 else
-  warn "Gestor de paquetes no reconocido. Instalá manualmente:"
-  warn "  compilador C++17, make, pkg-config, gtkmm-3.0 (dev) y papirus-icon-theme"
+  PREBUILT=0
+  if   command -v apt-get >/dev/null 2>&1; then
+    $SUDO apt-get update -qq
+    $SUDO apt-get install -y build-essential make pkg-config libgtkmm-3.0-dev papirus-icon-theme
+  elif command -v dnf >/dev/null 2>&1; then
+    $SUDO dnf install -y gcc-c++ make pkgconf-pkg-config gtkmm30-devel papirus-icon-theme
+  elif command -v pacman >/dev/null 2>&1; then
+    $SUDO pacman -S --needed --noconfirm base-devel gtkmm3 papirus-icon-theme
+  elif command -v zypper >/dev/null 2>&1; then
+    $SUDO zypper install -y gcc-c++ make pkg-config gtkmm3-devel papirus-icon-theme
+  fi
+  command -v g++  >/dev/null 2>&1 || die "Falta g++ (compilador C++)."
+  command -v make >/dev/null 2>&1 || die "Falta make."
 fi
-
-# Chequeo mínimo
-command -v g++  >/dev/null 2>&1 || die "Falta g++ (compilador C++)."
-command -v make >/dev/null 2>&1 || die "Falta make."
-pkg-config --exists gtkmm-3.0 2>/dev/null || die "Falta gtkmm-3.0 (instalá libgtkmm-3.0-dev / gtkmm30-devel / gtkmm3)."
+command -v ldconfig >/dev/null 2>&1 && ldconfig 2>/dev/null || true
 ok "Dependencias listas."
 
-# ── 2) compilar ───────────────────────────────────────────────────────────────
-say "Compilando…"
-make clean >/dev/null 2>&1 || true
-make
-ok "Compilado: ./$APP $(./$APP --version 2>/dev/null || echo "v$VERSION")"
+# ── 2) compilar (o usar binario pre-compilado) ────────────────────────────────
+if [ "$PREBUILT" = "1" ]; then
+  say "Binario pre-compilado detectado, saltando compilación…"
+else
+  say "Compilando…"
+  make clean >/dev/null 2>&1 || true
+  make
+fi
+ok "Listo: ./$APP $(./$APP --version 2>/dev/null || echo "v$VERSION")"
 
 # ── 3) instalar binario + CSS + iconos ────────────────────────────────────────
 say "Instalando en $PREFIX (requiere privilegios)…"
