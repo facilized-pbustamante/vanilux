@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <defs>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <path d="M24 6l5.5 11.2L42 19l-9 8.8 2.1 12.2-11.1-5.8-11.1 5.8 2.1-12.2-9-8.8 12.5-1.8z" fill="none" stroke="#e09924" stroke-width="2" stroke-linejoin="round" filter="url(#glow)"/>
+</svg>

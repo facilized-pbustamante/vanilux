@@ -1,0 +1,325 @@
+/* Force monospace font globally across all widgets in the window */
+#launcher-window, label, entry, button, textview {
+    font-family: monospace;
+}
+
+/* Transparent so the translucent frosted-glass tint painted in
+   LauncherWindow::on_draw paints a solid dark backdrop. */
+#launcher-window {
+    background-color: #0d0d12;
+}
+
+/* Strip all default GTK theme styles from buttons */
+button,
+button:hover,
+button:active,
+button:focus,
+button:backdrop,
+button:backdrop:hover,
+button:backdrop:active,
+button:checked,
+button:checked:hover {
+    background-image: none;
+    background-color: transparent;
+    border-style: none;
+    border-width: 0;
+    box-shadow: none;
+    text-shadow: none;
+}
+
+/* Frame design with Amber border and custom titles */
+frame {
+    border: 1px solid rgba(224, 153, 36, 0.35);
+    border-radius: 4px;
+    margin: 4px;
+    padding: 6px;
+    background-color: transparent;
+}
+
+frame > label {
+    color: #e09924;
+    font-size: 11px;
+    font-weight: bold;
+    background-color: #0d0d12; /* Mask the border behind the label */
+    margin: 0 4px;
+    padding: 0 6px;
+}
+
+/* Flat search input */
+entry {
+    border: none;
+    background: transparent;
+    color: #f2e9e1;
+    caret-color: #e09924;
+    font-size: 14px;
+    box-shadow: none;
+    text-shadow: none;
+    padding: 2px 4px;
+}
+
+entry:focus {
+    box-shadow: none;
+    border: none;
+}
+
+.search-prompt {
+    color: #e09924;
+    font-size: 16px;
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+/* Grid/List View buttons */
+button.view-btn,
+button.view-btn:backdrop {
+    background-color: transparent;
+    border: 1px solid rgba(224, 153, 36, 0.35);
+    color: rgba(255, 255, 255, 0.6);
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin: 0 2px;
+}
+
+button.view-btn:hover {
+    background-color: rgba(224, 153, 36, 0.1);
+    color: #f2e9e1;
+}
+
+button.view-btn.active,
+button.view-btn.active:backdrop {
+    background-color: rgba(224, 153, 36, 0.25);
+    border-color: #e09924;
+    color: #e09924;
+    box-shadow: 0 0 5px rgba(224, 153, 36, 0.4);
+}
+
+/* Sidebar Categories */
+button.category-btn,
+button.category-btn:backdrop {
+    background-color: transparent;
+    border-style: none;
+    border-width: 0;
+    box-shadow: none;
+    color: rgba(255, 255, 255, 0.6);
+    padding: 8px 12px;
+    margin: 2px 4px;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 4px;
+}
+
+button.category-btn:hover {
+    background-color: rgba(224, 153, 36, 0.08);
+    color: #f2e9e1;
+}
+
+button.category-btn.active,
+button.category-btn.active:backdrop {
+    background-color: rgba(224, 153, 36, 0.15);
+    border-left: 3px solid #e09924;
+    border-radius: 0 4px 4px 0;
+    color: #e09924;
+    font-weight: bold;
+}
+
+/* App Icons & Buttons */
+.app-button,
+.app-button:backdrop {
+    background-color: rgba(224, 153, 36, 0.0);
+    border-style: none;
+    border-width: 0;
+    box-shadow: none;
+    padding: 4px;
+    border-radius: 6px;
+    transition: all 0.25s ease-out;
+}
+
+.app-button:focus,
+.app-button.hover {
+    background-color: transparent;
+}
+
+.icon-wrapper {
+    border: 2px solid rgba(224, 153, 36, 0.0);
+    border-radius: 8px;
+    padding: 3px;
+    margin-bottom: 0px;
+    background-color: transparent;
+    box-shadow: 0 0 0px rgba(224, 153, 36, 0.0);
+}
+
+/* Hover border + glow are drawn in Cairo (AppIconButton::on_draw), not here. */
+
+.app-label {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 10px;
+    font-weight: 400;
+    margin-top: 2px;
+}
+
+.app-button.hover .app-label,
+.app-button:focus .app-label {
+    color: #e09924;
+    font-weight: bold;
+}
+
+/* List-mode subtitle (the .desktop Comment) */
+.app-sublabel {
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 10px;
+    font-weight: 400;
+}
+.app-button.hover .app-sublabel,
+.app-button:focus .app-sublabel {
+    color: rgba(242, 233, 225, 0.7);
+}
+
+/* List-mode category badge (amber pill on the right) */
+.cat-badge {
+    color: #e09924;
+    background-color: rgba(224, 153, 36, 0.12);
+    border: 1px solid rgba(224, 153, 36, 0.35);
+    border-radius: 10px;
+    padding: 1px 9px;
+    font-size: 9px;
+    font-weight: bold;
+    margin-right: 4px;
+}
+
+/* List-mode ⚙ config icon (window-less image) */
+.config-icon {
+    opacity: 0.5;
+}
+.app-button.hover .config-icon,
+.app-button:focus .config-icon {
+    opacity: 1.0;
+}
+
+/* Tag popover */
+popover.tags-popover,
+popover.tags-popover > box,
+popover.tags-popover contents {
+    background-color: #14141c;
+    border: 1px solid rgba(224, 153, 36, 0.4);
+    border-radius: 8px;
+}
+popover.tags-popover checkbutton {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 12px;
+    padding: 3px 2px;
+}
+popover.tags-popover checkbutton:hover {
+    color: #e09924;
+}
+popover.tags-popover check {
+    border: 1px solid rgba(224, 153, 36, 0.5);
+    border-radius: 3px;
+    min-width: 14px;
+    min-height: 14px;
+}
+popover.tags-popover check:checked {
+    background-color: #e09924;
+    border-color: #e09924;
+}
+
+/* Favorite Toggle Overlay Button */
+button.fav-toggle-btn,
+button.fav-toggle-btn:backdrop {
+    color: rgba(224, 153, 36, 0.4);
+    background-color: transparent;
+    background-image: none;
+    border-style: none;
+    border-width: 0;
+    padding: 1px;
+    margin: 0;
+    font-size: 14px;
+    font-weight: bold;
+    min-width: 18px;
+    min-height: 18px;
+    box-shadow: none;
+    text-shadow: none;
+    border-radius: 4px;
+}
+button.fav-toggle-btn:hover,
+button.fav-toggle-btn.active,
+button.fav-toggle-btn.active:backdrop {
+    color: #ffb000;
+    background-color: transparent;
+    background-image: none;
+    border-style: none;
+    border-width: 0;
+    box-shadow: none;
+    text-shadow: 0 0 6px rgba(255, 176, 0, 0.8);
+}
+
+/* Section Header Separators */
+.section-header-label {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 11px;
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+.section-separator {
+    background-color: rgba(224, 153, 36, 0.2);
+    min-height: 1px;
+}
+
+/* Status Bar & Keycaps */
+.status-ws {
+    color: #e09924;
+    font-weight: bold;
+    margin-right: 12px;
+}
+
+.status-text {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 11px;
+    margin-right: 12px;
+}
+
+.key-cap {
+    border: 1px solid rgba(224, 153, 36, 0.5);
+    border-radius: 3px;
+    padding: 0 3px;
+    background-color: #1a1a24;
+    color: #e09924;
+    font-weight: bold;
+    font-size: 8px;
+    margin-right: 4px;
+}
+
+.key-cap-arrow {
+    border: 1px solid rgba(224, 153, 36, 0.5);
+    border-radius: 2px;
+    background-color: #1a1a24;
+    color: #e09924;
+    font-weight: bold;
+    font-size: 4px;
+    padding: 0;
+    margin: 0;
+    min-width: 9px;
+    min-height: 7px;
+}
+
+.key-desc {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 11px;
+    margin-right: 16px;
+}
+
+/* Scrollbar styling */
+scrollbar, scrollbar button, scrollbar slider {
+    background-color: transparent;
+    border: none;
+}
+
+scrollbar.vertical slider {
+    background-color: rgba(224, 153, 36, 0.2);
+    min-width: 5px;
+    border-radius: 3px;
+}
+
+scrollbar.vertical slider:hover {
+    background-color: #e09924;
+}

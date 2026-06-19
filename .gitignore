@@ -1,0 +1,6 @@
+# Build artifacts
+*.o
+/vanilux
+/vanilux-asan
+/test-discovery
+tests/*.o

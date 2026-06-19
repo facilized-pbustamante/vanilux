@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Vanilux
+GenericName=Application Launcher
+Comment=Lanzador de aplicaciones a pantalla completa (estilo Launchpad)
+Comment[en]=Fullscreen application launcher (Launchpad style)
+Exec=/usr/local/bin/vanilux
+Icon=/usr/local/share/vanilux/icons/grid_amber.svg
+Terminal=false
+Categories=Utility;
+Keywords=launcher;apps;menu;lanzador;aplicaciones;
+StartupNotify=false
