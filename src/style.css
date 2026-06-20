@@ -360,44 +360,59 @@ scrollbar.vertical slider:hover {
 }
 
 .settings-card colorselection,
-.settings-card colorselection * {
+.settings-card colorsel,
+.settings-card colorsel colorchooser,
+.settings-card colorselection *,
+.settings-card colorsel *,
+.settings-card colorsel colorchooser * {
     color: #f2e9e1;
 }
-.settings-card colorselection button {
-    background-color: #1a1a24;
+.settings-card colorselection button,
+.settings-card colorsel button {
+    background-color: #1a1a24 !important;
     border: 1px solid rgba(224,153,36,0.25);
     border-radius: 4px;
-    color: #f2e9e1;
+    color: #f2e9e1 !important;
 }
-.settings-card colorselection entry {
-    background-color: #1a1a24;
-    color: #f2e9e1;
+.settings-card colorselection entry,
+.settings-card colorsel entry {
+    background-color: #1a1a24 !important;
+    color: #f2e9e1 !important;
     border: 1px solid rgba(224,153,36,0.25);
     border-radius: 3px;
     padding: 2px 4px;
 }
-.settings-card colorselection label {
-    color: rgba(255,255,255,0.7);
+.settings-card colorselection label,
+.settings-card colorsel label {
+    color: rgba(255,255,255,0.7) !important;
 }
-.settings-card colorselection scale trough {
-    background-color: #1a1a24;
+.settings-card colorselection scale,
+.settings-card colorsel scale {
+    background-color: transparent;
 }
-.settings-card colorselection scale slider {
-    background-color: #e09924;
+.settings-card colorselection scale trough,
+.settings-card colorsel scale trough {
+    background-color: #1a1a24 !important;
+}
+.settings-card colorselection scale slider,
+.settings-card colorsel scale slider {
+    background-color: #e09924 !important;
     border: none;
     border-radius: 4px;
     min-width: 8px;
     min-height: 8px;
 }
-.settings-card colorselection spinbutton {
-    background-color: #1a1a24;
-    color: #f2e9e1;
+.settings-card colorselection spinbutton,
+.settings-card colorsel spinbutton {
+    background-color: #1a1a24 !important;
+    color: #f2e9e1 !important;
     border: 1px solid rgba(224,153,36,0.25);
     border-radius: 3px;
 }
-.settings-card colorselection spinbutton button {
-    background-color: #1a1a24;
-    color: #f2e9e1;
+.settings-card colorselection spinbutton button,
+.settings-card colorsel spinbutton button {
+    background-color: #1a1a24 !important;
+    color: #f2e9e1 !important;
     border: none;
 }
 

@@ -407,8 +407,8 @@ AppIconButton::AppIconButton(const AppEntry& entry, bool is_favorite, bool list_
     m_fav_toggle_btn.set_halign(Gtk::ALIGN_END);
     m_fav_toggle_btn.set_valign(Gtk::ALIGN_START);
     if (list_mode) {
-        m_fav_toggle_btn.set_margin_end(-10);
-        m_fav_toggle_btn.set_margin_top(-20);
+        m_fav_toggle_btn.set_margin_end(-13);
+        m_fav_toggle_btn.set_margin_top(-9);
     } else {
         m_fav_toggle_btn.set_margin_end(0);
         m_fav_toggle_btn.set_margin_top(0);
@@ -963,14 +963,16 @@ void LauncherWindow::load_css() {
 .settings-card { background-color: #14141c; border: 1px solid rgba(224,153,36,0.35); border-radius: 6px; padding: 32px 36px; margin: 32px; box-shadow: 0 12px 48px rgba(0,0,0,0.6), 0 0 24px rgba(224,153,36,0.12); }
 .settings-card label { color: #f2e9e1; }
 .settings-card separator { background-color: rgba(224,153,36,0.20); min-height: 1px; margin: 6px 0; }
-.settings-card colorselection,.settings-card colorselection * { color: #f2e9e1; }
-.settings-card colorselection button { background-color: #1a1a24; border: 1px solid rgba(224,153,36,0.25); border-radius: 4px; color: #f2e9e1; }
-.settings-card colorselection entry { background-color: #1a1a24; color: #f2e9e1; border: 1px solid rgba(224,153,36,0.25); border-radius: 3px; padding: 2px 4px; }
-.settings-card colorselection label { color: rgba(255,255,255,0.7); }
-.settings-card colorselection scale trough { background-color: #1a1a24; }
-.settings-card colorselection scale slider { background-color: #e09924; border: none; border-radius: 4px; min-width: 8px; min-height: 8px; }
-.settings-card colorselection spinbutton { background-color: #1a1a24; color: #f2e9e1; border: 1px solid rgba(224,153,36,0.25); border-radius: 3px; }
-.settings-card colorselection spinbutton button { background-color: #1a1a24; color: #f2e9e1; border: none; }
+.settings-card colorselection,.settings-card colorsel,.settings-card colorsel colorchooser,
+.settings-card colorselection *,.settings-card colorsel *,.settings-card colorsel colorchooser * { color: #f2e9e1; }
+.settings-card colorselection button,.settings-card colorsel button { background-color: #1a1a24 !important; border: 1px solid rgba(224,153,36,0.25); border-radius: 4px; color: #f2e9e1 !important; }
+.settings-card colorselection entry,.settings-card colorsel entry { background-color: #1a1a24 !important; color: #f2e9e1 !important; border: 1px solid rgba(224,153,36,0.25); border-radius: 3px; padding: 2px 4px; }
+.settings-card colorselection label,.settings-card colorsel label { color: rgba(255,255,255,0.7) !important; }
+.settings-card colorselection scale,.settings-card colorsel scale { background-color: transparent; }
+.settings-card colorselection scale trough,.settings-card colorsel scale trough { background-color: #1a1a24 !important; }
+.settings-card colorselection scale slider,.settings-card colorsel scale slider { background-color: #e09924 !important; border: none; border-radius: 4px; min-width: 8px; min-height: 8px; }
+.settings-card colorselection spinbutton,.settings-card colorsel spinbutton { background-color: #1a1a24 !important; color: #f2e9e1 !important; border: 1px solid rgba(224,153,36,0.25); border-radius: 3px; }
+.settings-card colorselection spinbutton button,.settings-card colorsel spinbutton button { background-color: #1a1a24 !important; color: #f2e9e1 !important; border: none; }
 .mode-toggle { color: rgba(255,255,255,0.7); padding: 2px 6px; }
 .mode-toggle radio { background-color: #1a1a24; border: 1px solid rgba(224,153,36,0.4); border-radius: 8px; min-width: 13px; min-height: 13px; -gtk-icon-source: none; }
 .mode-toggle radio:checked { background-color: #e09924; border-color: #e09924; box-shadow: 0 0 6px rgba(224,153,36,0.6); }
