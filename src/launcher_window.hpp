@@ -1,10 +1,13 @@
 #pragma once
 #include <gtkmm.h>
 #include "app_discovery.hpp"
+#include "i18n.hpp"
+#include "keyboard_widget.hpp"
 #include <chrono>
 #include <vector>
 #include <string>
 #include <map>
+#include <tuple>
 #include <functional>
 #include <memory>
 
@@ -21,6 +24,9 @@ public:
                   SetTagCb set_tag_cb = nullptr);
     const AppEntry& get_entry() const { return m_entry; }
     sigc::signal<void>& signal_clicked() { return m_signal_clicked; }
+    // Re-tint the favorite star (and list-mode ⚙) for the current theme version,
+    // so live color-picker previews recolor them in step with everything else.
+    void refresh_theme();
 protected:
     bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr) override;
 private:
@@ -86,6 +92,7 @@ protected:
     
     // Layout and UI builders
     void rebuild_all();
+    void reload_control_icons();
     void populate_grid(Gtk::Grid& grid, const std::vector<AppEntry>& list);
     void set_category(const std::string& cat_id);
     void update_status();
@@ -98,8 +105,22 @@ protected:
 
     // Refresh, settings, theming
     void refresh_apps();
-    void show_settings_dialog();
-    void apply_theme(const std::string& hex_color);
+    // Re-scan installed apps and rebuild only if the set actually changed. Run
+    // (deferred) on every open so newly installed apps appear silently without
+    // slowing the launcher's open or flickering the grid when nothing changed.
+    void sync_apps();
+    void build_settings_panel();   // builds the in-window modal once, lazily
+    void open_settings();
+    void close_settings();
+    void update_combo_label();     // refresh the chosen-hotkey display in the modal
+
+    // i18n: register a label for retranslation, switch language, re-apply strings.
+    void register_tr(Gtk::Label* lbl, const std::string& key, bool markup = false);
+    void retranslate();
+    void apply_language(Lang l);
+    bool set_theme_color(const std::string& hex_color);   // updates globals only
+    void recolor_theme_live(const std::string& hex_color); // cheap live preview
+    void apply_theme(const std::string& hex_color);        // full commit + persist
 
     static std::string detect_category(const std::string& categories);
 
@@ -109,7 +130,37 @@ protected:
     static constexpr int HOME_SECTION_MAX = 9;
 
     // Widgets
+    // Root overlay: the launcher content sits in the base layer; the settings
+    // modal is an overlay child shown in-place (no separate top-level window).
+    Gtk::Overlay m_root_overlay;
     Gtk::Box  m_outer_box{Gtk::ORIENTATION_VERTICAL};
+
+    // In-window settings modal
+    Gtk::EventBox m_settings_backdrop;                       // dimmed full-area scrim
+    Gtk::EventBox m_settings_card_evt;                       // captures clicks on the card
+    Gtk::Box      m_settings_card{Gtk::ORIENTATION_VERTICAL}; // centered panel content
+    Gtk::ColorSelection* m_color_picker = nullptr;
+    KeyboardWidget*      m_keyboard     = nullptr;
+    Gtk::RadioButton*    m_mode_f       = nullptr;
+    Gtk::RadioButton*    m_mode_super   = nullptr;
+    Gtk::Label*          m_combo_value  = nullptr;
+    std::vector<std::pair<Gtk::Button*, Lang>> m_lang_buttons;
+    bool m_settings_built = false;
+    bool m_settings_open  = false;
+    std::string m_settings_orig_color;   // color when the modal opened (for cancel)
+
+    // Live preview driven by the frame clock: the picker's change events just
+    // stash the color and set a dirty flag; a per-frame tick callback (installed
+    // only while the modal is open) does the actual recolor. Running it in the
+    // frame clock's update phase means the CSS text, icons and stars all repaint
+    // together in the SAME frame — and at most once per frame — so the preview is
+    // both perfectly in step and cheap, even during the picker's pointer grab.
+    std::string m_pending_color;
+    bool  m_preview_dirty = false;
+    guint m_preview_tick  = 0;
+
+    // Raw CSS template cached in memory (read from disk once).
+    std::string m_css_template;
 
     // Search Box
     Gtk::Frame m_search_frame;
@@ -119,6 +170,12 @@ protected:
     Gtk::Box m_view_toggle_box{Gtk::ORIENTATION_HORIZONTAL};
     Gtk::Button m_btn_grid;
     Gtk::Button m_btn_list;
+    Gtk::Image* m_img_grid_view = nullptr;
+    Gtk::Image* m_img_list_view = nullptr;
+    Gtk::Image* m_img_settings  = nullptr;   // wrench glyph in the top toggle row
+    Gtk::Image* m_img_fav_header = nullptr;
+    Gtk::Image* m_img_rec_header = nullptr;
+    Gtk::Image* m_img_all_header = nullptr;
 
     // Middle Pane
     Gtk::Box m_middle_box{Gtk::ORIENTATION_HORIZONTAL};
@@ -160,7 +217,6 @@ protected:
     Gtk::Label m_app_count_label;
     Gtk::Label m_cat_name_label;
     Gtk::Box m_shortcuts_box{Gtk::ORIENTATION_HORIZONTAL};
-    Gtk::Button m_btn_refresh;
     Gtk::Button m_btn_settings;
 
     // Data lists
@@ -174,6 +230,10 @@ protected:
     std::vector<std::pair<std::string, Gtk::Button*>> m_cat_buttons;
 
     Glib::RefPtr<Gtk::CssProvider> m_theme_provider;
+
+    // i18n retranslation registry: labels + their string keys (markup flag).
+    std::vector<std::tuple<Gtk::Label*, std::string, bool>> m_tr_labels;
+    std::map<std::string, Gtk::Label*> m_cat_labels;   // sidebar tag id → its label
 
     std::chrono::steady_clock::time_point m_created_at;
     bool m_close_inhibited = false;

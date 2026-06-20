@@ -1,30 +1,28 @@
 #!/usr/bin/env bash
 #
-# vanilux — instalador todo-en-uno (release 0.1)
+# vanilux — instalador todo-en-uno
 #
-#   ./install.sh                 instala en /usr/local, pregunta tecla
-#   ./install.sh --key F4        instala con F4 (sin preguntar)
-#   ./install.sh --key '<Alt>F1' instala con Alt+F1
-#   PREFIX=/usr ./install.sh     cambia el prefijo
-#
-# Hace: instala dependencias, compila, instala binario+CSS+iconos,
-# crea la entrada en el menú de aplicaciones y configura la tecla rápida.
+#   ./install.sh                     instala (elige idioma, tecla F4 default)
+#   ./install.sh --key '<Alt>F1'     instala con Alt+F1
+#   PREFIX=/usr ./install.sh         cambia prefijo
 #
 set -euo pipefail
 
-VERSION="$(cat "$(dirname "$0")/VERSION" 2>/dev/null || echo 0.1)"
+VERSION="$(cat "$(dirname "$0")/VERSION" 2>/dev/null || echo 0.2)"
 APP="vanilux"
 PREFIX="${PREFIX:-/usr/local}"
 APPS_DIR="/usr/share/applications"
 BIN="$PREFIX/bin/$APP"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+CONFIG_DIR="$HOME/.config/vanilux"
+CONFIG_FILE="$CONFIG_DIR/config.txt"
 
 # ── argumentos ──────────────────────────────────────────────────────────────
 HOTKEY=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --key) shift; HOTKEY="$1" ;;
-    *) die "Argumento desconocido: $1. Uso: ./install.sh [--key <tecla>]" ;;
+    *) echo "Uso: ./install.sh [--key <tecla>]" >&2; exit 1 ;;
   esac
   shift
 done
@@ -49,10 +47,35 @@ else
 fi
 
 printf "${B}┌──────────────────────────────────────────────────┐${N}\n"
-printf "${B}│   vanilux — instalador  (release %s)    │${N}\n" "$VERSION"
+printf "${B}│   vanilux — instalador  (v%s)               │${N}\n" "$VERSION"
 printf "${B}└──────────────────────────────────────────────────┘${N}\n"
 
 cd "$SCRIPT_DIR"
+
+# ── 0) selector de idioma ───────────────────────────────────────────────────
+echo
+say "Seleccioná tu idioma / Select your language:"
+echo "  1) Español        (ES)"
+echo "  2) English        (EN)"
+echo "  3) Português      (PT)"
+echo "  4) 中文           (ZH)"
+echo "  5) Français       (FR)"
+echo "  6) 日本語         (JA)"
+echo "  7) 한국어         (KO)"
+printf "  ${C}➜${N} "
+read -r LANG_INPUT
+LANG_INPUT="${LANG_INPUT:-1}"
+case "$LANG_INPUT" in
+  1|es|ES)     LANG_CODE="ES" ;;
+  2|en|EN)     LANG_CODE="EN" ;;
+  3|pt|PT)     LANG_CODE="PT" ;;
+  4|zh|ZH)     LANG_CODE="ZH" ;;
+  5|fr|FR)     LANG_CODE="FR" ;;
+  6|ja|JA)     LANG_CODE="JA" ;;
+  7|ko|KO)     LANG_CODE="KO" ;;
+  *)           LANG_CODE="ES" ;;
+esac
+ok "Idioma seleccionado: $LANG_CODE"
 
 # ── 1) dependencias ─────────────────────────────────────────────────────────
 say "Instalando dependencias…"
@@ -60,25 +83,25 @@ if [ -x "./$APP" ] && file "./$APP" | grep -qi "ELF.*executable" >/dev/null 2>&1
   PREBUILT=1
   if   command -v apt-get >/dev/null 2>&1; then
     $SUDO apt-get update -qq
-    $SUDO apt-get install -y libgtkmm-3.0-1v5 papirus-icon-theme
+    $SUDO apt-get install -y libgtkmm-3.0-1v5 papirus-icon-theme 2>/dev/null
   elif command -v dnf >/dev/null 2>&1; then
-    $SUDO dnf install -y gtkmm30 papirus-icon-theme
+    $SUDO dnf install -y gtkmm30 papirus-icon-theme 2>/dev/null
   elif command -v pacman >/dev/null 2>&1; then
-    $SUDO pacman -S --needed --noconfirm gtkmm3 papirus-icon-theme
+    $SUDO pacman -S --needed --noconfirm gtkmm3 papirus-icon-theme 2>/dev/null
   elif command -v zypper >/dev/null 2>&1; then
-    $SUDO zypper install -y gtkmm3 papirus-icon-theme
+    $SUDO zypper install -y gtkmm3 papirus-icon-theme 2>/dev/null
   fi
 else
   PREBUILT=0
   if   command -v apt-get >/dev/null 2>&1; then
     $SUDO apt-get update -qq
-    $SUDO apt-get install -y build-essential make pkg-config libgtkmm-3.0-dev papirus-icon-theme
+    $SUDO apt-get install -y build-essential make pkg-config libgtkmm-3.0-dev papirus-icon-theme 2>/dev/null
   elif command -v dnf >/dev/null 2>&1; then
-    $SUDO dnf install -y gcc-c++ make pkgconf-pkg-config gtkmm30-devel papirus-icon-theme
+    $SUDO dnf install -y gcc-c++ make pkgconf-pkg-config gtkmm30-devel papirus-icon-theme 2>/dev/null
   elif command -v pacman >/dev/null 2>&1; then
-    $SUDO pacman -S --needed --noconfirm base-devel gtkmm3 papirus-icon-theme
+    $SUDO pacman -S --needed --noconfirm base-devel gtkmm3 papirus-icon-theme 2>/dev/null
   elif command -v zypper >/dev/null 2>&1; then
-    $SUDO zypper install -y gcc-c++ make pkg-config gtkmm3-devel papirus-icon-theme
+    $SUDO zypper install -y gcc-c++ make pkg-config gtkmm3-devel papirus-icon-theme 2>/dev/null
   fi
   command -v g++  >/dev/null 2>&1 || die "Falta g++ (compilador C++)."
   command -v make >/dev/null 2>&1 || die "Falta make."
@@ -119,25 +142,17 @@ Keywords=launcher;apps;menu;lanzador;aplicaciones;
 StartupNotify=false
 EOF
 $SUDO update-desktop-database "$APPS_DIR" >/dev/null 2>&1 || true
-ok "Entrada de menú creada (buscá 'Vanilux' en el menú)."
+ok "Entrada de menú creada."
 
-# ── 5) elegir tecla rápida ──────────────────────────────────────────────────
-if [ -z "$HOTKEY" ] && [ -t 1 ]; then
-  echo
-  say "Elegí la tecla rápida para abrir Vanilux (Enter = F4):"
-  say "Ejemplos: F4, <Alt>F1, <Super>space, <Ctrl><Alt>T"
-  printf "  ${C}➜${N} "
-  read -r HOTKEY_INPUT
-  if [ -z "$HOTKEY_INPUT" ]; then
-    HOTKEY="F4"
-  else
-    HOTKEY="$HOTKEY_INPUT"
-  fi
-fi
-if [ -z "$HOTKEY" ]; then
-  HOTKEY="F4"
-fi
-ok "Tecla rápida seleccionada: ${B}$HOTKEY${N}"
+# ── 5) escribir config (idioma + tecla rápida por defecto F4) ───────────────
+say "Guardando configuración…"
+mkdir -p "$CONFIG_DIR"
+cat > "$CONFIG_FILE" <<EOF
+color=#e09924
+hotkey=${HOTKEY:-F4}
+lang=$LANG_CODE
+EOF
+ok "Configuración guardada ($CONFIG_FILE)."
 
 # ── 6) configurar atajo ─────────────────────────────────────────────────────
 setup_keybind() {
@@ -145,7 +160,6 @@ setup_keybind() {
   command -v gsettings >/dev/null 2>&1 || return 1
   local schemas; schemas="$(gsettings list-schemas 2>/dev/null || true)"
 
-  # Limpiar atajo previo (si existe)
   if printf '%s\n' "$schemas" | grep -qx "org.cinnamon.desktop.keybindings"; then
     local s="org.cinnamon.desktop.keybindings"
     local relo="org.cinnamon.desktop.keybindings.custom-keybinding"
@@ -178,9 +192,7 @@ setup_keybind() {
     echo "gnome"; return 0
   fi
 
-  # XFCE (xfconf)
   if command -v xfconf-query >/dev/null 2>&1; then
-    local existing; existing=$(xfconf-query -c xfce4-keyboard-shortcuts -p /commands/custom 2>/dev/null || echo "")
     xfconf-query -c xfce4-keyboard-shortcuts -n -t string -p "/commands/custom/$key" -s "$BIN" 2>/dev/null || \
     xfconf-query -c xfce4-keyboard-shortcuts -t string -p "/commands/custom/$key" -s "$BIN" 2>/dev/null || true
     echo "xfce"; return 0
@@ -189,6 +201,7 @@ setup_keybind() {
   return 1
 }
 
+HOTKEY="${HOTKEY:-F4}"
 say "Configurando tecla rápida ${B}$HOTKEY${N}…"
 if [ "$RUNNING_AS_ROOT" -eq 1 ]; then
   warn "Corriendo como root: el atajo es por-usuario, no se puede setear aquí."
@@ -197,7 +210,7 @@ if [ "$RUNNING_AS_ROOT" -eq 1 ]; then
 else
   KB="$(setup_keybind "$HOTKEY" || true)"
   if [ -n "${KB:-}" ]; then
-    ok "Atajo $HOTKEY configurado ($KB). Si no responde, cerrá y volvé a entrar a la sesión."
+    ok "Atajo $HOTKEY configurado ($KB)."
   else
     warn "No pude configurar $HOTKEY automáticamente en este entorno."
     warn "Asignalo a mano: Atajos de teclado → comando '$BIN' → tecla $HOTKEY."
@@ -208,5 +221,8 @@ fi
 killall "$APP" 2>/dev/null || true
 
 printf "\n${G}${B}¡Instalación completa! (vanilux %s)${N}\n" "$VERSION"
-echo   "  • Lanzá con ${B}$HOTKEY${N}, o desde el menú de aplicaciones ('Vanilux')."
+echo   "  • Idioma:     ${B}$LANG_CODE${N}"
+echo   "  • Atajo:      ${B}$HOTKEY${N}"
+echo   "  • Lanzá con   ${B}$HOTKEY${N} o desde el menú de aplicaciones."
 echo   "  • Para desinstalar:  ./uninstall.sh"
+echo   "  • Para cambiar idioma/tecla: abrí Vanilux → Configuración"

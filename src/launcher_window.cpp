@@ -1,4 +1,6 @@
 #include "launcher_window.hpp"
+#include "i18n.hpp"
+#include "keyboard_widget.hpp"
 #include <iostream>
 #include <cstdlib>
 #include <cmath>
@@ -9,6 +11,7 @@
 #include <unordered_map>
 #include <iomanip>
 #include <cstring>
+#include <filesystem>
 
 // ── Theme globals (shared by LauncherWindow & AppIconButton Cairo glow) ─────
 static double g_theme_r = 224.0 / 255.0;
@@ -19,6 +22,21 @@ static int    g_theme_gi = 153;
 static int    g_theme_bi = 36;
 static std::string g_theme_color = "#e09924";
 static std::string g_theme_hotkey = "F4";
+static unsigned int g_theme_svg_ver = 0;
+static std::string g_theme_cache_dir;
+static std::string g_theme_bright_color;
+
+// In-memory recolored-SVG → pixbuf cache. Keyed by version|path|WxH so a theme
+// change (version bump) makes every old key a miss without any filesystem work.
+// Replaces the old /tmp/vanilux-theme-vN scheme that wrote dirs+files on each
+// color change — the single biggest source of color-picker lag.
+static std::map<std::string, Glib::RefPtr<Gdk::Pixbuf>> g_pixbuf_cache;
+
+static void clear_theme_cache() {
+    g_theme_cache_dir.clear();
+    g_theme_bright_color.clear();
+    g_pixbuf_cache.clear();
+}
 
 static std::string config_path() {
     const char* home = std::getenv("HOME");
@@ -50,6 +68,8 @@ static void load_theme_config() {
             }
         } else if (line.rfind("hotkey=", 0) == 0 && line.size() > 7) {
             g_theme_hotkey = line.substr(7);
+        } else if (line.rfind("lang=", 0) == 0 && line.size() > 5) {
+            set_language(lang_from_code(line.substr(5)));
         }
     }
 }
@@ -57,22 +77,43 @@ static void load_theme_config() {
 static void save_theme_config() {
     std::string path = config_path();
     if (path.empty()) return;
+    // Validate color: must be 7 chars like #rrggbb
+    if (g_theme_color.size() != 7 || g_theme_color[0] != '#') return;
     std::ofstream f(path);
     if (!f) return;
     f << "color=" << g_theme_color << "\n";
     f << "hotkey=" << g_theme_hotkey << "\n";
+    f << "lang=" << lang_code(current_lang()) << "\n";
+}
+
+static std::string normalize_rgba(const std::string& css) {
+    std::string s = css;
+    // Normalize rgba() to no-space format: rgba(R,G,B,ALPHA)
+    size_t p = 0;
+    while ((p = s.find("rgba(", p)) != std::string::npos) {
+        size_t end = s.find(')', p);
+        if (end == std::string::npos) break;
+        std::string inner = s.substr(p + 5, end - p - 5);
+        std::string cleaned;
+        for (char c : inner) if (c != ' ') cleaned += c;
+        s.replace(p + 5, end - p - 5, cleaned);
+        p = end + 1;
+    }
+    return s;
 }
 
 static std::string replace_theme_color(const std::string& css) {
-    std::string result = css;
-    // Replace hardcoded amber hex #e09924 with theme color (case-sensitive)
+    // Normalize first so we always work with no-space rgba()
+    std::string result = normalize_rgba(css);
+
+    // Replace #e09924 → theme hex
     size_t pos = 0;
     while ((pos = result.find("#e09924", pos)) != std::string::npos) {
         result.replace(pos, 7, g_theme_color);
         pos += g_theme_color.size();
     }
-    // Replace #ffb000 (favorite star hover) with a brightened version
-    pos = 0;
+
+    // Replace #ffb000 → brightened version
     int hr = std::min(255, (int)(g_theme_ri * 1.3 + 30));
     int hg = std::min(255, (int)(g_theme_gi * 1.3 + 30));
     int hb = std::min(255, (int)(g_theme_bi * 1.3 + 30));
@@ -85,21 +126,26 @@ static std::string replace_theme_color(const std::string& css) {
         result.replace(pos, 7, bright);
         pos += bright.size();
     }
+
+    // Replace rgba(255,176,0, → brightened
+    std::string old_fav = "rgba(255,176,0,";
+    std::ostringstream new_fav;
+    new_fav << "rgba(" << hr << "," << hg << "," << hb << ",";
+    std::string nf = new_fav.str();
     pos = 0;
-    while ((pos = result.find("rgba(255, 176, 0,", pos)) != std::string::npos) {
-        std::ostringstream rep;
-        rep << "rgba(" << hr << ", " << hg << ", " << hb << ",";
-        result.replace(pos, 17, rep.str());
-        pos += rep.str().size();
+    while ((pos = result.find(old_fav, pos)) != std::string::npos) {
+        result.replace(pos, old_fav.size(), nf);
+        pos += nf.size();
     }
-    // Replace rgba(224, 153, 36, with rgba(THEME_R, THEME_G, THEME_B,
-    std::string old_rgba = "rgba(224, 153, 36,";
+
+    // Replace rgba(224,153,36, → theme color
+    std::string old_amber = "rgba(224,153,36,";
     std::ostringstream new_rgba;
-    new_rgba << "rgba(" << g_theme_ri << ", " << g_theme_gi << ", " << g_theme_bi << ",";
+    new_rgba << "rgba(" << g_theme_ri << "," << g_theme_gi << "," << g_theme_bi << ",";
     std::string nr = new_rgba.str();
     pos = 0;
-    while ((pos = result.find(old_rgba, pos)) != std::string::npos) {
-        result.replace(pos, old_rgba.size(), nr);
+    while ((pos = result.find(old_amber, pos)) != std::string::npos) {
+        result.replace(pos, old_amber.size(), nr);
         pos += nr.size();
     }
 
@@ -171,6 +217,69 @@ static std::string resolve_icon_path(const std::string& rel_path) {
         if (!installed.empty()) return installed;
     }
     return rel_path;
+}
+
+// Recolor an SVG's accent tokens in memory (no temp files). Returns the
+// recolored markup; empty on failure.
+static std::string themed_svg_data(const std::string& orig) {
+    std::ifstream in(orig);
+    if (!in) return "";
+    std::string svg((std::istreambuf_iterator<char>(in)), {});
+    size_t p = 0;
+    while ((p = svg.find("#e09924", p)) != std::string::npos) {
+        svg.replace(p, 7, g_theme_color);
+        p += g_theme_color.size();
+    }
+    if (g_theme_bright_color.empty()) {
+        int hr = std::min(255, (int)(g_theme_ri * 1.3 + 30));
+        int hg = std::min(255, (int)(g_theme_gi * 1.3 + 30));
+        int hb = std::min(255, (int)(g_theme_bi * 1.3 + 30));
+        std::ostringstream hx;
+        hx << "#" << std::hex << std::setfill('0') << std::setw(2) << hr
+           << std::setw(2) << hg << std::setw(2) << hb;
+        g_theme_bright_color = hx.str();
+    }
+    p = 0;
+    while ((p = svg.find("#ffb000", p)) != std::string::npos) {
+        svg.replace(p, 7, g_theme_bright_color);
+        p += g_theme_bright_color.size();
+    }
+    return svg;
+}
+
+// Render an icon to a pixbuf at WxH, recoloring accent tokens in memory for
+// themed icons. Cached per (theme version, path, size) so a live preview frame
+// renders each distinct icon at most once and repeats are free. No disk writes.
+static Glib::RefPtr<Gdk::Pixbuf> themed_pixbuf(const std::string& rel_path, int w, int h) {
+    std::string orig = resolve_icon_path(rel_path);
+    if (orig.empty()) return {};
+
+    std::string key = std::to_string(g_theme_svg_ver) + "|" + orig + "|" +
+                      std::to_string(w) + "x" + std::to_string(h);
+    auto it = g_pixbuf_cache.find(key);
+    if (it != g_pixbuf_cache.end()) return it->second;
+
+    bool is_themed = (rel_path.find("_amber") != std::string::npos ||
+                      rel_path.find("star_") != std::string::npos);
+
+    Glib::RefPtr<Gdk::Pixbuf> pb;
+    if (is_themed) {
+        std::string svg = themed_svg_data(orig);
+        if (!svg.empty()) {
+            try {
+                auto loader = Gdk::PixbufLoader::create("svg");
+                loader->set_size(w, h);
+                loader->write(reinterpret_cast<const guint8*>(svg.data()), svg.size());
+                loader->close();
+                pb = loader->get_pixbuf();
+            } catch (...) { pb.reset(); }
+        }
+    }
+    if (!pb) {  // non-themed icon, or recolor failed → load original from disk
+        try { pb = Gdk::Pixbuf::create_from_file(orig, w, h, true); } catch (...) {}
+    }
+    if (pb) g_pixbuf_cache[key] = pb;
+    return pb;
 }
 
 // ── AppIconButton ────────────────────────────────────────────────────────────
@@ -253,17 +362,11 @@ AppIconButton::AppIconButton(const AppEntry& entry, bool is_favorite, bool list_
     // Star glyphs are identical for every icon — load them once and reuse.
     static Glib::RefPtr<Gdk::Pixbuf> s_pb_empty;
     static Glib::RefPtr<Gdk::Pixbuf> s_pb_filled;
-    static bool s_stars_loaded = false;
-    if (!s_stars_loaded) {
-        s_stars_loaded = true;
-        std::string path_empty = find_installed("icons/star_empty_rounded.svg");
-        if (path_empty.empty()) path_empty = "src/icons/star_empty_rounded.svg";
-        std::string path_filled = find_installed("icons/star_filled_rounded.svg");
-        if (path_filled.empty()) path_filled = "src/icons/star_filled_rounded.svg";
-        try {
-            s_pb_empty = Gdk::Pixbuf::create_from_file(path_empty, 14, 14, true);
-            s_pb_filled = Gdk::Pixbuf::create_from_file(path_filled, 14, 14, true);
-        } catch (...) {}
+    static unsigned int s_star_ver = 0;
+    if (s_star_ver != g_theme_svg_ver) {
+        s_star_ver = g_theme_svg_ver;
+        s_pb_empty = themed_pixbuf("src/icons/star_empty_rounded.svg", 14, 14);
+        s_pb_filled = themed_pixbuf("src/icons/star_filled_rounded.svg", 14, 14);
     }
     Glib::RefPtr<Gdk::Pixbuf> pb_empty = s_pb_empty, pb_filled = s_pb_filled;
 
@@ -465,11 +568,11 @@ AppIconButton::AppIconButton(const AppEntry& entry, bool is_favorite, bool list_
         if (!entry.comment.empty())
             m_text_box.pack_start(m_sublabel, Gtk::PACK_SHRINK);
 
-        // Category badge: display name of the auto-detected category.
+        // Category badge: localized name of the auto-detected category.
         std::string badge_text;
         for (const auto& c : CATEGORIES)
-            if (c.id == m_detected_cat) { badge_text = c.name; break; }
-        if (badge_text.empty()) badge_text = "Otros";
+            if (c.id == m_detected_cat) { badge_text = tr("cat_" + c.id); break; }
+        if (badge_text.empty()) badge_text = tr("cat_other");
         m_cat_badge.set_text(badge_text);
         m_cat_badge.get_style_context()->add_class("cat-badge");
         m_cat_badge.set_valign(Gtk::ALIGN_CENTER);
@@ -478,12 +581,10 @@ AppIconButton::AppIconButton(const AppEntry& entry, bool is_favorite, bool list_
         // release handler opens the popover by pointer position (see over_config).
         {
             static Glib::RefPtr<Gdk::Pixbuf> s_cfg_pb;
-            static bool s_cfg_loaded = false;
-            if (!s_cfg_loaded) {
-                s_cfg_loaded = true;
-                std::string p = find_installed("icons/settings_amber.svg");
-                if (p.empty()) p = "src/icons/settings_amber.svg";
-                try { s_cfg_pb = Gdk::Pixbuf::create_from_file(p, 18, 18, true); } catch (...) {}
+            static unsigned int s_cfg_ver = 0;
+            if (s_cfg_ver != g_theme_svg_ver) {
+                s_cfg_ver = g_theme_svg_ver;
+                s_cfg_pb = themed_pixbuf("src/icons/settings_amber.svg", 18, 18);
             }
             if (s_cfg_pb) m_config_icon_img.set(s_cfg_pb);
             else          m_config_icon_img.set_from_icon_name("emblem-system-symbolic", Gtk::ICON_SIZE_MENU);
@@ -492,7 +593,7 @@ AppIconButton::AppIconButton(const AppEntry& entry, bool is_favorite, bool list_
         m_config_icon_img.set_valign(Gtk::ALIGN_CENTER);
         m_config_icon_img.set_margin_start(6);
         m_config_icon_img.set_margin_end(8);
-        m_config_icon_img.set_tooltip_text("Clasificar en categorías");
+        m_config_icon_img.set_tooltip_text(tr("tt_classify"));
 
         m_box.pack_start(m_overlay, Gtk::PACK_SHRINK);
         m_box.pack_start(m_text_box, Gtk::PACK_EXPAND_WIDGET);
@@ -547,7 +648,7 @@ void AppIconButton::build_tags_popover() {
     box->set_margin_end(12);
 
     auto* title = Gtk::manage(new Gtk::Label());
-    title->set_text("Categorías");
+    title->set_text(tr("lbl_categories"));
     title->get_style_context()->add_class("section-header-label");
     title->set_halign(Gtk::ALIGN_START);
     title->set_margin_bottom(6);
@@ -555,7 +656,7 @@ void AppIconButton::build_tags_popover() {
 
     for (const auto& c : CATEGORIES) {
         if (c.id == "all") continue;
-        auto* chk = Gtk::manage(new Gtk::CheckButton(c.name));
+        auto* chk = Gtk::manage(new Gtk::CheckButton(tr("cat_" + c.id)));
         chk->get_style_context()->add_class("tag-check");
         chk->set_can_focus(false);
 
@@ -563,7 +664,7 @@ void AppIconButton::build_tags_popover() {
             // Automatic membership — always on, can't be removed here.
             chk->set_active(true);
             chk->set_sensitive(false);
-            chk->set_label(c.name + "  (auto)");
+            chk->set_label(tr("cat_" + c.id) + "  " + tr("auto_suffix"));
         } else {
             chk->set_active(m_is_tagged_cb ? m_is_tagged_cb(m_entry.name, c.id) : false);
             std::string cat_id = c.id;
@@ -708,6 +809,24 @@ bool AppIconButton::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
     return ret;
 }
 
+void AppIconButton::refresh_theme() {
+    // Only the visible accent SVGs need re-tinting live. The empty (non-favorite)
+    // star is hidden until hover, so skip it — it's regenerated on the next
+    // rebuild. themed_pixbuf is cached per (version, path, size), so the few
+    // remaining icons are rendered once per color change and shared by all
+    // buttons, keeping a full-grid refresh cheap.
+    if (m_is_favorite) {
+        if (auto star = themed_pixbuf("src/icons/star_filled_rounded.svg", 14, 14))
+            m_fav_icon_img.set(star);
+    }
+    if (m_list_mode) {
+        if (auto cfg = themed_pixbuf("src/icons/settings_amber.svg", 18, 18))
+            m_config_icon_img.set(cfg);
+    }
+    // The focus glow is repainted by the window-level queue_draw() in
+    // recolor_theme_live(), so no per-button queue_draw() is needed here.
+}
+
 // ── LauncherWindow ───────────────────────────────────────────────────────────
 
 LauncherWindow::LauncherWindow() {
@@ -748,6 +867,12 @@ void LauncherWindow::show_launcher() {
     fullscreen();
     present();
     m_search_entry.grab_focus();
+
+    // Re-scan installed apps just after the window is up (lower priority than the
+    // paint), so opening stays instant. sync_apps() only rebuilds if the app set
+    // actually changed, so a newly installed app appears on this open without the
+    // user noticing any check or flicker.
+    Glib::signal_idle().connect_once([this]() { sync_apps(); }, Glib::PRIORITY_DEFAULT_IDLE);
 }
 
 void LauncherWindow::hide_launcher() {
@@ -764,7 +889,10 @@ void LauncherWindow::hide_launcher() {
 
 void LauncherWindow::load_css() {
     try {
-        std::string css_data;
+        // Read the raw CSS template from disk only once, then keep it in memory.
+        // Live theme changes re-substitute this string instead of re-reading the
+        // file on every color-picker frame.
+        if (m_css_template.empty()) {
         std::ifstream file;
         std::string installed_css = find_installed("style.css");
         if (!installed_css.empty()) file.open(installed_css);
@@ -773,9 +901,9 @@ void LauncherWindow::load_css() {
         if (file) {
             std::stringstream ss;
             ss << file.rdbuf();
-            css_data = ss.str();
+            m_css_template = ss.str();
         } else {
-            css_data = R"(
+            m_css_template = R"(
                 #launcher-window, label, entry, button, textview { font-family: monospace; }
                 #launcher-window { background-color: #0d0d12; }
                 button,button:hover,button:active,button:focus,button:backdrop,
@@ -824,49 +952,113 @@ void LauncherWindow::load_css() {
                 scrollbar.vertical slider:hover { background-color: #e09924; }
             )";
         }
+        }   // m_css_template populated once
 
-        // Apply theme color substitution to the entire CSS
-        css_data = replace_theme_color(css_data);
+        // Re-substitute the theme color and reload the SAME provider. Creating a
+        // fresh provider on every call (the old behavior) stacked one more
+        // provider onto the screen for each color-picker frame — a leak that also
+        // made every subsequent restyle slower.
+        std::string css_data = replace_theme_color(m_css_template);
 
-        auto css_provider = Gtk::CssProvider::create();
-        css_provider->load_from_data(css_data);
-        Gtk::StyleContext::add_provider_for_screen(
-            Gdk::Screen::get_default(), css_provider,
-            GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-
-        // Store a reference so we can re-create on theme change
-        m_theme_provider = css_provider;
+        if (!m_theme_provider) {
+            m_theme_provider = Gtk::CssProvider::create();
+            Gtk::StyleContext::add_provider_for_screen(
+                Gdk::Screen::get_default(), m_theme_provider,
+                GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+        }
+        m_theme_provider->load_from_data(css_data);
     } catch (const std::exception& e) {
         std::cerr << "vanilux: CSS load error: " << e.what() << std::endl;
     }
 }
 
-void LauncherWindow::apply_theme(const std::string& hex_color) {
-    // Parse hex to RGB
+bool LauncherWindow::set_theme_color(const std::string& hex_color) {
     try {
         std::string h = hex_color;
-        if (h[0] == '#') h = h.substr(1);
+        if (!h.empty() && h[0] == '#') h = h.substr(1);
+        if (h.size() < 6) return false;
         unsigned int ri, gi, bi;
         std::istringstream(h.substr(0,2)) >> std::hex >> ri;
         std::istringstream(h.substr(2,2)) >> std::hex >> gi;
         std::istringstream(h.substr(4,2)) >> std::hex >> bi;
         g_theme_ri = ri; g_theme_gi = gi; g_theme_bi = bi;
         g_theme_r = ri / 255.0; g_theme_g = gi / 255.0; g_theme_b = bi / 255.0;
-        g_theme_color = "#" + h;
-    } catch (...) { return; }
+        g_theme_color = "#" + h.substr(0, 6);
+    } catch (...) { return false; }
 
-    // Reload CSS with new color substitution
+    // Bump the version so themed-pixbuf and CSS caches treat this as a new theme.
+    g_theme_svg_ver++;
+    clear_theme_cache();
+    return true;
+}
+
+// Cheap live recolor for the color picker's real-time preview: re-tint the CSS
+// and the on-screen control icons (all in memory) and repaint the Cairo glows
+// via queue_draw(). Deliberately does NOT rescan .desktop files, rebuild the app
+// grid, or write config to disk — those made the old preview crawl. The app
+// list never changes when only the accent color does.
+void LauncherWindow::recolor_theme_live(const std::string& hex_color) {
+    if (!set_theme_color(hex_color)) return;
+    // Called from the frame-clock tick callback: reloading the CSS here invalidates
+    // styles and the queue_draw() below repaints in the SAME frame's paint phase,
+    // so accent text recolors in lockstep with the icons — no eager full-tree
+    // restyle (that was pure cost and still lagged).
     load_css();
+    reload_control_icons();
 
-    // Force queue redraw on all children so Cairo glow updates
+    // Re-tint the favorite stars on the existing buttons so they recolor in step
+    // with the CSS text/borders and the control icons (no grid rebuild needed).
+    auto refresh_grid = [](Gtk::Grid& g) {
+        for (auto* child : g.get_children())
+            if (auto* b = dynamic_cast<AppIconButton*>(child)) b->refresh_theme();
+    };
+    refresh_grid(m_favorites_grid);
+    refresh_grid(m_recents_grid);
+    refresh_grid(m_all_grid);
+
+    if (m_keyboard) m_keyboard->set_accent(g_theme_r, g_theme_g, g_theme_b);
+
     queue_draw();
-    for (auto* w : get_children()) {
-        w->queue_draw();
-        auto box = dynamic_cast<Gtk::Container*>(w);
-        if (box) box->foreach([](Gtk::Widget& c) { c.queue_draw(); });
-    }
+}
 
+// Full commit: recolor, then rebuild the grid (so favorite stars repaint with
+// the new accent) and persist. Run once on save/cancel, never mid-drag.
+void LauncherWindow::apply_theme(const std::string& hex_color) {
+    if (!set_theme_color(hex_color)) return;
+    load_css();
+    refresh_apps();
+    reload_control_icons();
+    if (m_keyboard) m_keyboard->set_accent(g_theme_r, g_theme_g, g_theme_b);
     save_theme_config();
+}
+
+void LauncherWindow::reload_control_icons() {
+    try { m_img_grid_view->set(themed_pixbuf("src/icons/grid_amber.svg", 16, 16)); } catch(...) {}
+    try { m_img_list_view->set(themed_pixbuf("src/icons/list_amber.svg", 16, 16)); } catch(...) {}
+    if (m_img_settings) { try { m_img_settings->set(themed_pixbuf("src/icons/wrench_amber.svg", 16, 16)); } catch(...) {} }
+    try { m_img_fav_header->set(themed_pixbuf("src/icons/star_amber.svg", 16, 16)); } catch(...) {}
+    try { m_img_rec_header->set(themed_pixbuf("src/icons/clock_amber.svg", 16, 16)); } catch(...) {}
+    try { m_img_all_header->set(themed_pixbuf("src/icons/grid_amber.svg", 16, 16)); } catch(...) {}
+    for (auto& [id, btn] : m_cat_buttons) {
+        std::string svg_path;
+        if      (id == "all")       svg_path = "src/icons/grid_amber.svg";
+        else if (id == "favorites") svg_path = "src/icons/star_amber.svg";
+        else if (id == "recents")   svg_path = "src/icons/clock_amber.svg";
+        else if (id == "internet")  svg_path = "src/icons/globe_amber.svg";
+        else if (id == "dev")       svg_path = "src/icons/code_amber.svg";
+        else if (id == "media")     svg_path = "src/icons/music_amber.svg";
+        else if (id == "system")    svg_path = "src/icons/settings_amber.svg";
+        else if (id == "android")   svg_path = "src/icons/android_amber.svg";
+        else if (id == "office")    svg_path = "src/icons/document_amber.svg";
+        else if (id == "games")     svg_path = "src/icons/gamepad_amber.svg";
+        else continue;
+        if (auto* box = dynamic_cast<Gtk::Box*>(btn->get_child())) {
+            auto kids = box->get_children();
+            if (auto* img = dynamic_cast<Gtk::Image*>(kids.empty() ? nullptr : kids[0])) {
+                if (auto pb = themed_pixbuf(svg_path, 16, 16)) img->set(pb);
+            }
+        }
+    }
 }
 
 void LauncherWindow::refresh_apps() {
@@ -898,165 +1090,350 @@ void LauncherWindow::refresh_apps() {
     update_status();
 }
 
-void LauncherWindow::show_settings_dialog() {
-    auto dialog = Gtk::Dialog();
-    dialog.set_title("Configuración de Vanilux");
-    dialog.set_transient_for(*this);
-    dialog.set_modal(true);
-    dialog.set_size_request(500, 400);
-    dialog.set_resizable(false);
-
-    auto content = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 20));
-    content->set_margin_top(24);
-    content->set_margin_bottom(24);
-    content->set_margin_start(24);
-    content->set_margin_end(24);
-
-    // ── Color picker section ──────────────────────────────────────────────
-    auto color_label = Gtk::manage(new Gtk::Label());
-    color_label->set_markup("<b>Color del tema</b>");
-    color_label->set_halign(Gtk::ALIGN_START);
-
-    auto color_desc = Gtk::manage(new Gtk::Label());
-    color_desc->set_text("Elegí el color principal para bordes, brillos y destacados.");
-    color_desc->set_halign(Gtk::ALIGN_START);
-    color_desc->set_ellipsize(Pango::ELLIPSIZE_END);
-    color_desc->set_opacity(0.7);
-
-    auto color_picker = Gtk::manage(new Gtk::ColorSelection());
-    Gdk::Color current;
-    current.set_rgb(g_theme_ri * 256, g_theme_gi * 256, g_theme_bi * 256);
-    color_picker->set_has_opacity_control(false);
-    color_picker->set_has_palette(true);
-    color_picker->set_current_color(current);
-    color_picker->set_halign(Gtk::ALIGN_CENTER);
-    color_picker->set_size_request(400, 240);
-
-    // ── Keybinding section ────────────────────────────────────────────────
-    auto key_label = Gtk::manage(new Gtk::Label());
-    key_label->set_markup("<b>Tecla rápida</b>");
-    key_label->set_halign(Gtk::ALIGN_START);
-
-    auto key_desc = Gtk::manage(new Gtk::Label());
-    key_desc->set_text("Hacé clic en el botón y presioná la combinación de teclas.");
-    key_desc->set_halign(Gtk::ALIGN_START);
-    key_desc->set_opacity(0.7);
-
-    auto key_hbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 12));
-    key_hbox->set_halign(Gtk::ALIGN_CENTER);
-    key_hbox->set_margin_top(8);
-
-    auto key_entry = Gtk::manage(new Gtk::Entry());
-    key_entry->set_text(g_theme_hotkey);
-    key_entry->set_width_chars(20);
-    key_entry->set_alignment(Gtk::ALIGN_CENTER);
-    key_entry->set_editable(false);
-    key_entry->set_can_focus(true);
-
-    // Capture key presses on the entry
-    auto key_handler = [key_entry](GdkEventKey* ev) -> bool {
-        if (ev->type == GDK_KEY_PRESS) {
-            std::string key_name;
-
-            if (ev->state & GDK_CONTROL_MASK) key_name += "<Ctrl>";
-            if (ev->state & GDK_MOD1_MASK)    key_name += "<Alt>";
-            if (ev->state & GDK_SHIFT_MASK)   key_name += "<Shift>";
-            if (ev->state & GDK_SUPER_MASK)   key_name += "<Super>";
-
-            auto name = gdk_keyval_name(ev->keyval);
-            if (name) {
-                // Skip modifier-only presses
-                std::string n(name);
-                if (n == "Control_L" || n == "Control_R" || n == "Alt_L" ||
-                    n == "Alt_R" || n == "Shift_L" || n == "Shift_R" ||
-                    n == "Super_L" || n == "Super_R") return true;
-
-                key_name += n;
-                key_entry->set_text(key_name);
-            }
-            return true;
-        }
-        return false;
+void LauncherWindow::sync_apps() {
+    std::vector<std::string> dirs = {
+        "/usr/share/applications",
+        "/usr/local/share/applications",
     };
-    key_entry->signal_key_press_event().connect(key_handler, false);
+    const char* home = std::getenv("HOME");
+    if (home) dirs.push_back(std::string(home) + "/.local/share/applications");
 
-    auto key_btn_clear = Gtk::manage(new Gtk::Button("Limpiar"));
-    key_btn_clear->signal_clicked().connect([key_entry]() {
-        key_entry->set_text("");
+    auto scanned = AppDiscovery::scan_applications(dirs);
+
+    // Compare the new scan against what's loaded. If the set of apps is identical
+    // (the common case), do nothing — no rebuild, no flicker, the user never
+    // notices the check ran. Only when an app was added/removed do we rebuild,
+    // which is exactly when a newly installed app should silently appear.
+    auto names_of = [](const std::vector<AppEntry>& v) {
+        std::set<std::string> s;
+        for (const auto& a : v) s.insert(a.name);
+        return s;
+    };
+    if (names_of(scanned) == names_of(m_all_apps)) return;
+
+    m_all_apps = std::move(scanned);
+    set_category(m_current_category);
+    update_status();
+}
+
+// Format a Gdk::Color as #rrggbb.
+static std::string color_to_hex(const Gdk::Color& c) {
+    std::ostringstream hex;
+    hex << "#" << std::hex << std::setfill('0') << std::setw(2)
+        << (unsigned int)(c.get_red_p()   * 255) << std::setw(2)
+        << (unsigned int)(c.get_green_p() * 255) << std::setw(2)
+        << (unsigned int)(c.get_blue_p()  * 255);
+    return hex.str();
+}
+
+// Build the settings modal once. It lives as an overlay child of the launcher
+// (not a separate top-level Gtk::Dialog), so it floats in-place over the
+// fullscreen launcher as a dimmed, centered card — part of the same experience.
+void LauncherWindow::build_settings_panel() {
+    if (m_settings_built) return;
+    m_settings_built = true;
+
+    // ── Card ──────────────────────────────────────────────────────────────
+    // The card lives inside its own EventBox: that window captures every click
+    // over the card (including the empty gaps between widgets and the color
+    // palette), so they can never reach — and accidentally close — the backdrop.
+    m_settings_card_evt.get_style_context()->add_class("settings-card");
+    m_settings_card_evt.set_halign(Gtk::ALIGN_CENTER);
+    m_settings_card_evt.set_valign(Gtk::ALIGN_CENTER);
+    m_settings_card_evt.add(m_settings_card);
+
+    m_settings_card.set_spacing(16);
+
+    auto title = Gtk::manage(new Gtk::Label());
+    title->set_halign(Gtk::ALIGN_START);
+    register_tr(title, "cfg_title", true);
+
+    // ── Color section: just the wheel / palette / picker ──────────────────────
+    auto color_label = Gtk::manage(new Gtk::Label());
+    color_label->set_halign(Gtk::ALIGN_START);
+    register_tr(color_label, "cfg_color", true);
+
+    m_color_picker = Gtk::manage(new Gtk::ColorSelection());
+    m_color_picker->set_has_opacity_control(false);
+    m_color_picker->set_has_palette(true);
+    m_color_picker->set_halign(Gtk::ALIGN_CENTER);
+    m_color_picker->set_size_request(420, 210);
+
+    // ── Hotkey section: mode selector + combo display + on-screen keyboard ────
+    auto key_label = Gtk::manage(new Gtk::Label());
+    key_label->set_halign(Gtk::ALIGN_START);
+    register_tr(key_label, "cfg_hotkey", true);
+
+    auto key_head = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 10));
+    m_mode_f     = Gtk::manage(new Gtk::RadioButton());
+    m_mode_super = Gtk::manage(new Gtk::RadioButton());
+    m_mode_super->join_group(*m_mode_f);
+    auto* mf_lbl = Gtk::manage(new Gtk::Label()); register_tr(mf_lbl, "mode_f");     m_mode_f->add(*mf_lbl);
+    auto* ms_lbl = Gtk::manage(new Gtk::Label()); register_tr(ms_lbl, "mode_super"); m_mode_super->add(*ms_lbl);
+    m_mode_f->get_style_context()->add_class("mode-toggle");
+    m_mode_super->get_style_context()->add_class("mode-toggle");
+
+    m_combo_value = Gtk::manage(new Gtk::Label());
+    m_combo_value->get_style_context()->add_class("combo-value");
+    m_combo_value->set_halign(Gtk::ALIGN_END);
+
+    key_head->pack_start(*m_mode_f, Gtk::PACK_SHRINK);
+    key_head->pack_start(*m_mode_super, Gtk::PACK_SHRINK);
+    key_head->pack_start(*m_combo_value, Gtk::PACK_EXPAND_WIDGET);
+
+    m_keyboard = Gtk::manage(new KeyboardWidget());
+    m_keyboard->set_accent(g_theme_r, g_theme_g, g_theme_b);
+
+    m_mode_f->signal_toggled().connect([this]() {
+        if (m_mode_f->get_active()) { m_keyboard->set_mode(KeyboardWidget::Mode::F_KEY); update_combo_label(); }
+    });
+    m_mode_super->signal_toggled().connect([this]() {
+        if (m_mode_super->get_active()) { m_keyboard->set_mode(KeyboardWidget::Mode::SUPER); update_combo_label(); }
+    });
+    m_keyboard->signal_changed().connect([this]() { update_combo_label(); });
+
+    // ── Language section: flag + code chips ───────────────────────────────────
+    auto lang_label = Gtk::manage(new Gtk::Label());
+    lang_label->set_halign(Gtk::ALIGN_START);
+    register_tr(lang_label, "cfg_language", true);
+
+    auto lang_row = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
+    lang_row->set_halign(Gtk::ALIGN_CENTER);
+    for (const auto& meta : LANGS) {
+        auto* b = Gtk::manage(new Gtk::Button());
+        b->get_style_context()->add_class("lang-btn");
+        b->set_tooltip_text(meta.native);
+        auto* vb = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 3));
+        auto* fimg = Gtk::manage(new Gtk::Image());
+        try { fimg->set(Gdk::Pixbuf::create_from_file(
+                  resolve_icon_path(std::string("src/icons/") + meta.flag), 30, 20, true)); } catch (...) {}
+        auto* code = Gtk::manage(new Gtk::Label(meta.code));
+        code->get_style_context()->add_class("lang-code");
+        vb->pack_start(*fimg, Gtk::PACK_SHRINK);
+        vb->pack_start(*code, Gtk::PACK_SHRINK);
+        b->add(*vb);
+        Lang lv = meta.lang;
+        b->signal_clicked().connect([this, lv]() { apply_language(lv); });
+        lang_row->pack_start(*b, Gtk::PACK_SHRINK);
+        m_lang_buttons.push_back({b, lv});
+    }
+
+    // ── Actions ─────────────────────────────────────────────────────────────
+    auto actions = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 12));
+    actions->set_halign(Gtk::ALIGN_END);
+    auto btn_cancel = Gtk::manage(new Gtk::Button());
+    auto btn_save   = Gtk::manage(new Gtk::Button());
+    auto* cancel_lbl = Gtk::manage(new Gtk::Label()); register_tr(cancel_lbl, "btn_cancel"); btn_cancel->add(*cancel_lbl);
+    auto* save_lbl   = Gtk::manage(new Gtk::Label()); register_tr(save_lbl,   "btn_save");   btn_save->add(*save_lbl);
+    btn_cancel->get_style_context()->add_class("view-btn");
+    btn_save->get_style_context()->add_class("view-btn");
+    btn_save->get_style_context()->add_class("active");
+    actions->pack_start(*btn_cancel, Gtk::PACK_SHRINK);
+    actions->pack_start(*btn_save, Gtk::PACK_SHRINK);
+
+    auto sep = []() { return Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL)); };
+
+    // ── Assemble card ─────────────────────────────────────────────────────────
+    m_settings_card.pack_start(*title, Gtk::PACK_SHRINK);
+    m_settings_card.pack_start(*color_label, Gtk::PACK_SHRINK);
+    m_settings_card.pack_start(*m_color_picker, Gtk::PACK_SHRINK);
+    m_settings_card.pack_start(*sep(), Gtk::PACK_SHRINK);
+    m_settings_card.pack_start(*key_label, Gtk::PACK_SHRINK);
+    m_settings_card.pack_start(*key_head, Gtk::PACK_SHRINK);
+    m_settings_card.pack_start(*m_keyboard, Gtk::PACK_SHRINK);
+    m_settings_card.pack_start(*sep(), Gtk::PACK_SHRINK);
+    m_settings_card.pack_start(*lang_label, Gtk::PACK_SHRINK);
+    m_settings_card.pack_start(*lang_row, Gtk::PACK_SHRINK);
+    m_settings_card.pack_start(*sep(), Gtk::PACK_SHRINK);
+    m_settings_card.pack_start(*actions, Gtk::PACK_SHRINK);
+
+    // ── Backdrop (dimmed full-area scrim) ─────────────────────────────────────
+    m_settings_backdrop.get_style_context()->add_class("settings-backdrop");
+    m_settings_backdrop.set_halign(Gtk::ALIGN_FILL);
+    m_settings_backdrop.set_valign(Gtk::ALIGN_FILL);
+    m_settings_backdrop.add(m_settings_card_evt);
+
+    // Live preview: the change event only stashes the color + marks dirty; the
+    // frame-clock tick callback (installed in open_settings) does the recolor.
+    Gtk::ColorSelection* picker = m_color_picker;
+    m_color_picker->signal_color_changed().connect([this, picker]() {
+        if (!m_settings_open) return;   // ignore the programmatic set on open
+        m_pending_color = color_to_hex(picker->get_current_color());
+        m_preview_dirty = true;
     });
 
-    key_hbox->pack_start(*key_entry, Gtk::PACK_SHRINK);
-    key_hbox->pack_start(*key_btn_clear, Gtk::PACK_SHRINK);
+    // The card EventBox swallows all button events over the card so they never
+    // propagate up to the backdrop (which would close the modal). Interactive
+    // children — the wheel, palette, entry and buttons — handle their own clicks
+    // before this fires; only clicks on the card's empty gaps land here.
+    m_settings_card_evt.signal_button_press_event().connect([](GdkEventButton*) -> bool { return true; });
+    m_settings_card_evt.signal_button_release_event().connect([](GdkEventButton*) -> bool { return true; });
 
-    // ── Assemble ──────────────────────────────────────────────────────────
-    content->pack_start(*color_label, Gtk::PACK_SHRINK);
-    content->pack_start(*color_desc, Gtk::PACK_SHRINK);
-    content->pack_start(*color_picker, Gtk::PACK_SHRINK);
-    content->pack_start(*Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL)), Gtk::PACK_SHRINK);
-    content->pack_start(*key_label, Gtk::PACK_SHRINK);
-    content->pack_start(*key_desc, Gtk::PACK_SHRINK);
-    content->pack_start(*key_hbox, Gtk::PACK_SHRINK);
-
-    dialog.add_button("Cancelar", Gtk::RESPONSE_CANCEL);
-    dialog.add_button("Aplicar",  Gtk::RESPONSE_APPLY);
-    auto btn_save    = dialog.add_button("Guardar",  Gtk::RESPONSE_OK);
-    dialog.set_default_response(Gtk::RESPONSE_OK);
-
-    auto ca = dialog.get_content_area();
-    ca->pack_start(*content, Gtk::PACK_EXPAND_WIDGET);
-    ca->show_all();
-
-    // Real-time preview: on color change, apply immediately
-    auto color_conn = color_picker->signal_color_changed().connect([this, color_picker, btn_save]() {
-        auto c = color_picker->get_current_color();
-        std::ostringstream hex;
-        hex << "#" << std::hex << std::setfill('0') << std::setw(2)
-            << (c.get_red_p() * 255) << std::setw(2)
-            << (c.get_green_p() * 255) << std::setw(2)
-            << (c.get_blue_p() * 255);
-        apply_theme(hex.str());
-        btn_save->grab_focus();
+    // Clicks on the dim area outside the card cancel. Consume the press so the
+    // implicit pointer grab stays on the backdrop — otherwise closing would hand
+    // the matching release to an app underneath and launch it by accident — and
+    // do the actual close on release.
+    m_settings_backdrop.signal_button_press_event().connect([](GdkEventButton*) -> bool { return true; });
+    m_settings_backdrop.signal_button_release_event().connect([this](GdkEventButton*) -> bool {
+        apply_theme(m_settings_orig_color);   // revert the live preview
+        close_settings();
+        return true;
     });
 
-    // Apply keybinding via gsettings when saved
-    int result = dialog.run();
+    btn_cancel->signal_clicked().connect([this]() {
+        apply_theme(m_settings_orig_color);
+        close_settings();
+    });
 
-    // Disconnect real-time preview to avoid double-apply
-    color_conn.disconnect();
+    btn_save->signal_clicked().connect([this]() {
+        apply_theme(color_to_hex(m_color_picker->get_current_color()));
 
-    if (result == Gtk::RESPONSE_OK || result == Gtk::RESPONSE_APPLY) {
-        // Save color
-        if (result == Gtk::RESPONSE_OK) {
-            auto c = color_picker->get_current_color();
-            std::ostringstream hex;
-            hex << "#" << std::hex << std::setfill('0') << std::setw(2)
-                << (unsigned int)(c.get_red_p() * 255) << std::setw(2)
-                << (unsigned int)(c.get_green_p() * 255) << std::setw(2)
-                << (unsigned int)(c.get_blue_p() * 255);
-            apply_theme(hex.str());
-        }
-
-        // Save keybinding
-        std::string new_key = key_entry->get_text();
-        if (!new_key.empty()) {
+        std::string new_key = m_keyboard->get_binding();
+        if (!new_key.empty() && new_key != g_theme_hotkey) {
+            std::string old_key = g_theme_hotkey;   // capture before overwriting
             g_theme_hotkey = new_key;
             save_theme_config();
-        }
-
-        // Apply keybinding to the system
-        if (get_visible() == false) {
-            // Only run keybinding setup if we're not root
-            std::string bin_path = "/usr/local/bin/vanilux";
-            if (!std::filesystem::exists(bin_path))
-                bin_path = "/usr/bin/vanilux";
-            if (std::filesystem::exists(bin_path)) {
-                std::string cmd = "gsettings set org.cinnamon.desktop.keybindings.custom-keybinding:/org/cinnamon/desktop/keybindings/custom-keybindings/vanilux/ binding \"['" + new_key + "']\" 2>/dev/null || "
-                                  "gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/vanilux/ binding \"['" + new_key + "']\" 2>/dev/null || true";
+            std::string b = "/usr/local/bin/vanilux";
+            if (!std::filesystem::exists(b)) b = "/usr/bin/vanilux";
+            if (std::filesystem::exists(b)) {
+                const std::string& k = new_key;
+                const std::string cp = "/org/cinnamon/desktop/keybindings/custom-keybindings/vanilux/";
+                const std::string gp = "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/vanilux/";
+                // Apply the hotkey to whichever desktop is in use. XFCE (xfconf)
+                // is checked first — it's keyed by the combo itself, so the old
+                // key is removed and the new one created (and it re-grabs live).
+                // Cinnamon / GNOME fall back to a named custom-keybinding entry.
+                std::string cmd =
+                  "if command -v xfconf-query >/dev/null 2>&1 && "
+                     "xfconf-query -c xfce4-keyboard-shortcuts -l >/dev/null 2>&1; then "
+                    "xfconf-query -c xfce4-keyboard-shortcuts -p '/commands/custom/" + old_key + "' -r 2>/dev/null; "
+                    "xfconf-query -c xfce4-keyboard-shortcuts -n -t string -p '/commands/custom/" + k + "' -s '" + b + "' 2>/dev/null || "
+                    "xfconf-query -c xfce4-keyboard-shortcuts -t string -p '/commands/custom/" + k + "' -s '" + b + "' 2>/dev/null; "
+                  "elif gsettings list-schemas 2>/dev/null | grep -qx org.cinnamon.desktop.keybindings; then "
+                    "cur=$(gsettings get org.cinnamon.desktop.keybindings custom-list 2>/dev/null); "
+                    "case \"$cur\" in *\"'vanilux'\"*) : ;; '@as []'|'[]'|'') gsettings set org.cinnamon.desktop.keybindings custom-list \"['vanilux']\" ;; "
+                    "*) gsettings set org.cinnamon.desktop.keybindings custom-list \"${cur%]}, 'vanilux']\" ;; esac; "
+                    "B=org.cinnamon.desktop.keybindings.custom-keybinding:" + cp + "; "
+                    "gsettings set $B name 'Vanilux'; gsettings set $B command '" + b + "'; gsettings set $B binding \"['" + k + "']\"; "
+                  "elif gsettings list-schemas 2>/dev/null | grep -qx org.gnome.settings-daemon.plugins.media-keys; then "
+                    "cur=$(gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings 2>/dev/null); "
+                    "case \"$cur\" in *\"" + gp + "\"*) : ;; '@as []'|'[]'|'') gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings \"['" + gp + "']\" ;; "
+                    "*) gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings \"${cur%]}, '" + gp + "']\" ;; esac; "
+                    "B=org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:" + gp + "; "
+                    "gsettings set $B name 'Vanilux'; gsettings set $B command '" + b + "'; gsettings set $B binding \"['" + k + "']\"; "
+                  "fi";
                 int rc = std::system(cmd.c_str());
                 (void)rc;
             }
         }
+        close_settings();
+    });
+
+    m_root_overlay.add_overlay(m_settings_backdrop);
+    m_settings_backdrop.show_all();          // realize the card + children once
+    m_settings_backdrop.hide();              // hidden until opened
+    m_settings_backdrop.set_no_show_all(true); // window-wide show_all() won't reveal it
+}
+
+void LauncherWindow::open_settings() {
+    if (m_settings_open) return;
+    build_settings_panel();          // lazy: build the modal on first use
+    m_settings_orig_color = g_theme_color;
+
+    Gdk::Color current;
+    current.set_rgb(g_theme_ri * 256, g_theme_gi * 256, g_theme_bi * 256);
+    m_color_picker->set_current_color(current);   // fires before m_settings_open → ignored
+
+    // Seed the keyboard with the current hotkey + accent, and sync the mode radio.
+    m_keyboard->set_accent(g_theme_r, g_theme_g, g_theme_b);
+    m_keyboard->set_layout(lang_code(current_lang()));
+    m_keyboard->set_binding(g_theme_hotkey);
+    if (m_keyboard->get_mode() == KeyboardWidget::Mode::SUPER) m_mode_super->set_active(true);
+    else                                                       m_mode_f->set_active(true);
+    update_combo_label();
+
+    // Highlight the active language chip.
+    for (auto& [btn, lv] : m_lang_buttons) {
+        if (lv == current_lang()) btn->get_style_context()->add_class("active");
+        else                      btn->get_style_context()->remove_class("active");
     }
+
+    m_settings_open = true;
+    m_preview_dirty = false;
+    m_settings_backdrop.show();
+    m_color_picker->grab_focus();
+
+    // Drive the live preview off the frame clock while the modal is open. The
+    // callback fires once per frame in the update phase, so a recolor done here
+    // repaints CSS text + icons + stars together in that frame.
+    if (!m_preview_tick) {
+        m_preview_tick = add_tick_callback(
+            [this](const Glib::RefPtr<Gdk::FrameClock>&) -> bool {
+                if (m_preview_dirty) {
+                    m_preview_dirty = false;
+                    recolor_theme_live(m_pending_color);
+                }
+                return true;   // keep ticking until removed
+            });
+    }
+}
+
+void LauncherWindow::close_settings() {
+    if (!m_settings_open) return;
+    m_settings_open = false;
+    m_preview_dirty = false;
+    if (m_preview_tick) { remove_tick_callback(m_preview_tick); m_preview_tick = 0; }
+    m_settings_backdrop.hide();
+    m_search_entry.grab_focus();
+}
+
+void LauncherWindow::update_combo_label() {
+    if (!m_keyboard || !m_combo_value) return;
+    std::string d = m_keyboard->get_display();
+    m_combo_value->set_text(d.empty() ? tr("cfg_pick") : d);
+}
+
+void LauncherWindow::register_tr(Gtk::Label* lbl, const std::string& key, bool markup) {
+    m_tr_labels.push_back({lbl, key, markup});
+    if (markup) lbl->set_markup("<b>" + tr(key) + "</b>");
+    else        lbl->set_text(tr(key));
+}
+
+void LauncherWindow::retranslate() {
+    // All registered labels (configurator + shortcuts + section headers).
+    for (auto& [lbl, key, markup] : m_tr_labels) {
+        if (!lbl) continue;
+        if (markup) lbl->set_markup("<b>" + tr(key) + "</b>");
+        else        lbl->set_text(tr(key));
+    }
+    // Sidebar tag labels.
+    for (auto& [id, lbl] : m_cat_labels)
+        if (lbl) lbl->set_text(tr(id));   // id is already the full key (cat_*/tag_*)
+
+    // Things that aren't plain Gtk::Labels.
+    m_search_entry.set_placeholder_text(tr("search_placeholder"));
+    m_btn_settings.set_tooltip_text(tr("tt_settings"));
+    m_search_frame.set_label(" [ " + tr("frame_search") + " ] ");
+    m_sidebar_frame.set_label(" [ " + tr("frame_tags")   + " ] ");
+    m_apps_frame.set_label(" [ "    + tr("frame_apps")   + " ] ");
+    m_status_frame.set_label(" [ "  + tr("frame_status") + " ] ");
+
+    if (m_combo_value) update_combo_label();
+
+    // Rebuild the grids so category badges pick up the new language, and refresh
+    // the status line (count + current category name).
+    set_category(m_current_category);
+}
+
+void LauncherWindow::apply_language(Lang l) {
+    set_language(l);
+    if (m_keyboard) m_keyboard->set_layout(lang_code(l));
+    save_theme_config();
+    for (auto& [btn, lv] : m_lang_buttons) {
+        if (lv == l) btn->get_style_context()->add_class("active");
+        else         btn->get_style_context()->remove_class("active");
+    }
+    retranslate();
 }
 
 void LauncherWindow::load_persisted_data() {
@@ -1195,10 +1572,14 @@ void LauncherWindow::setup_ui() {
     m_outer_box.set_margin_end(16);
     m_outer_box.set_margin_top(16);
     m_outer_box.set_margin_bottom(16);
-    add(m_outer_box);
+    m_root_overlay.add(m_outer_box);
+    add(m_root_overlay);
+    // The settings modal (incl. the heavy ColorSelection) is built lazily on the
+    // first open() — keeps startup lean and avoids constructing complex widgets
+    // before the GTK main loop is running.
 
     // ── Search Frame ──────────────────────────────────────────────────────────
-    m_search_frame.set_label(" [ search ] ");
+    m_search_frame.set_label(" [ " + tr("frame_search") + " ] ");
     m_search_box.set_spacing(8);
     m_search_box.set_margin_top(4);
     m_search_box.set_margin_bottom(4);
@@ -1208,29 +1589,40 @@ void LauncherWindow::setup_ui() {
     m_search_prompt.set_text(">");
     m_search_prompt.get_style_context()->add_class("search-prompt");
 
-    m_search_entry.set_placeholder_text("Escribe para filtrar");
+    m_search_entry.set_placeholder_text(tr("search_placeholder"));
     m_search_entry.set_hexpand(true);
     m_search_entry.set_can_focus(true);
     m_search_entry.signal_changed().connect([this]() { on_search_changed(); });
 
     m_view_toggle_box.set_spacing(0);
-    auto grid_img = Gtk::manage(new Gtk::Image());
-    try { grid_img->set(Gdk::Pixbuf::create_from_file(resolve_icon_path("src/icons/grid_amber.svg"), 16, 16, true)); } catch (...) {}
-    m_btn_grid.set_image(*grid_img);
+    m_img_grid_view = Gtk::manage(new Gtk::Image());
+    try { m_img_grid_view->set(themed_pixbuf("src/icons/grid_amber.svg", 16, 16)); } catch (...) {}
+    m_btn_grid.set_image(*m_img_grid_view);
     m_btn_grid.set_always_show_image(true);
     m_btn_grid.get_style_context()->add_class("view-btn");
     m_btn_grid.get_style_context()->add_class("active");
     m_btn_grid.signal_clicked().connect([this]() { toggle_view_mode("grid"); });
 
-    auto list_img = Gtk::manage(new Gtk::Image());
-    try { list_img->set(Gdk::Pixbuf::create_from_file(resolve_icon_path("src/icons/list_amber.svg"), 16, 16, true)); } catch (...) {}
-    m_btn_list.set_image(*list_img);
+    m_img_list_view = Gtk::manage(new Gtk::Image());
+    try { m_img_list_view->set(themed_pixbuf("src/icons/list_amber.svg", 16, 16)); } catch (...) {}
+    m_btn_list.set_image(*m_img_list_view);
     m_btn_list.set_always_show_image(true);
     m_btn_list.get_style_context()->add_class("view-btn");
     m_btn_list.signal_clicked().connect([this]() { toggle_view_mode("list"); });
 
+    // Settings (wrench) button sits right after the grid/list toggles, in the
+    // same style — the dedicated status-bar ⚙/refresh buttons are gone.
+    m_img_settings = Gtk::manage(new Gtk::Image());
+    try { m_img_settings->set(themed_pixbuf("src/icons/wrench_amber.svg", 16, 16)); } catch (...) {}
+    m_btn_settings.set_image(*m_img_settings);
+    m_btn_settings.set_always_show_image(true);
+    m_btn_settings.set_tooltip_text(tr("tt_settings"));
+    m_btn_settings.get_style_context()->add_class("view-btn");
+    m_btn_settings.signal_clicked().connect([this]() { open_settings(); });
+
     m_view_toggle_box.pack_start(m_btn_grid, Gtk::PACK_SHRINK);
     m_view_toggle_box.pack_start(m_btn_list, Gtk::PACK_SHRINK);
+    m_view_toggle_box.pack_start(m_btn_settings, Gtk::PACK_SHRINK);
 
     m_search_box.pack_start(m_search_prompt, Gtk::PACK_SHRINK);
     m_search_box.pack_start(m_search_entry, Gtk::PACK_EXPAND_WIDGET);
@@ -1244,7 +1636,7 @@ void LauncherWindow::setup_ui() {
     m_outer_box.pack_start(m_middle_box, Gtk::PACK_EXPAND_WIDGET);
 
     // ── Sidebar Frame (Tags) ──────────────────────────────────────────────────
-    m_sidebar_frame.set_label(" [ tags ] ");
+    m_sidebar_frame.set_label(" [ " + tr("frame_tags") + " ] ");
     m_sidebar_box.set_spacing(2);
     m_sidebar_box.set_margin_start(4);
     m_sidebar_box.set_margin_end(4);
@@ -1258,18 +1650,21 @@ void LauncherWindow::setup_ui() {
     for (const auto& app : m_all_apps)
         populated.insert(detect_category(app.categories));
 
-    auto make_tag_btn = [&](const std::string& id, const std::string& name,
+    // tr_key is the i18n key for the label (e.g. "cat_all", "tag_favorites");
+    // id is the stable category id used for filtering.
+    auto make_tag_btn = [&](const std::string& id, const std::string& tr_key,
                             const std::string& svg_path, bool active) {
         auto btn_box = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 8));
         auto icon_img = Gtk::manage(new Gtk::Image());
         try {
-            auto pb = Gdk::Pixbuf::create_from_file(resolve_icon_path(svg_path), 16, 16, true);
+            auto pb = themed_pixbuf(svg_path, 16, 16);
             icon_img->set(pb);
         } catch (...) {
             icon_img->set_from_icon_name("image-missing", Gtk::ICON_SIZE_MENU);
         }
-        auto text_lbl = Gtk::manage(new Gtk::Label(name));
+        auto text_lbl = Gtk::manage(new Gtk::Label(tr(tr_key)));
         text_lbl->set_halign(Gtk::ALIGN_START);
+        m_cat_labels[tr_key] = text_lbl;   // retranslated on language change
         btn_box->pack_start(*icon_img, Gtk::PACK_SHRINK);
         btn_box->pack_start(*text_lbl, Gtk::PACK_SHRINK);
 
@@ -1286,9 +1681,9 @@ void LauncherWindow::setup_ui() {
     };
 
     // Todas + the two special tags (favorites / recents) always at the top.
-    make_tag_btn("all",       "Todas",     "src/icons/grid_amber.svg",  true);
-    make_tag_btn("favorites", "Favoritos", "src/icons/star_amber.svg",  false);
-    make_tag_btn("recents",   "Recientes", "src/icons/clock_amber.svg", false);
+    make_tag_btn("all",       "cat_all",       "src/icons/grid_amber.svg",  true);
+    make_tag_btn("favorites", "tag_favorites", "src/icons/star_amber.svg",  false);
+    make_tag_btn("recents",   "tag_recents",   "src/icons/clock_amber.svg", false);
 
     for (const auto& cat : CATEGORIES) {
         if (cat.id == "all") continue;
@@ -1302,11 +1697,11 @@ void LauncherWindow::setup_ui() {
         else if (cat.id == "android")  svg_path = "src/icons/android_amber.svg";
         else if (cat.id == "office")   svg_path = "src/icons/document_amber.svg";
         else if (cat.id == "games")    svg_path = "src/icons/gamepad_amber.svg";
-        make_tag_btn(cat.id, cat.name, svg_path, false);
+        make_tag_btn(cat.id, "cat_" + cat.id, svg_path, false);
     }
 
     // ── Apps Frame ───────────────────────────────────────────────────────────
-    m_apps_frame.set_label(" [ apps ] ");
+    m_apps_frame.set_label(" [ " + tr("frame_apps") + " ] ");
     m_apps_scrolled.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
     m_apps_scrolled.add(m_apps_scroll_content);
     m_apps_frame.add(m_apps_scrolled);
@@ -1323,13 +1718,13 @@ void LauncherWindow::setup_ui() {
     // Favorites Grid Setup
     m_favorites_container.set_spacing(8);
     m_favorites_header.set_spacing(8);
-    auto fav_img = Gtk::manage(new Gtk::Image());
-    try { fav_img->set(Gdk::Pixbuf::create_from_file(resolve_icon_path("src/icons/star_amber.svg"), 16, 16, true)); } catch(...) {}
+    m_img_fav_header = Gtk::manage(new Gtk::Image());
+    try { m_img_fav_header->set(themed_pixbuf("src/icons/star_amber.svg", 16, 16)); } catch(...) {}
     m_favorites_label.get_style_context()->add_class("section-header-label");
-    m_favorites_label.set_text("FAVORITOS");
+    register_tr(&m_favorites_label, "tag_favorites");
     m_favorites_sep.set_hexpand(true);
     m_favorites_sep.get_style_context()->add_class("section-separator");
-    m_favorites_header.pack_start(*fav_img, Gtk::PACK_SHRINK);
+    m_favorites_header.pack_start(*m_img_fav_header, Gtk::PACK_SHRINK);
     m_favorites_header.pack_start(m_favorites_label, Gtk::PACK_SHRINK);
     m_favorites_header.pack_start(m_favorites_sep, Gtk::PACK_EXPAND_WIDGET);
     m_favorites_grid.set_column_spacing(12);
@@ -1346,13 +1741,13 @@ void LauncherWindow::setup_ui() {
     // Recents Grid Setup
     m_recents_container.set_spacing(8);
     m_recents_header.set_spacing(8);
-    auto rec_img = Gtk::manage(new Gtk::Image());
-    try { rec_img->set(Gdk::Pixbuf::create_from_file(resolve_icon_path("src/icons/clock_amber.svg"), 16, 16, true)); } catch(...) {}
+    m_img_rec_header = Gtk::manage(new Gtk::Image());
+    try { m_img_rec_header->set(themed_pixbuf("src/icons/clock_amber.svg", 16, 16)); } catch(...) {}
     m_recents_label.get_style_context()->add_class("section-header-label");
-    m_recents_label.set_text("RECIENTES");
+    register_tr(&m_recents_label, "tag_recents");
     m_recents_sep.set_hexpand(true);
     m_recents_sep.get_style_context()->add_class("section-separator");
-    m_recents_header.pack_start(*rec_img, Gtk::PACK_SHRINK);
+    m_recents_header.pack_start(*m_img_rec_header, Gtk::PACK_SHRINK);
     m_recents_header.pack_start(m_recents_label, Gtk::PACK_SHRINK);
     m_recents_header.pack_start(m_recents_sep, Gtk::PACK_EXPAND_WIDGET);
     m_recents_grid.set_column_spacing(12);
@@ -1369,13 +1764,13 @@ void LauncherWindow::setup_ui() {
     // All Apps Grid Setup
     m_all_container.set_spacing(8);
     m_all_header.set_spacing(8);
-    auto all_img = Gtk::manage(new Gtk::Image());
-    try { all_img->set(Gdk::Pixbuf::create_from_file(resolve_icon_path("src/icons/grid_amber.svg"), 16, 16, true)); } catch(...) {}
+    m_img_all_header = Gtk::manage(new Gtk::Image());
+    try { m_img_all_header->set(themed_pixbuf("src/icons/grid_amber.svg", 16, 16)); } catch(...) {}
     m_all_label.get_style_context()->add_class("section-header-label");
-    m_all_label.set_text("TODAS");
+    register_tr(&m_all_label, "cat_all");
     m_all_sep.set_hexpand(true);
     m_all_sep.get_style_context()->add_class("section-separator");
-    m_all_header.pack_start(*all_img, Gtk::PACK_SHRINK);
+    m_all_header.pack_start(*m_img_all_header, Gtk::PACK_SHRINK);
     m_all_header.pack_start(m_all_label, Gtk::PACK_SHRINK);
     m_all_header.pack_start(m_all_sep, Gtk::PACK_EXPAND_WIDGET);
     m_all_grid.set_column_spacing(12);
@@ -1390,7 +1785,7 @@ void LauncherWindow::setup_ui() {
     m_apps_scroll_content.pack_start(m_all_container, Gtk::PACK_SHRINK);
 
     // ── Status Frame ─────────────────────────────────────────────────────────
-    m_status_frame.set_label(" [ status ] ");
+    m_status_frame.set_label(" [ " + tr("frame_status") + " ] ");
     m_status_box.set_spacing(16);
     m_status_box.set_margin_start(12);
     m_status_box.set_margin_end(12);
@@ -1411,11 +1806,18 @@ void LauncherWindow::setup_ui() {
     m_shortcuts_box.set_halign(Gtk::ALIGN_END);
     m_status_box.pack_end(m_shortcuts_box, Gtk::PACK_SHRINK);
 
-    auto add_shortcut = [this](const std::string& key, const std::string& desc) {
-        auto key_lbl = Gtk::manage(new Gtk::Label(key));
+    // cap_key: i18n key for the key-cap glyph (translatable, e.g. kc_esc); pass a
+    // literal cap via cap_lit instead when it's a fixed symbol. desc_key: i18n
+    // key for the description.
+    auto add_shortcut = [this](const std::string& cap_lit, const std::string& cap_key,
+                               const std::string& desc_key) {
+        auto key_lbl = Gtk::manage(new Gtk::Label());
         key_lbl->get_style_context()->add_class("key-cap");
-        auto desc_lbl = Gtk::manage(new Gtk::Label(desc));
+        if (cap_key.empty()) key_lbl->set_text(cap_lit);
+        else                 register_tr(key_lbl, cap_key);
+        auto desc_lbl = Gtk::manage(new Gtk::Label());
         desc_lbl->get_style_context()->add_class("key-desc");
+        register_tr(desc_lbl, desc_key);
         m_shortcuts_box.pack_start(*key_lbl, Gtk::PACK_SHRINK);
         m_shortcuts_box.pack_start(*desc_lbl, Gtk::PACK_SHRINK);
     };
@@ -1452,38 +1854,28 @@ void LauncherWindow::setup_ui() {
     arrow_grid->attach(*lbl_down, 1, 1, 1, 1);
     arrow_grid->attach(*lbl_right, 2, 1, 1, 1);
 
-    auto nav_desc = Gtk::manage(new Gtk::Label("navegar"));
+    auto nav_desc = Gtk::manage(new Gtk::Label());
     nav_desc->get_style_context()->add_class("key-desc");
     nav_desc->set_valign(Gtk::ALIGN_CENTER);
+    register_tr(nav_desc, "sc_navigate");
 
     nav_box->pack_start(*arrow_grid, Gtk::PACK_SHRINK);
     nav_box->pack_start(*nav_desc, Gtk::PACK_SHRINK);
 
     m_shortcuts_box.pack_start(*nav_box, Gtk::PACK_SHRINK);
 
-    add_shortcut("↵", "abrir");
-    add_shortcut("f", "favorito");
-    add_shortcut("esc", "cerrar");
+    add_shortcut("↵", "",       "sc_open");
+    add_shortcut("",  "kc_fav", "sc_favorite");
+    add_shortcut("",  "kc_esc", "sc_close");
 
-    // ── Refresh & Settings buttons ────────────────────────────────────────
-    m_btn_refresh.set_label("↻");
-    m_btn_refresh.set_tooltip_text("Re-escanear aplicaciones instaladas");
-    m_btn_refresh.get_style_context()->add_class("view-btn");
-    m_btn_refresh.signal_clicked().connect([this]() { refresh_apps(); });
-    m_status_box.pack_end(m_btn_refresh, Gtk::PACK_SHRINK);
-    m_status_box.pack_end(*Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_VERTICAL)), Gtk::PACK_SHRINK);
-
-    m_btn_settings.set_label("⚙");
-    m_btn_settings.set_tooltip_text("Configurar tema y tecla rápida");
-    m_btn_settings.get_style_context()->add_class("view-btn");
-    m_btn_settings.signal_clicked().connect([this]() { show_settings_dialog(); });
-    m_status_box.pack_end(m_btn_settings, Gtk::PACK_SHRINK);
-    m_status_box.pack_end(*Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_VERTICAL)), Gtk::PACK_SHRINK);
-
+    // (Settings moved to the top toggle row; the manual refresh button is gone —
+    //  apps now re-sync automatically on every open, see sync_apps().)
     m_status_frame.add(m_status_box);
     m_outer_box.pack_start(m_status_frame, Gtk::PACK_SHRINK);
 
-    m_outer_box.show_all();
+    // Show the overlay subtree. The settings backdrop has no_show_all set, so it
+    // stays hidden until open_settings() shows it explicitly.
+    m_root_overlay.show_all();
 
     // Defer the icon-heavy first population so the window paints (opens) right
     // away and the grid fills in a moment later, instead of blocking the open
@@ -1643,20 +2035,15 @@ void LauncherWindow::set_category(const std::string& cat_id) {
 }
 
 void LauncherWindow::update_status() {
-    m_app_count_label.set_text(std::to_string(m_apps.size()) + " aplicaciones");
+    m_app_count_label.set_text(std::to_string(m_apps.size()) + " " + tr("apps_word"));
 
-    std::string cat_label = "Todas";
+    std::string cat_label = tr("cat_all");
     if (m_current_category == "favorites") {
-        cat_label = "Favoritos";
+        cat_label = tr("tag_favorites");
     } else if (m_current_category == "recents") {
-        cat_label = "Recientes";
-    } else {
-        for (const auto& cat : CATEGORIES) {
-            if (cat.id == m_current_category) {
-                cat_label = cat.name;
-                break;
-            }
-        }
+        cat_label = tr("tag_recents");
+    } else if (m_current_category != "all") {
+        cat_label = tr("cat_" + m_current_category);
     }
     m_cat_name_label.set_text(cat_label);
 }
@@ -1710,6 +2097,18 @@ void LauncherWindow::toggle_view_mode(const std::string& mode) {
 }
 
 bool LauncherWindow::on_key_press_event(GdkEventKey* event) {
+    // While the settings modal is open, Esc cancels it (reverting any live
+    // preview) and other keys go to the focused widget (picker / key entry) —
+    // the launcher's own shortcuts (f, arrows, Enter) stay inert.
+    if (m_settings_open) {
+        if (event->keyval == GDK_KEY_Escape) {
+            apply_theme(m_settings_orig_color);
+            close_settings();
+            return true;
+        }
+        return Gtk::Window::on_key_press_event(event);
+    }
+
     if (event->keyval == GDK_KEY_Escape) {
         hide_launcher();
         return true;

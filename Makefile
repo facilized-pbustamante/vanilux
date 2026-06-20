@@ -1,12 +1,16 @@
 CXX = g++
 VERSION = $(shell cat VERSION 2>/dev/null || echo 0.1)
-CXXFLAGS = -O2 -g -std=c++17 -Wall -Wextra -DVLX_VERSION='"$(VERSION)"'
+# -fno-strict-aliasing: we interoperate heavily with GLib/GObject/GTK C types
+# (gobj() casts, GdkEvent unions, etc.); disabling strict-aliasing assumptions
+# avoids the optimizer mis-transforming that interop at -O2. Standard practice
+# for C-library interop (the kernel and many GTK apps build this way).
+CXXFLAGS = -O2 -g -std=c++17 -fno-strict-aliasing -Wall -Wextra -DVLX_VERSION='"$(VERSION)"'
 
 # Separate compile & link flags for GTKMM
 GTK_CFLAGS = $(shell pkg-config --cflags gtkmm-3.0)
 GTK_LIBS = $(shell pkg-config --libs gtkmm-3.0)
 
-SRC_FILES = src/main.cpp src/app_discovery.cpp src/launcher_window.cpp
+SRC_FILES = src/main.cpp src/app_discovery.cpp src/launcher_window.cpp src/keyboard_widget.cpp
 OBJ_FILES = $(SRC_FILES:.cpp=.o)
 TARGET = vanilux
 TEST_TARGET = test-discovery
