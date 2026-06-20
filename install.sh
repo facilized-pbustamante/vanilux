@@ -52,30 +52,18 @@ printf "${B}└─────────────────────�
 
 cd "$SCRIPT_DIR"
 
-# ── 0) selector de idioma ───────────────────────────────────────────────────
-echo
-say "Seleccioná tu idioma / Select your language:"
-echo "  1) Español        (ES)"
-echo "  2) English        (EN)"
-echo "  3) Português      (PT)"
-echo "  4) 中文           (ZH)"
-echo "  5) Français       (FR)"
-echo "  6) 日本語         (JA)"
-echo "  7) 한국어         (KO)"
-printf "  ${C}➜${N} "
-read -r LANG_INPUT
-LANG_INPUT="${LANG_INPUT:-1}"
-case "$LANG_INPUT" in
-  1|es|ES)     LANG_CODE="ES" ;;
-  2|en|EN)     LANG_CODE="EN" ;;
-  3|pt|PT)     LANG_CODE="PT" ;;
-  4|zh|ZH)     LANG_CODE="ZH" ;;
-  5|fr|FR)     LANG_CODE="FR" ;;
-  6|ja|JA)     LANG_CODE="JA" ;;
-  7|ko|KO)     LANG_CODE="KO" ;;
-  *)           LANG_CODE="ES" ;;
+# ── 0) detectar idioma (sin interacción) ─────────────────────────────────────
+SYS_LANG="${LANG:-es_CL.UTF-8}"
+case "$SYS_LANG" in
+  pt*|PT*) LANG_CODE="PT" ;;
+  fr*|FR*) LANG_CODE="FR" ;;
+  ja*|JA*) LANG_CODE="JA" ;;
+  ko*|KO*) LANG_CODE="KO" ;;
+  zh*|ZH*) LANG_CODE="ZH" ;;
+  en*|EN*) LANG_CODE="EN" ;;
+  *)       LANG_CODE="ES" ;;
 esac
-ok "Idioma seleccionado: $LANG_CODE"
+ok "Idioma autodetectado: $LANG_CODE (desde \$LANG=$SYS_LANG)"
 
 # ── 1) dependencias ─────────────────────────────────────────────────────────
 say "Instalando dependencias…"
