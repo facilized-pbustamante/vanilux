@@ -338,14 +338,12 @@ scrollbar.vertical slider:hover {
 
 .settings-card {
     background-color: #14141c;
-    /* Match the section frames' subtle orange border + small radius, just scaled
-       up for a big surface. */
     border: 1px solid rgba(224, 153, 36, 0.35);
     border-radius: 6px;
-    padding: 32px 36px;
-    margin: 32px;
-    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6),
-                0 0 24px rgba(224, 153, 36, 0.12);
+    padding: 29px 32px;
+    margin: 29px;
+    box-shadow: 0 11px 43px rgba(0, 0, 0, 0.6),
+                0 0 22px rgba(224, 153, 36, 0.12);
 }
 
 .settings-card label {
@@ -403,17 +401,32 @@ scrollbar.vertical slider:hover {
     min-height: 8px;
 }
 .settings-card colorselection spinbutton,
-.settings-card colorsel spinbutton {
+.settings-card colorsel spinbutton,
+.settings-card colorsel colorchooser spinbutton,
+.settings-card colorsel colorchooser notebook spinbutton {
     background-color: #1a1a24 !important;
     color: #f2e9e1 !important;
     border: 1px solid rgba(224,153,36,0.25);
     border-radius: 3px;
 }
+.settings-card colorselection spinbutton *,
+.settings-card colorsel spinbutton *,
+.settings-card colorsel colorchooser spinbutton * {
+    background-color: #1a1a24 !important;
+    color: #f2e9e1 !important;
+}
 .settings-card colorselection spinbutton button,
-.settings-card colorsel spinbutton button {
+.settings-card colorsel spinbutton button,
+.settings-card colorsel colorchooser spinbutton button {
     background-color: #1a1a24 !important;
     color: #f2e9e1 !important;
     border: none;
+}
+.settings-card colorselection spinbutton button *,
+.settings-card colorsel spinbutton button *,
+.settings-card colorsel colorchooser spinbutton button * {
+    background-color: #1a1a24 !important;
+    color: #f2e9e1 !important;
 }
 
 /* Hotkey mode selector (F key / Super + key) styled as pill toggles. */
