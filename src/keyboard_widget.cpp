@@ -5,7 +5,7 @@
 KeyboardWidget::KeyboardWidget() {
     // Fixed-ish size — NOT hexpand: an expanding keyboard dragged the whole
     // settings card to full width and broke its centering.
-    set_size_request(560, 188);
+    set_size_request(500, 170);
     add_events(Gdk::BUTTON_PRESS_MASK);
     build_layout();
 }

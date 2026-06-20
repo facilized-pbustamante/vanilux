@@ -1204,7 +1204,7 @@ void LauncherWindow::build_settings_panel() {
     m_settings_card_evt.set_valign(Gtk::ALIGN_CENTER);
     m_settings_card_evt.add(m_settings_card);
 
-    m_settings_card.set_spacing(16);
+    m_settings_card.set_spacing(10);
     m_settings_card.set_margin_start(27);
     m_settings_card.set_margin_end(27);
     m_settings_card.set_margin_top(14);
@@ -1223,7 +1223,7 @@ void LauncherWindow::build_settings_panel() {
     m_color_picker->set_has_opacity_control(false);
     m_color_picker->set_has_palette(true);
     m_color_picker->set_halign(Gtk::ALIGN_CENTER);
-    m_color_picker->set_size_request(380, 190);
+    m_color_picker->set_size_request(340, 170);
 
     // ── Hotkey section: mode selector + combo display + on-screen keyboard ────
     auto key_label = Gtk::manage(new Gtk::Label());
@@ -1355,20 +1355,18 @@ void LauncherWindow::build_settings_panel() {
         apply_theme(color_to_hex(m_color_picker->get_current_color()));
 
         std::string new_key = m_keyboard->get_binding();
-        if (!new_key.empty() && new_key != g_theme_hotkey) {
-            std::string old_key = g_theme_hotkey;   // capture before overwriting
-            g_theme_hotkey = new_key;
-            save_theme_config();
+        bool key_changed = (!new_key.empty() && new_key != g_theme_hotkey);
+        std::string old_key = g_theme_hotkey;
+        if (key_changed) g_theme_hotkey = new_key;
+        save_theme_config();
+        if (!new_key.empty()) {
+            std::string old_key = key_changed ? g_theme_hotkey : new_key;
             std::string b = "/usr/local/bin/vanilux";
             if (!std::filesystem::exists(b)) b = "/usr/bin/vanilux";
             if (std::filesystem::exists(b)) {
                 const std::string& k = new_key;
                 const std::string cp = "/org/cinnamon/desktop/keybindings/custom-keybindings/vanilux/";
                 const std::string gp = "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/vanilux/";
-                // Apply the hotkey to whichever desktop is in use. XFCE (xfconf)
-                // is checked first — it's keyed by the combo itself, so the old
-                // key is removed and the new one created (and it re-grabs live).
-                // Cinnamon / GNOME fall back to a named custom-keybinding entry.
                 std::string cmd =
                   "if command -v xfconf-query >/dev/null 2>&1 && "
                      "xfconf-query -c xfce4-keyboard-shortcuts -l >/dev/null 2>&1; then "
