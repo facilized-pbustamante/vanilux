@@ -1,6 +1,8 @@
 <div align="center">
 
-# 🟠 Vanilux
+<img src="../logo.svg" width="116" alt="Vanilux">
+
+# Vanilux
 
 ### 一款拥有终端之魂的 Linux 全屏应用启动器。
 
@@ -18,9 +20,13 @@
 ![C++17](https://img.shields.io/badge/C%2B%2B-17-00599C?style=flat-square&logo=cplusplus&logoColor=white)
 ![gtkmm3](https://img.shields.io/badge/GTK-gtkmm%203-7AAD0C?style=flat-square&logo=gnome&logoColor=white)
 ![Linux](https://img.shields.io/badge/Linux-X11-FCC624?style=flat-square&logo=linux&logoColor=black)
+![Ubuntu](https://img.shields.io/badge/Ubuntu-%E2%9C%93-E95420?style=flat-square&logo=ubuntu&logoColor=white)
+![Linux Mint](https://img.shields.io/badge/Linux_Mint-%E2%9C%93-86C440?style=flat-square&logo=linuxmint&logoColor=white)
 ![i18n](https://img.shields.io/badge/i18n-7%20%E7%A7%8D%E8%AF%AD%E8%A8%80-e09924?style=flat-square)
 
-### 🌐 [查看在线演示 →](https://facilized-pbustamante.github.io/vanilux/)
+[![查看在线演示](https://img.shields.io/badge/%E2%96%B6%20%E6%9F%A5%E7%9C%8B%E5%9C%A8%E7%BA%BF%E6%BC%94%E7%A4%BA-e09924?style=for-the-badge)](https://facilized-pbustamante.github.io/vanilux/)
+&nbsp;&nbsp;
+[![点个 Star](https://img.shields.io/badge/%E2%AD%90%20%E7%82%B9%E4%B8%AA%20Star-ffb000?style=for-the-badge&logo=github&logoColor=14141c)](https://github.com/facilized-pbustamante/vanilux)
 
 </div>
 
@@ -53,6 +59,14 @@
 ![设置菜单](../screenshots/settings.png)
 
 ## 🚀 安装
+
+**`.deb` 安装包（推荐 · Ubuntu / Linux Mint）** —— 从 [Releases](https://github.com/facilized-pbustamante/vanilux/releases) 下载 `vanilux_1.0_amd64.deb` 并安装：
+
+```bash
+sudo apt install ./vanilux_1.0_amd64.deb
+```
+
+**或从源码编译：**
 
 ```bash
 git clone https://github.com/facilized-pbustamante/vanilux
@@ -100,5 +114,19 @@ cd vanilux
 ## 🤝 贡献
 
 欢迎提交 issue 和 pull request。如果你喜欢终端美学或 Linux 极简主义，请给仓库点个 ⭐。
+
+---
+
+<div align="center">
+
+## ⭐ 喜欢 Vanilux 吗？
+
+### 点一个 Star —— 免费，还能帮项目被更多人看到 🙌
+
+[![star](https://img.shields.io/badge/%E2%AD%90%20%E7%82%B9%E4%B8%AA%20Star-ffb000?style=for-the-badge&logo=github&logoColor=14141c)](https://github.com/facilized-pbustamante/vanilux)
+&nbsp;
+[![GitHub stars](https://img.shields.io/github/stars/facilized-pbustamante/vanilux?style=for-the-badge&color=e09924&labelColor=14141c)](https://github.com/facilized-pbustamante/vanilux/stargazers)
+
+</div>
 
 <div align="center"><sub>vani<b>lux</b> · 用 C++ 和咖啡 ☕ 打造 · 琥珀终端美学</sub></div>

@@ -1,6 +1,8 @@
 <div align="center">
 
-# 🟠 Vanilux
+<img src="../logo.svg" width="116" alt="Vanilux">
+
+# Vanilux
 
 ### ターミナルの魂を持つ、Linux 向けフルスクリーン・アプリランチャー。
 
@@ -18,9 +20,13 @@
 ![C++17](https://img.shields.io/badge/C%2B%2B-17-00599C?style=flat-square&logo=cplusplus&logoColor=white)
 ![gtkmm3](https://img.shields.io/badge/GTK-gtkmm%203-7AAD0C?style=flat-square&logo=gnome&logoColor=white)
 ![Linux](https://img.shields.io/badge/Linux-X11-FCC624?style=flat-square&logo=linux&logoColor=black)
+![Ubuntu](https://img.shields.io/badge/Ubuntu-%E2%9C%93-E95420?style=flat-square&logo=ubuntu&logoColor=white)
+![Linux Mint](https://img.shields.io/badge/Linux_Mint-%E2%9C%93-86C440?style=flat-square&logo=linuxmint&logoColor=white)
 ![i18n](https://img.shields.io/badge/i18n-7%E8%A8%80%E8%AA%9E-e09924?style=flat-square)
 
-### 🌐 [ライブデモを見る →](https://facilized-pbustamante.github.io/vanilux/)
+[![ライブデモを見る](https://img.shields.io/badge/%E2%96%B6%20%E3%83%A9%E3%82%A4%E3%83%96%E3%83%87%E3%83%A2%E3%82%92%E8%A6%8B%E3%82%8B-e09924?style=for-the-badge)](https://facilized-pbustamante.github.io/vanilux/)
+&nbsp;&nbsp;
+[![スターをください](https://img.shields.io/badge/%E2%AD%90%20%E3%82%B9%E3%82%BF%E3%83%BC%E3%82%92%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84-ffb000?style=for-the-badge&logo=github&logoColor=14141c)](https://github.com/facilized-pbustamante/vanilux)
 
 </div>
 
@@ -53,6 +59,14 @@
 ![設定メニュー](../screenshots/settings.png)
 
 ## 🚀 インストール
+
+**`.deb` パッケージ（推奨 · Ubuntu / Linux Mint）** — [Releases](https://github.com/facilized-pbustamante/vanilux/releases) から `vanilux_1.0_amd64.deb` をダウンロードしてインストール：
+
+```bash
+sudo apt install ./vanilux_1.0_amd64.deb
+```
+
+**またはソースからビルド：**
 
 ```bash
 git clone https://github.com/facilized-pbustamante/vanilux
@@ -100,5 +114,19 @@ cd vanilux
 ## 🤝 コントリビュート
 
 Issue と Pull Request を歓迎します。ターミナル美学や Linux のミニマリズムが好きなら、リポジトリに ⭐ をどうぞ。
+
+---
+
+<div align="center">
+
+## ⭐ Vanilux は気に入りましたか？
+
+### スターをひとつ — 無料で、プロジェクトの後押しになります 🙌
+
+[![star](https://img.shields.io/badge/%E2%AD%90%20%E3%82%B9%E3%82%BF%E3%83%BC%E3%82%92%E3%81%8F%E3%81%A0%E3%81%95%E3%81%84-ffb000?style=for-the-badge&logo=github&logoColor=14141c)](https://github.com/facilized-pbustamante/vanilux)
+&nbsp;
+[![GitHub stars](https://img.shields.io/github/stars/facilized-pbustamante/vanilux?style=for-the-badge&color=e09924&labelColor=14141c)](https://github.com/facilized-pbustamante/vanilux/stargazers)
+
+</div>
 
 <div align="center"><sub>vani<b>lux</b> · C++ とコーヒー ☕ で制作 · アンバーのターミナル美学</sub></div>

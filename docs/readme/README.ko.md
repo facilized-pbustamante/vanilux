@@ -1,6 +1,8 @@
 <div align="center">
 
-# 🟠 Vanilux
+<img src="../logo.svg" width="116" alt="Vanilux">
+
+# Vanilux
 
 ### 터미널의 영혼을 가진 Linux 전체 화면 앱 런처.
 
@@ -18,9 +20,13 @@
 ![C++17](https://img.shields.io/badge/C%2B%2B-17-00599C?style=flat-square&logo=cplusplus&logoColor=white)
 ![gtkmm3](https://img.shields.io/badge/GTK-gtkmm%203-7AAD0C?style=flat-square&logo=gnome&logoColor=white)
 ![Linux](https://img.shields.io/badge/Linux-X11-FCC624?style=flat-square&logo=linux&logoColor=black)
+![Ubuntu](https://img.shields.io/badge/Ubuntu-%E2%9C%93-E95420?style=flat-square&logo=ubuntu&logoColor=white)
+![Linux Mint](https://img.shields.io/badge/Linux_Mint-%E2%9C%93-86C440?style=flat-square&logo=linuxmint&logoColor=white)
 ![i18n](https://img.shields.io/badge/i18n-7%EA%B0%9C%20%EC%96%B8%EC%96%B4-e09924?style=flat-square)
 
-### 🌐 [라이브 데모 보기 →](https://facilized-pbustamante.github.io/vanilux/)
+[![라이브 데모 보기](https://img.shields.io/badge/%E2%96%B6%20%EB%9D%BC%EC%9D%B4%EB%B8%8C%20%EB%8D%B0%EB%AA%A8%20%EB%B3%B4%EA%B8%B0-e09924?style=for-the-badge)](https://facilized-pbustamante.github.io/vanilux/)
+&nbsp;&nbsp;
+[![스타를 눌러주세요](https://img.shields.io/badge/%E2%AD%90%20%EC%8A%A4%ED%83%80%EB%A5%BC%20%EB%88%8C%EB%9F%AC%EC%A3%BC%EC%84%B8%EC%9A%94-ffb000?style=for-the-badge&logo=github&logoColor=14141c)](https://github.com/facilized-pbustamante/vanilux)
 
 </div>
 
@@ -53,6 +59,14 @@
 ![설정 메뉴](../screenshots/settings.png)
 
 ## 🚀 설치
+
+**`.deb` 패키지 (권장 · Ubuntu / Linux Mint)** — [Releases](https://github.com/facilized-pbustamante/vanilux/releases) 에서 `vanilux_1.0_amd64.deb` 를 받아 설치:
+
+```bash
+sudo apt install ./vanilux_1.0_amd64.deb
+```
+
+**또는 소스에서 빌드:**
 
 ```bash
 git clone https://github.com/facilized-pbustamante/vanilux
@@ -100,5 +114,19 @@ cd vanilux
 ## 🤝 기여
 
 이슈와 풀 리퀘스트를 환영합니다. 터미널 미학이나 Linux 미니멀리즘을 좋아한다면 저장소에 ⭐를 남겨 주세요.
+
+---
+
+<div align="center">
+
+## ⭐ Vanilux가 마음에 드나요?
+
+### 스타 하나 — 무료이고 프로젝트에 큰 힘이 됩니다 🙌
+
+[![star](https://img.shields.io/badge/%E2%AD%90%20%EC%8A%A4%ED%83%80%EB%A5%BC%20%EB%88%8C%EB%9F%AC%EC%A3%BC%EC%84%B8%EC%9A%94-ffb000?style=for-the-badge&logo=github&logoColor=14141c)](https://github.com/facilized-pbustamante/vanilux)
+&nbsp;
+[![GitHub stars](https://img.shields.io/github/stars/facilized-pbustamante/vanilux?style=for-the-badge&color=e09924&labelColor=14141c)](https://github.com/facilized-pbustamante/vanilux/stargazers)
+
+</div>
 
 <div align="center"><sub>vani<b>lux</b> · C++와 커피 ☕로 제작 · 앰버 터미널 미학</sub></div>

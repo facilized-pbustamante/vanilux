@@ -1,6 +1,8 @@
 <div align="center">
 
-# 🟠 Vanilux
+<img src="docs/logo.svg" width="116" alt="Vanilux">
+
+# Vanilux
 
 ### Un lanzador de aplicaciones a pantalla completa para Linux — con alma de terminal.
 
@@ -18,9 +20,13 @@
 ![C++17](https://img.shields.io/badge/C%2B%2B-17-00599C?style=flat-square&logo=cplusplus&logoColor=white)
 ![gtkmm3](https://img.shields.io/badge/GTK-gtkmm%203-7AAD0C?style=flat-square&logo=gnome&logoColor=white)
 ![Linux](https://img.shields.io/badge/Linux-X11-FCC624?style=flat-square&logo=linux&logoColor=black)
+![Ubuntu](https://img.shields.io/badge/Ubuntu-%E2%9C%93-E95420?style=flat-square&logo=ubuntu&logoColor=white)
+![Linux Mint](https://img.shields.io/badge/Linux_Mint-%E2%9C%93-86C440?style=flat-square&logo=linuxmint&logoColor=white)
 ![i18n](https://img.shields.io/badge/i18n-7%20idiomas-e09924?style=flat-square)
 
-### 🌐 [Ver demo en vivo →](https://facilized-pbustamante.github.io/vanilux/)
+[![Ver demo en vivo](https://img.shields.io/badge/%E2%96%B6%20Ver%20demo%20en%20vivo-e09924?style=for-the-badge)](https://facilized-pbustamante.github.io/vanilux/)
+&nbsp;&nbsp;
+[![Dejá una estrella](https://img.shields.io/badge/%E2%AD%90%20Dej%C3%A1%20una%20estrella-ffb000?style=for-the-badge&logo=github&logoColor=14141c)](https://github.com/facilized-pbustamante/vanilux)
 
 </div>
 
@@ -54,6 +60,14 @@ nativo, liviano y rápido. Sin Electron, sin runtime pesado.
 ![Menú de configuración](docs/screenshots/settings.png)
 
 ## 🚀 Instalación
+
+**Paquete `.deb` (recomendado · Ubuntu / Linux Mint)** — descargá `vanilux_1.0_amd64.deb` desde [Releases](https://github.com/facilized-pbustamante/vanilux/releases) e instalalo:
+
+```bash
+sudo apt install ./vanilux_1.0_amd64.deb
+```
+
+**O compilá desde el código fuente:**
 
 ```bash
 git clone https://github.com/facilized-pbustamante/vanilux
@@ -102,5 +116,19 @@ del lanzador (apps inventadas) donde podés probar el cambio de color y de idiom
 ## 🤝 Contribuir
 
 Issues y *pull requests* son bienvenidos. Si te gusta la estética terminal o el minimalismo en Linux, dejá una ⭐ en el repo.
+
+---
+
+<div align="center">
+
+## ⭐ ¿Te gustó Vanilux?
+
+### Dejá una estrella — es gratis y ayuda a que el proyecto crezca 🙌
+
+[![star](https://img.shields.io/badge/%E2%AD%90%20Dej%C3%A1%20una%20estrella-ffb000?style=for-the-badge&logo=github&logoColor=14141c)](https://github.com/facilized-pbustamante/vanilux)
+&nbsp;
+[![GitHub stars](https://img.shields.io/github/stars/facilized-pbustamante/vanilux?style=for-the-badge&color=e09924&labelColor=14141c)](https://github.com/facilized-pbustamante/vanilux/stargazers)
+
+</div>
 
 <div align="center"><sub>vani<b>lux</b> · hecho con C++ y café ☕ · estética terminal ámbar</sub></div>
