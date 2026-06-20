@@ -28,12 +28,17 @@ button:checked:hover {
 }
 
 /* Frame design with Amber border and custom titles */
+/* border-image: none forces the theme engine to NOT paint its own inner
+   shadow/bevel on top of the CSS border (white lines on some themes). */
 frame {
     border: 1px solid rgba(224, 153, 36, 0.35);
     border-radius: 4px;
     margin: 4px;
     padding: 6px;
     background-color: transparent;
+    border-image: none;
+    outline: none;
+    box-shadow: none;
 }
 
 frame > label {
@@ -357,6 +362,22 @@ scrollbar.vertical slider:hover {
 .settings-card colorselection,
 .settings-card colorselection * {
     color: #f2e9e1;
+}
+.settings-card colorselection button {
+    background-color: #1a1a24;
+    border: 1px solid rgba(224,153,36,0.25);
+    border-radius: 4px;
+    color: #f2e9e1;
+}
+.settings-card colorselection entry {
+    background-color: #1a1a24;
+    color: #f2e9e1;
+    border: 1px solid rgba(224,153,36,0.25);
+    border-radius: 3px;
+    padding: 2px 4px;
+}
+.settings-card colorselection label {
+    color: rgba(255,255,255,0.7);
 }
 
 /* Hotkey mode selector (F key / Super + key) styled as pill toggles. */

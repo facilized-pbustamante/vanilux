@@ -35,6 +35,10 @@ void KeyboardWidget::build_layout() {
         l2 = {"ㅂ","ㅈ","ㄷ","ㄱ","ㅅ","ㅛ","ㅕ","ㅑ","ㅐ","ㅔ"};
         l3 = {"ㅁ","ㄴ","ㅇ","ㄹ","ㅎ","ㅗ","ㅓ","ㅏ","ㅣ"};
         l4 = {"ㅋ","ㅌ","ㅊ","ㅍ","ㅠ","ㅜ","ㅡ"};
+    } else if (m_layout == "zhuyin") {          // Chinese Zhuyin (Bopomofo)
+        l2 = {"ㄆ","ㄊ","ㄍ","ㄐ","ㄔ","ㄗ","ㄧ","ㄛ","ㄌ","ㄨ"};
+        l3 = {"ㄇ","ㄋ","ㄎ","ㄑ","ㄓ","ㄕ","ㄖ","ㄘ","ㄙ"};
+        l4 = {"ㄅ","ㄉ","ㄏ","ㄒ","ㄚ","ㄠ","ㄥ"};
     } else {                                   // qwerty (also ES/PT base)
         l2 = split(kn2); l3 = split(kn3); l4 = split(kn4);
     }
@@ -103,6 +107,7 @@ void KeyboardWidget::set_layout(const std::string& code) {
     if      (code == "FR") layout  = "azerty";
     else if (code == "JA") layout  = "jis";
     else if (code == "KO") layout  = "hangul";
+    else if (code == "ZH") layout  = "zhuyin";
     else if (code == "ES") special = "ntilde";
     else if (code == "PT") special = "ccedilla";
     if (layout == m_layout && special == m_special) return;
