@@ -1592,6 +1592,11 @@ void LauncherWindow::setup_ui() {
     m_all_apps = AppDiscovery::scan_applications(dirs);
     m_apps     = m_all_apps;
 
+    // Preload star SVGs so the first AppIconButton doesn't block on SVG
+    // processing (themed_pixbuf caches the result after the first call).
+    themed_pixbuf("src/icons/star_empty_rounded.svg", 14, 14);
+    themed_pixbuf("src/icons/star_filled_rounded.svg", 14, 14);
+
     // ── Outer Box ────────────────────────────────────────────────────────────
     m_outer_box.set_spacing(6);
     m_outer_box.set_margin_start(16);
