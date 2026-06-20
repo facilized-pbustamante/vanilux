@@ -53,7 +53,7 @@ printf "${B}└─────────────────────�
 cd "$SCRIPT_DIR"
 
 # ── 0) detectar idioma (sin interacción) ─────────────────────────────────────
-SYS_LANG="${LANG:-es_CL.UTF-8}"
+SYS_LANG="${LANG:-en_US.UTF-8}"
 case "$SYS_LANG" in
   pt*|PT*) LANG_CODE="PT" ;;
   fr*|FR*) LANG_CODE="FR" ;;
@@ -61,7 +61,7 @@ case "$SYS_LANG" in
   ko*|KO*) LANG_CODE="KO" ;;
   zh*|ZH*) LANG_CODE="ZH" ;;
   en*|EN*) LANG_CODE="EN" ;;
-  *)       LANG_CODE="ES" ;;
+  *)       LANG_CODE="EN" ;;
 esac
 ok "Idioma autodetectado: $LANG_CODE (desde \$LANG=$SYS_LANG)"
 

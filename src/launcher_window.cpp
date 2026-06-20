@@ -406,8 +406,13 @@ AppIconButton::AppIconButton(const AppEntry& entry, bool is_favorite, bool list_
     m_fav_toggle_btn.set_size_request(24, 24);
     m_fav_toggle_btn.set_halign(Gtk::ALIGN_END);
     m_fav_toggle_btn.set_valign(Gtk::ALIGN_START);
-    m_fav_toggle_btn.set_margin_end(0);
-    m_fav_toggle_btn.set_margin_top(0);
+    if (list_mode) {
+        m_fav_toggle_btn.set_margin_end(-10);
+        m_fav_toggle_btn.set_margin_top(-20);
+    } else {
+        m_fav_toggle_btn.set_margin_end(0);
+        m_fav_toggle_btn.set_margin_top(0);
+    }
     m_fav_toggle_btn.set_margin_bottom(0);
     m_overlay.add_overlay(m_fav_toggle_btn);
 
@@ -962,6 +967,10 @@ void LauncherWindow::load_css() {
 .settings-card colorselection button { background-color: #1a1a24; border: 1px solid rgba(224,153,36,0.25); border-radius: 4px; color: #f2e9e1; }
 .settings-card colorselection entry { background-color: #1a1a24; color: #f2e9e1; border: 1px solid rgba(224,153,36,0.25); border-radius: 3px; padding: 2px 4px; }
 .settings-card colorselection label { color: rgba(255,255,255,0.7); }
+.settings-card colorselection scale trough { background-color: #1a1a24; }
+.settings-card colorselection scale slider { background-color: #e09924; border: none; border-radius: 4px; min-width: 8px; min-height: 8px; }
+.settings-card colorselection spinbutton { background-color: #1a1a24; color: #f2e9e1; border: 1px solid rgba(224,153,36,0.25); border-radius: 3px; }
+.settings-card colorselection spinbutton button { background-color: #1a1a24; color: #f2e9e1; border: none; }
 .mode-toggle { color: rgba(255,255,255,0.7); padding: 2px 6px; }
 .mode-toggle radio { background-color: #1a1a24; border: 1px solid rgba(224,153,36,0.4); border-radius: 8px; min-width: 13px; min-height: 13px; -gtk-icon-source: none; }
 .mode-toggle radio:checked { background-color: #e09924; border-color: #e09924; box-shadow: 0 0 6px rgba(224,153,36,0.6); }

@@ -379,6 +379,27 @@ scrollbar.vertical slider:hover {
 .settings-card colorselection label {
     color: rgba(255,255,255,0.7);
 }
+.settings-card colorselection scale trough {
+    background-color: #1a1a24;
+}
+.settings-card colorselection scale slider {
+    background-color: #e09924;
+    border: none;
+    border-radius: 4px;
+    min-width: 8px;
+    min-height: 8px;
+}
+.settings-card colorselection spinbutton {
+    background-color: #1a1a24;
+    color: #f2e9e1;
+    border: 1px solid rgba(224,153,36,0.25);
+    border-radius: 3px;
+}
+.settings-card colorselection spinbutton button {
+    background-color: #1a1a24;
+    color: #f2e9e1;
+    border: none;
+}
 
 /* Hotkey mode selector (F key / Super + key) styled as pill toggles. */
 .mode-toggle { color: rgba(255,255,255,0.7); padding: 2px 6px; }

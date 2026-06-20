@@ -30,7 +30,7 @@ if [ ! -f "$CONFIG_FILE" ]; then
   cat > "$CONFIG_FILE" <<EOF2
 color=#e09924
 hotkey=F4
-lang=ES
+lang=EN
 EOF2
 fi
 

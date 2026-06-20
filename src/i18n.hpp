@@ -28,16 +28,16 @@ static const LangMeta LANGS[LANG_COUNT] = {
     {Lang::KO, "KO", "한국어",     "flag_ko.svg"},
 };
 
-inline Lang& current_lang() { static Lang l = Lang::ES; return l; }
+inline Lang& current_lang() { static Lang l = Lang::EN; return l; }
 inline void  set_language(Lang l) { current_lang() = l; }
 
 inline Lang lang_from_code(const std::string& c) {
     for (const auto& m : LANGS) if (c == m.code) return m.lang;
-    return Lang::ES;
+    return Lang::EN;
 }
 inline const char* lang_code(Lang l) {
     for (const auto& m : LANGS) if (m.lang == l) return m.code;
-    return "ES";
+    return "EN";
 }
 
 // key → { ES, EN, PT, ZH, FR, JA, KO }
