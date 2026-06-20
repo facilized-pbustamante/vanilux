@@ -282,6 +282,26 @@ static Glib::RefPtr<Gdk::Pixbuf> themed_pixbuf(const std::string& rel_path, int 
     return pb;
 }
 
+// ── Inline star SVGs (no file I/O) ───────────────────────────────────────────
+static const char* STAR_EMPTY_SVG = R"(<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="none" stroke="COLOR" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/></svg>)";
+static const char* STAR_FILLED_SVG = R"(<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="COLOR" stroke="COLOR" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/></svg>)";
+
+static Glib::RefPtr<Gdk::Pixbuf> make_star_pixbuf(const std::string& tmpl, const std::string& color, int w, int h) {
+    std::string svg = tmpl;
+    size_t p = 0;
+    while ((p = svg.find("COLOR", p)) != std::string::npos) {
+        svg.replace(p, 5, color);
+        p += color.size();
+    }
+    try {
+        auto loader = Gdk::PixbufLoader::create("svg");
+        loader->set_size(w, h);
+        loader->write(reinterpret_cast<const guint8*>(svg.data()), svg.size());
+        loader->close();
+        return loader->get_pixbuf();
+    } catch (...) { return {}; }
+}
+
 // ── AppIconButton ────────────────────────────────────────────────────────────
 
 static std::string get_custom_icon(const std::string& icon_name) {
@@ -302,9 +322,9 @@ AppIconButton::AppIconButton(const AppEntry& entry, bool is_favorite, bool list_
     // List mode uses a smaller icon + a denser row; grid mode keeps the big tile.
     const int icon_px  = list_mode ? 30 : 48;
     const int wrap_sz  = list_mode ? 40 : 54;
-    const int ov_w     = list_mode ? 56 : 96;
-    const int ov_h     = list_mode ? 56 : 72;
-    const int wrap_top = list_mode ? 0  : 17;
+    const int ov_w     = list_mode ? 82 : 96;
+    const int ov_h     = list_mode ? 57 : 72;
+    const int wrap_top = 17;
 
     if (list_mode) {
         m_box.set_orientation(Gtk::ORIENTATION_HORIZONTAL);
@@ -365,8 +385,8 @@ AppIconButton::AppIconButton(const AppEntry& entry, bool is_favorite, bool list_
     static unsigned int s_star_ver = 0;
     if (s_star_ver != g_theme_svg_ver) {
         s_star_ver = g_theme_svg_ver;
-        s_pb_empty = themed_pixbuf("src/icons/star_empty_rounded.svg", 14, 14);
-        s_pb_filled = themed_pixbuf("src/icons/star_filled_rounded.svg", 14, 14);
+        s_pb_empty = make_star_pixbuf(STAR_EMPTY_SVG, g_theme_color, 14, 14);
+        s_pb_filled = make_star_pixbuf(STAR_FILLED_SVG, g_theme_bright_color, 14, 14);
     }
     Glib::RefPtr<Gdk::Pixbuf> pb_empty = s_pb_empty, pb_filled = s_pb_filled;
 
@@ -376,7 +396,7 @@ AppIconButton::AppIconButton(const AppEntry& entry, bool is_favorite, bool list_
     overlay_main->set_halign(Gtk::ALIGN_CENTER);
     overlay_main->set_valign(Gtk::ALIGN_CENTER);
     m_icon_wrapper.set_halign(Gtk::ALIGN_CENTER);
-    m_icon_wrapper.set_valign(list_mode ? Gtk::ALIGN_CENTER : Gtk::ALIGN_START);
+    m_icon_wrapper.set_valign(Gtk::ALIGN_START);
     // Reserve glow room ABOVE the icon (valign has no effect for a shrink child
     // in a vertical box). The label then sits right below the icon, not far down.
     m_icon_wrapper.set_margin_top(wrap_top);
@@ -406,13 +426,8 @@ AppIconButton::AppIconButton(const AppEntry& entry, bool is_favorite, bool list_
     m_fav_toggle_btn.set_size_request(24, 24);
     m_fav_toggle_btn.set_halign(Gtk::ALIGN_END);
     m_fav_toggle_btn.set_valign(Gtk::ALIGN_START);
-    if (list_mode) {
-        m_fav_toggle_btn.set_margin_end(-13);
-        m_fav_toggle_btn.set_margin_top(-9);
-    } else {
-        m_fav_toggle_btn.set_margin_end(0);
-        m_fav_toggle_btn.set_margin_top(0);
-    }
+    m_fav_toggle_btn.set_margin_end(0);
+    m_fav_toggle_btn.set_margin_top(0);
     m_fav_toggle_btn.set_margin_bottom(0);
     m_overlay.add_overlay(m_fav_toggle_btn);
 
@@ -821,7 +836,7 @@ void AppIconButton::refresh_theme() {
     // remaining icons are rendered once per color change and shared by all
     // buttons, keeping a full-grid refresh cheap.
     if (m_is_favorite) {
-        if (auto star = themed_pixbuf("src/icons/star_filled_rounded.svg", 14, 14))
+        if (auto star = make_star_pixbuf(STAR_FILLED_SVG, g_theme_bright_color, 14, 14))
             m_fav_icon_img.set(star);
     }
     if (m_list_mode) {
@@ -1604,9 +1619,9 @@ void LauncherWindow::setup_ui() {
     m_apps     = m_all_apps;
 
     // Preload star SVGs so the first AppIconButton doesn't block on SVG
-    // processing (themed_pixbuf caches the result after the first call).
-    themed_pixbuf("src/icons/star_empty_rounded.svg", 14, 14);
-    themed_pixbuf("src/icons/star_filled_rounded.svg", 14, 14);
+    // processing (make_star_pixbuf is instant — no file I/O).
+    make_star_pixbuf(STAR_EMPTY_SVG, g_theme_color, 14, 14);
+    make_star_pixbuf(STAR_FILLED_SVG, g_theme_bright_color, 14, 14);
 
     // ── Outer Box ────────────────────────────────────────────────────────────
     m_outer_box.set_spacing(6);
