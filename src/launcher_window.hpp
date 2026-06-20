@@ -6,6 +6,7 @@
 #include <string>
 #include <map>
 #include <functional>
+#include <memory>
 
 class AppIconButton : public Gtk::EventBox {
 public:
@@ -95,6 +96,11 @@ protected:
     // Keyboard navigation helper
     bool handle_custom_navigation(unsigned int keyval);
 
+    // Refresh, settings, theming
+    void refresh_apps();
+    void show_settings_dialog();
+    void apply_theme(const std::string& hex_color);
+
     static std::string detect_category(const std::string& categories);
 
     static constexpr int COLS = 9; // Matching mockup columns
@@ -154,6 +160,8 @@ protected:
     Gtk::Label m_app_count_label;
     Gtk::Label m_cat_name_label;
     Gtk::Box m_shortcuts_box{Gtk::ORIENTATION_HORIZONTAL};
+    Gtk::Button m_btn_refresh;
+    Gtk::Button m_btn_settings;
 
     // Data lists
     std::vector<AppEntry> m_all_apps;
@@ -164,6 +172,8 @@ protected:
     std::string m_current_category = "all";
     std::string m_view_mode = "grid";
     std::vector<std::pair<std::string, Gtk::Button*>> m_cat_buttons;
+
+    Glib::RefPtr<Gtk::CssProvider> m_theme_provider;
 
     std::chrono::steady_clock::time_point m_created_at;
     bool m_close_inhibited = false;

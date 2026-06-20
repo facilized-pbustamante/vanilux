@@ -7,6 +7,104 @@
 #include <sstream>
 #include <algorithm>
 #include <unordered_map>
+#include <iomanip>
+#include <cstring>
+
+// ── Theme globals (shared by LauncherWindow & AppIconButton Cairo glow) ─────
+static double g_theme_r = 224.0 / 255.0;
+static double g_theme_g = 153.0 / 255.0;
+static double g_theme_b = 36.0 / 255.0;
+static int    g_theme_ri = 224;
+static int    g_theme_gi = 153;
+static int    g_theme_bi = 36;
+static std::string g_theme_color = "#e09924";
+static std::string g_theme_hotkey = "F4";
+
+static std::string config_path() {
+    const char* home = std::getenv("HOME");
+    if (!home) return "";
+    std::string dir = std::string(home) + "/.config/vanilux";
+    std::filesystem::create_directories(dir);
+    return dir + "/config.txt";
+}
+
+static void load_theme_config() {
+    std::string path = config_path();
+    if (path.empty()) return;
+    std::ifstream f(path);
+    if (!f) return;
+    std::string line;
+    while (std::getline(f, line)) {
+        if (line.rfind("color=", 0) == 0 && line.size() >= 8) {
+            std::string c = line.substr(6);
+            if (c.size() == 7 && c[0] == '#') {
+                try {
+                    unsigned int ri, gi, bi;
+                    std::istringstream(c.substr(1,2)) >> std::hex >> ri;
+                    std::istringstream(c.substr(3,2)) >> std::hex >> gi;
+                    std::istringstream(c.substr(5,2)) >> std::hex >> bi;
+                    g_theme_ri = ri; g_theme_gi = gi; g_theme_bi = bi;
+                    g_theme_r = ri / 255.0; g_theme_g = gi / 255.0; g_theme_b = bi / 255.0;
+                    g_theme_color = c;
+                } catch (...) {}
+            }
+        } else if (line.rfind("hotkey=", 0) == 0 && line.size() > 7) {
+            g_theme_hotkey = line.substr(7);
+        }
+    }
+}
+
+static void save_theme_config() {
+    std::string path = config_path();
+    if (path.empty()) return;
+    std::ofstream f(path);
+    if (!f) return;
+    f << "color=" << g_theme_color << "\n";
+    f << "hotkey=" << g_theme_hotkey << "\n";
+}
+
+static std::string replace_theme_color(const std::string& css) {
+    std::string result = css;
+    // Replace hardcoded amber hex #e09924 with theme color (case-sensitive)
+    size_t pos = 0;
+    while ((pos = result.find("#e09924", pos)) != std::string::npos) {
+        result.replace(pos, 7, g_theme_color);
+        pos += g_theme_color.size();
+    }
+    // Replace #ffb000 (favorite star hover) with a brightened version
+    pos = 0;
+    int hr = std::min(255, (int)(g_theme_ri * 1.3 + 30));
+    int hg = std::min(255, (int)(g_theme_gi * 1.3 + 30));
+    int hb = std::min(255, (int)(g_theme_bi * 1.3 + 30));
+    std::ostringstream bright_hex;
+    bright_hex << "#" << std::hex << std::setfill('0') << std::setw(2) << hr
+               << std::setw(2) << hg << std::setw(2) << hb;
+    std::string bright = bright_hex.str();
+    pos = 0;
+    while ((pos = result.find("#ffb000", pos)) != std::string::npos) {
+        result.replace(pos, 7, bright);
+        pos += bright.size();
+    }
+    pos = 0;
+    while ((pos = result.find("rgba(255, 176, 0,", pos)) != std::string::npos) {
+        std::ostringstream rep;
+        rep << "rgba(" << hr << ", " << hg << ", " << hb << ",";
+        result.replace(pos, 17, rep.str());
+        pos += rep.str().size();
+    }
+    // Replace rgba(224, 153, 36, with rgba(THEME_R, THEME_G, THEME_B,
+    std::string old_rgba = "rgba(224, 153, 36,";
+    std::ostringstream new_rgba;
+    new_rgba << "rgba(" << g_theme_ri << ", " << g_theme_gi << ", " << g_theme_bi << ",";
+    std::string nr = new_rgba.str();
+    pos = 0;
+    while ((pos = result.find(old_rgba, pos)) != std::string::npos) {
+        result.replace(pos, old_rgba.size(), nr);
+        pos += nr.size();
+    }
+
+    return result;
+}
 
 struct CategoryMeta {
     std::string id;
@@ -558,7 +656,7 @@ bool AppIconButton::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
     const double x = cx - half, y = cy - half;
     const double w = 2.0 * half, h = 2.0 * half;
     const double r = 12.0;
-    const double R = 224.0 / 255.0, G = 153.0 / 255.0, B = 36.0 / 255.0;
+    const double R = g_theme_r, G = g_theme_g, B = g_theme_b;
 
     auto rounded = [&](double rx, double ry, double rw, double rh, double rr) {
         if (rr > rw / 2.0) rr = rw / 2.0;
@@ -630,6 +728,7 @@ LauncherWindow::LauncherWindow() {
             gtk_widget_set_visual(GTK_WIDGET(gobj()), const_cast<GdkVisual*>(visual->gobj()));
     }
 
+    load_theme_config();
     load_css();
     load_persisted_data();
     setup_ui();
@@ -664,358 +763,299 @@ void LauncherWindow::hide_launcher() {
 }
 
 void LauncherWindow::load_css() {
-    auto css_provider = Gtk::CssProvider::create();
     try {
         std::string css_data;
         std::ifstream file;
         std::string installed_css = find_installed("style.css");
-        if (!installed_css.empty()) {
-            file.open(installed_css);
-        }
-        if (!file) {
-            file.open("src/style.css");
-        }
-        if (!file) {
-            file.open("style.css");
-        }
+        if (!installed_css.empty()) file.open(installed_css);
+        if (!file) file.open("src/style.css");
+        if (!file) file.open("style.css");
         if (file) {
             std::stringstream ss;
             ss << file.rdbuf();
             css_data = ss.str();
         } else {
             css_data = R"(
-                /* Force monospace font globally across all widgets in the window */
-                #launcher-window, label, entry, button, textview {
-                    font-family: monospace;
-                }
-
-                #launcher-window {
-                    background-color: #0d0d12;
-                }
-
-                /* Strip all default GTK theme styles from buttons */
-                button,
-                button:hover,
-                button:active,
-                button:focus,
-                button:backdrop,
-                button:backdrop:hover,
-                button:backdrop:active,
-                button:checked,
+                #launcher-window, label, entry, button, textview { font-family: monospace; }
+                #launcher-window { background-color: #0d0d12; }
+                button,button:hover,button:active,button:focus,button:backdrop,
+                button:backdrop:hover,button:backdrop:active,button:checked,
                 button:checked:hover {
-                    background-image: none;
-                    background-color: transparent;
-                    border-style: none;
-                    border-width: 0;
-                    box-shadow: none;
-                    text-shadow: none;
+                    background-image: none; background-color: transparent;
+                    border-style: none; border-width: 0; box-shadow: none; text-shadow: none;
                 }
-
-                /* Frame design with Amber border and custom titles */
-                frame {
-                    border: 1px solid rgba(224, 153, 36, 0.35);
-                    border-radius: 4px;
-                    margin: 4px;
-                    padding: 6px;
-                    background-color: transparent;
-                }
-
-                frame > label {
-                    color: #e09924;
-                    font-size: 11px;
-                    font-weight: bold;
-                    background-color: #0d0d12; /* Mask the border behind the label */
-                    margin: 0 4px;
-                    padding: 0 6px;
-                }
-
-                /* Flat search input */
-                entry {
-                    border: none;
-                    background: transparent;
-                    color: #f2e9e1;
-                    caret-color: #e09924;
-                    font-size: 14px;
-                    box-shadow: none;
-                    text-shadow: none;
-                    padding: 2px 4px;
-                }
-
-                entry:focus {
-                    box-shadow: none;
-                    border: none;
-                }
-
-                .search-prompt {
-                    color: #e09924;
-                    font-size: 16px;
-                    font-weight: bold;
-                    margin-right: 8px;
-                }
-
-                /* Grid/List View buttons */
-                button.view-btn,
-                button.view-btn:backdrop {
-                    background-color: transparent;
-                    border: 1px solid rgba(224, 153, 36, 0.35);
-                    color: rgba(255, 255, 255, 0.6);
-                    padding: 3px 8px;
-                    border-radius: 4px;
-                    margin: 0 2px;
-                }
-
-                button.view-btn:hover {
-                    background-color: rgba(224, 153, 36, 0.1);
-                    color: #f2e9e1;
-                }
-
-                button.view-btn.active,
-                button.view-btn.active:backdrop {
-                    background-color: rgba(224, 153, 36, 0.25);
-                    border-color: #e09924;
-                    color: #e09924;
-                    box-shadow: 0 0 5px rgba(224, 153, 36, 0.4);
-                }
-
-                /* Sidebar Categories */
-                button.category-btn,
-                button.category-btn:backdrop {
-                    background-color: transparent;
-                    border-style: none;
-                    border-width: 0;
-                    box-shadow: none;
-                    color: rgba(255, 255, 255, 0.6);
-                    padding: 8px 12px;
-                    margin: 2px 4px;
-                    font-size: 12px;
-                    font-weight: 500;
-                    border-radius: 4px;
-                }
-
-                button.category-btn:hover {
-                    background-color: rgba(224, 153, 36, 0.08);
-                    color: #f2e9e1;
-                }
-
-                button.category-btn.active,
-                button.category-btn.active:backdrop {
-                    background-color: rgba(224, 153, 36, 0.15);
-                    border-left: 3px solid #e09924;
-                    border-radius: 0 4px 4px 0;
-                    color: #e09924;
-                    font-weight: bold;
-                }
-
-                /* App Icons & Buttons */
-                .app-button,
-                .app-button:backdrop {
-                    background-color: rgba(224, 153, 36, 0.0);
-                    border-style: none;
-                    border-width: 0;
-                    box-shadow: none;
-                    padding: 4px;
-                    border-radius: 6px;
-                    transition: all 0.25s ease-out;
-                }
-
-                .app-button:focus,
-                .app-button.hover {
-                    background-color: transparent;
-                }
-
-                .icon-wrapper {
-                    border: 2px solid rgba(224, 153, 36, 0.0);
-                    border-radius: 8px;
-                    padding: 3px;
-                    margin-bottom: 0px;
-                    background-color: transparent;
-                    box-shadow: 0 0 0px rgba(224, 153, 36, 0.0);
-                }
-
-                /* Hover border + glow are drawn in Cairo (AppIconButton::on_draw). */
-
-                .app-label {
-                    color: rgba(255, 255, 255, 0.85);
-                    font-size: 10px;
-                    font-weight: 400;
-                    margin-top: 2px;
-                }
-
-                .app-button.hover .app-label,
-                .app-button:focus .app-label {
-                    color: #e09924;
-                    font-weight: bold;
-                }
-
-                /* List-mode subtitle (the .desktop Comment) */
-                .app-sublabel {
-                    color: rgba(255, 255, 255, 0.45);
-                    font-size: 10px;
-                    font-weight: 400;
-                }
-                .app-button.hover .app-sublabel,
-                .app-button:focus .app-sublabel {
-                    color: rgba(242, 233, 225, 0.7);
-                }
-
-                /* List-mode category badge (amber pill on the right) */
-                .cat-badge {
-                    color: #e09924;
-                    background-color: rgba(224, 153, 36, 0.12);
-                    border: 1px solid rgba(224, 153, 36, 0.35);
-                    border-radius: 10px;
-                    padding: 1px 9px;
-                    font-size: 9px;
-                    font-weight: bold;
-                    margin-right: 4px;
-                }
-
-                /* List-mode ⚙ config icon (window-less image) */
-                .config-icon {
-                    opacity: 0.5;
-                }
-                .app-button.hover .config-icon,
-                .app-button:focus .config-icon {
-                    opacity: 1.0;
-                }
-
-                /* Tag popover */
-                popover.tags-popover,
-                popover.tags-popover > box,
-                popover.tags-popover contents {
-                    background-color: #14141c;
-                    border: 1px solid rgba(224, 153, 36, 0.4);
-                    border-radius: 8px;
-                }
-                popover.tags-popover checkbutton {
-                    color: rgba(255, 255, 255, 0.85);
-                    font-size: 12px;
-                    padding: 3px 2px;
-                }
-                popover.tags-popover checkbutton:hover {
-                    color: #e09924;
-                }
-                popover.tags-popover check {
-                    border: 1px solid rgba(224, 153, 36, 0.5);
-                    border-radius: 3px;
-                    min-width: 14px;
-                    min-height: 14px;
-                }
-                popover.tags-popover check:checked {
-                    background-color: #e09924;
-                    border-color: #e09924;
-                }
-
-                 /* Favorite Toggle Overlay Button */
-                 button.fav-toggle-btn,
-                 button.fav-toggle-btn:backdrop {
-                      color: rgba(224, 153, 36, 0.4);
-                      background-color: transparent;
-                      background-image: none;
-                      border-style: none;
-                      border-width: 0;
-                      padding: 1px;
-                      margin: 0;
-                      font-size: 14px;
-                      font-weight: bold;
-                      min-width: 18px;
-                      min-height: 18px;
-                      box-shadow: none;
-                      text-shadow: none;
-                      border-radius: 4px;
-                  }
-                  button.fav-toggle-btn:hover,
-                  button.fav-toggle-btn.active,
-                  button.fav-toggle-btn.active:backdrop {
-                      color: #ffb000;
-                      background-color: transparent;
-                      background-image: none;
-                      border-style: none;
-                      border-width: 0;
-                      box-shadow: none;
-                      text-shadow: 0 0 6px rgba(255, 176, 0, 0.8);
-                  }
-
-                /* Section Header Separators */
-                .section-header-label {
-                    color: rgba(255, 255, 255, 0.65);
-                    font-size: 11px;
-                    font-weight: bold;
-                    margin-right: 8px;
-                }
-
-                .section-separator {
-                    background-color: rgba(224, 153, 36, 0.2);
-                    min-height: 1px;
-                }
-
-                /* Status Bar & Keycaps */
-                .status-ws {
-                    color: #e09924;
-                    font-weight: bold;
-                    margin-right: 12px;
-                }
-
-                .status-text {
-                    color: rgba(255, 255, 255, 0.6);
-                    font-size: 11px;
-                    margin-right: 12px;
-                }
-
-                .key-cap {
-                    border: 1px solid rgba(224, 153, 36, 0.5);
-                    border-radius: 3px;
-                    padding: 0 3px;
-                    background-color: #1a1a24;
-                    color: #e09924;
-                    font-weight: bold;
-                    font-size: 8px;
-                    margin-right: 4px;
-                }
-
-                .key-cap-arrow {
-                    border: 1px solid rgba(224, 153, 36, 0.5);
-                    border-radius: 2px;
-                    background-color: #1a1a24;
-                    color: #e09924;
-                    font-weight: bold;
-                    font-size: 4px;
-                    padding: 0;
-                    margin: 0;
-                    min-width: 9px;
-                    min-height: 7px;
-                }
-
-                .key-desc {
-                    color: rgba(255, 255, 255, 0.5);
-                    font-size: 11px;
-                    margin-right: 16px;
-                }
-
-                /* Scrollbar styling */
-                scrollbar, scrollbar button, scrollbar slider {
-                    background-color: transparent;
-                    border: none;
-                }
-
-                scrollbar.vertical slider {
-                    background-color: rgba(224, 153, 36, 0.2);
-                    min-width: 5px;
-                    border-radius: 3px;
-                }
-
-                scrollbar.vertical slider:hover {
-                    background-color: #e09924;
-                }
+                frame { border: 1px solid rgba(224,153,36,0.35); border-radius: 4px; margin: 4px; padding: 6px; background-color: transparent; }
+                frame > label { color: #e09924; font-size: 11px; font-weight: bold; background-color: #0d0d12; margin: 0 4px; padding: 0 6px; }
+                entry { border: none; background: transparent; color: #f2e9e1; caret-color: #e09924; font-size: 14px; box-shadow: none; text-shadow: none; padding: 2px 4px; }
+                entry:focus { box-shadow: none; border: none; }
+                .search-prompt { color: #e09924; font-size: 16px; font-weight: bold; margin-right: 8px; }
+                button.view-btn,button.view-btn:backdrop { background-color: transparent; border: 1px solid rgba(224,153,36,0.35); color: rgba(255,255,255,0.6); padding: 3px 8px; border-radius: 4px; margin: 0 2px; }
+                button.view-btn:hover { background-color: rgba(224,153,36,0.1); color: #f2e9e1; }
+                button.view-btn.active,button.view-btn.active:backdrop { background-color: rgba(224,153,36,0.25); border-color: #e09924; color: #e09924; box-shadow: 0 0 5px rgba(224,153,36,0.4); }
+                button.category-btn,button.category-btn:backdrop { background-color: transparent; border-style: none; border-width: 0; box-shadow: none; color: rgba(255,255,255,0.6); padding: 8px 12px; margin: 2px 4px; font-size: 12px; font-weight: 500; border-radius: 4px; }
+                button.category-btn:hover { background-color: rgba(224,153,36,0.08); color: #f2e9e1; }
+                button.category-btn.active,button.category-btn.active:backdrop { background-color: rgba(224,153,36,0.15); border-left: 3px solid #e09924; border-radius: 0 4px 4px 0; color: #e09924; font-weight: bold; }
+                .app-button,.app-button:backdrop { background-color: rgba(224,153,36,0.0); border-style: none; border-width: 0; box-shadow: none; padding: 4px; border-radius: 6px; }
+                .app-button:focus,.app-button.hover { background-color: transparent; }
+                .icon-wrapper { border: 2px solid rgba(224,153,36,0.0); border-radius: 8px; padding: 3px; margin-bottom: 0px; background-color: transparent; box-shadow: 0 0 0 rgba(224,153,36,0); }
+                .app-label { color: rgba(255,255,255,0.85); font-size: 10px; font-weight: 400; margin-top: 2px; }
+                .app-button.hover .app-label,.app-button:focus .app-label { color: #e09924; font-weight: bold; }
+                .app-sublabel { color: rgba(255,255,255,0.45); font-size: 10px; font-weight: 400; }
+                .app-button.hover .app-sublabel,.app-button:focus .app-sublabel { color: rgba(242,233,225,0.7); }
+                .cat-badge { color: #e09924; background-color: rgba(224,153,36,0.12); border: 1px solid rgba(224,153,36,0.35); border-radius: 10px; padding: 1px 9px; font-size: 9px; font-weight: bold; margin-right: 4px; }
+                .config-icon { opacity: 0.5; }
+                .app-button.hover .config-icon,.app-button:focus .config-icon { opacity: 1.0; }
+                popover.tags-popover,popover.tags-popover>box,popover.tags-popover contents { background-color: #14141c; border: 1px solid rgba(224,153,36,0.4); border-radius: 8px; }
+                popover.tags-popover checkbutton { color: rgba(255,255,255,0.85); font-size: 12px; padding: 3px 2px; }
+                popover.tags-popover checkbutton:hover { color: #e09924; }
+                popover.tags-popover check { border: 1px solid rgba(224,153,36,0.5); border-radius: 3px; min-width: 14px; min-height: 14px; }
+                popover.tags-popover check:checked { background-color: #e09924; border-color: #e09924; }
+                button.fav-toggle-btn,button.fav-toggle-btn:backdrop { color: rgba(224,153,36,0.4); background-color: transparent; background-image: none; border-style: none; border-width: 0; padding: 1px; margin: 0; font-size: 14px; font-weight: bold; min-width: 18px; min-height: 18px; box-shadow: none; text-shadow: none; border-radius: 4px; }
+                button.fav-toggle-btn:hover,button.fav-toggle-btn.active,button.fav-toggle-btn.active:backdrop { color: #ffb000; background-color: transparent; background-image: none; border-style: none; border-width: 0; box-shadow: none; text-shadow: 0 0 6px rgba(255,176,0,0.8); }
+                .section-header-label { color: rgba(255,255,255,0.65); font-size: 11px; font-weight: bold; margin-right: 8px; }
+                .section-separator { background-color: rgba(224,153,36,0.2); min-height: 1px; }
+                .status-ws { color: #e09924; font-weight: bold; margin-right: 12px; }
+                .status-text { color: rgba(255,255,255,0.6); font-size: 11px; margin-right: 12px; }
+                .key-cap { border: 1px solid rgba(224,153,36,0.5); border-radius: 3px; padding: 0 3px; background-color: #1a1a24; color: #e09924; font-weight: bold; font-size: 8px; margin-right: 4px; }
+                .key-cap-arrow { border: 1px solid rgba(224,153,36,0.5); border-radius: 2px; background-color: #1a1a24; color: #e09924; font-weight: bold; font-size: 4px; padding: 0; margin: 0; min-width: 9px; min-height: 7px; }
+                .key-desc { color: rgba(255,255,255,0.5); font-size: 11px; margin-right: 16px; }
+                scrollbar,scrollbar button,scrollbar slider { background-color: transparent; border: none; }
+                scrollbar.vertical slider { background-color: rgba(224,153,36,0.2); min-width: 5px; border-radius: 3px; }
+                scrollbar.vertical slider:hover { background-color: #e09924; }
             )";
         }
+
+        // Apply theme color substitution to the entire CSS
+        css_data = replace_theme_color(css_data);
+
+        auto css_provider = Gtk::CssProvider::create();
         css_provider->load_from_data(css_data);
-        auto screen = get_screen();
-        if (screen)
-            get_style_context()->add_provider_for_screen(
-                screen, css_provider, GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-    } catch (const Gtk::CssProviderError& ex) {
-        std::cerr << "CSS error: " << ex.what() << std::endl;
+        Gtk::StyleContext::add_provider_for_screen(
+            Gdk::Screen::get_default(), css_provider,
+            GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+
+        // Store a reference so we can re-create on theme change
+        m_theme_provider = css_provider;
+    } catch (const std::exception& e) {
+        std::cerr << "vanilux: CSS load error: " << e.what() << std::endl;
+    }
+}
+
+void LauncherWindow::apply_theme(const std::string& hex_color) {
+    // Parse hex to RGB
+    try {
+        std::string h = hex_color;
+        if (h[0] == '#') h = h.substr(1);
+        unsigned int ri, gi, bi;
+        std::istringstream(h.substr(0,2)) >> std::hex >> ri;
+        std::istringstream(h.substr(2,2)) >> std::hex >> gi;
+        std::istringstream(h.substr(4,2)) >> std::hex >> bi;
+        g_theme_ri = ri; g_theme_gi = gi; g_theme_bi = bi;
+        g_theme_r = ri / 255.0; g_theme_g = gi / 255.0; g_theme_b = bi / 255.0;
+        g_theme_color = "#" + h;
+    } catch (...) { return; }
+
+    // Reload CSS with new color substitution
+    load_css();
+
+    // Force queue redraw on all children so Cairo glow updates
+    queue_draw();
+    for (auto* w : get_children()) {
+        w->queue_draw();
+        auto box = dynamic_cast<Gtk::Container*>(w);
+        if (box) box->foreach([](Gtk::Widget& c) { c.queue_draw(); });
+    }
+
+    save_theme_config();
+}
+
+void LauncherWindow::refresh_apps() {
+    std::vector<std::string> dirs = {
+        "/usr/share/applications",
+        "/usr/local/share/applications",
+    };
+    const char* home = std::getenv("HOME");
+    if (home) dirs.push_back(std::string(home) + "/.local/share/applications");
+
+    m_all_apps = AppDiscovery::scan_applications(dirs);
+
+    if (m_current_category == "all") {
+        m_apps = m_all_apps;
+    } else {
+        m_apps.clear();
+        for (const auto& app : m_all_apps) {
+            if (detect_category(app.categories) == m_current_category) {
+                m_apps.push_back(app);
+            }
+        }
+    }
+
+    // Rebuild sidebar first to recalc which categories exist
+    // Then rebuild the main grid
+    // We do this by clearing and re-setting up the sidebar buttons
+    // then calling set_category to re-filter and rebuild
+    set_category(m_current_category);
+    update_status();
+}
+
+void LauncherWindow::show_settings_dialog() {
+    auto dialog = Gtk::Dialog();
+    dialog.set_title("Configuración de Vanilux");
+    dialog.set_transient_for(*this);
+    dialog.set_modal(true);
+    dialog.set_size_request(500, 400);
+    dialog.set_resizable(false);
+
+    auto content = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_VERTICAL, 20));
+    content->set_margin_top(24);
+    content->set_margin_bottom(24);
+    content->set_margin_start(24);
+    content->set_margin_end(24);
+
+    // ── Color picker section ──────────────────────────────────────────────
+    auto color_label = Gtk::manage(new Gtk::Label());
+    color_label->set_markup("<b>Color del tema</b>");
+    color_label->set_halign(Gtk::ALIGN_START);
+
+    auto color_desc = Gtk::manage(new Gtk::Label());
+    color_desc->set_text("Elegí el color principal para bordes, brillos y destacados.");
+    color_desc->set_halign(Gtk::ALIGN_START);
+    color_desc->set_ellipsize(Pango::ELLIPSIZE_END);
+    color_desc->set_opacity(0.7);
+
+    auto color_picker = Gtk::manage(new Gtk::ColorSelection());
+    Gdk::Color current;
+    current.set_rgb(g_theme_ri * 256, g_theme_gi * 256, g_theme_bi * 256);
+    color_picker->set_has_opacity_control(false);
+    color_picker->set_has_palette(true);
+    color_picker->set_current_color(current);
+    color_picker->set_halign(Gtk::ALIGN_CENTER);
+    color_picker->set_size_request(400, 240);
+
+    // ── Keybinding section ────────────────────────────────────────────────
+    auto key_label = Gtk::manage(new Gtk::Label());
+    key_label->set_markup("<b>Tecla rápida</b>");
+    key_label->set_halign(Gtk::ALIGN_START);
+
+    auto key_desc = Gtk::manage(new Gtk::Label());
+    key_desc->set_text("Hacé clic en el botón y presioná la combinación de teclas.");
+    key_desc->set_halign(Gtk::ALIGN_START);
+    key_desc->set_opacity(0.7);
+
+    auto key_hbox = Gtk::manage(new Gtk::Box(Gtk::ORIENTATION_HORIZONTAL, 12));
+    key_hbox->set_halign(Gtk::ALIGN_CENTER);
+    key_hbox->set_margin_top(8);
+
+    auto key_entry = Gtk::manage(new Gtk::Entry());
+    key_entry->set_text(g_theme_hotkey);
+    key_entry->set_width_chars(20);
+    key_entry->set_alignment(Gtk::ALIGN_CENTER);
+    key_entry->set_editable(false);
+    key_entry->set_can_focus(true);
+
+    // Capture key presses on the entry
+    auto key_handler = [key_entry](GdkEventKey* ev) -> bool {
+        if (ev->type == GDK_KEY_PRESS) {
+            std::string key_name;
+
+            if (ev->state & GDK_CONTROL_MASK) key_name += "<Ctrl>";
+            if (ev->state & GDK_MOD1_MASK)    key_name += "<Alt>";
+            if (ev->state & GDK_SHIFT_MASK)   key_name += "<Shift>";
+            if (ev->state & GDK_SUPER_MASK)   key_name += "<Super>";
+
+            auto name = gdk_keyval_name(ev->keyval);
+            if (name) {
+                // Skip modifier-only presses
+                std::string n(name);
+                if (n == "Control_L" || n == "Control_R" || n == "Alt_L" ||
+                    n == "Alt_R" || n == "Shift_L" || n == "Shift_R" ||
+                    n == "Super_L" || n == "Super_R") return true;
+
+                key_name += n;
+                key_entry->set_text(key_name);
+            }
+            return true;
+        }
+        return false;
+    };
+    key_entry->signal_key_press_event().connect(key_handler, false);
+
+    auto key_btn_clear = Gtk::manage(new Gtk::Button("Limpiar"));
+    key_btn_clear->signal_clicked().connect([key_entry]() {
+        key_entry->set_text("");
+    });
+
+    key_hbox->pack_start(*key_entry, Gtk::PACK_SHRINK);
+    key_hbox->pack_start(*key_btn_clear, Gtk::PACK_SHRINK);
+
+    // ── Assemble ──────────────────────────────────────────────────────────
+    content->pack_start(*color_label, Gtk::PACK_SHRINK);
+    content->pack_start(*color_desc, Gtk::PACK_SHRINK);
+    content->pack_start(*color_picker, Gtk::PACK_SHRINK);
+    content->pack_start(*Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_HORIZONTAL)), Gtk::PACK_SHRINK);
+    content->pack_start(*key_label, Gtk::PACK_SHRINK);
+    content->pack_start(*key_desc, Gtk::PACK_SHRINK);
+    content->pack_start(*key_hbox, Gtk::PACK_SHRINK);
+
+    dialog.add_button("Cancelar", Gtk::RESPONSE_CANCEL);
+    dialog.add_button("Aplicar",  Gtk::RESPONSE_APPLY);
+    auto btn_save    = dialog.add_button("Guardar",  Gtk::RESPONSE_OK);
+    dialog.set_default_response(Gtk::RESPONSE_OK);
+
+    auto ca = dialog.get_content_area();
+    ca->pack_start(*content, Gtk::PACK_EXPAND_WIDGET);
+    ca->show_all();
+
+    // Real-time preview: on color change, apply immediately
+    auto color_conn = color_picker->signal_color_changed().connect([this, color_picker, btn_save]() {
+        auto c = color_picker->get_current_color();
+        std::ostringstream hex;
+        hex << "#" << std::hex << std::setfill('0') << std::setw(2)
+            << (c.get_red_p() * 255) << std::setw(2)
+            << (c.get_green_p() * 255) << std::setw(2)
+            << (c.get_blue_p() * 255);
+        apply_theme(hex.str());
+        btn_save->grab_focus();
+    });
+
+    // Apply keybinding via gsettings when saved
+    int result = dialog.run();
+
+    // Disconnect real-time preview to avoid double-apply
+    color_conn.disconnect();
+
+    if (result == Gtk::RESPONSE_OK || result == Gtk::RESPONSE_APPLY) {
+        // Save color
+        if (result == Gtk::RESPONSE_OK) {
+            auto c = color_picker->get_current_color();
+            std::ostringstream hex;
+            hex << "#" << std::hex << std::setfill('0') << std::setw(2)
+                << (unsigned int)(c.get_red_p() * 255) << std::setw(2)
+                << (unsigned int)(c.get_green_p() * 255) << std::setw(2)
+                << (unsigned int)(c.get_blue_p() * 255);
+            apply_theme(hex.str());
+        }
+
+        // Save keybinding
+        std::string new_key = key_entry->get_text();
+        if (!new_key.empty()) {
+            g_theme_hotkey = new_key;
+            save_theme_config();
+        }
+
+        // Apply keybinding to the system
+        if (get_visible() == false) {
+            // Only run keybinding setup if we're not root
+            std::string bin_path = "/usr/local/bin/vanilux";
+            if (!std::filesystem::exists(bin_path))
+                bin_path = "/usr/bin/vanilux";
+            if (std::filesystem::exists(bin_path)) {
+                std::string cmd = "gsettings set org.cinnamon.desktop.keybindings.custom-keybinding:/org/cinnamon/desktop/keybindings/custom-keybindings/vanilux/ binding \"['" + new_key + "']\" 2>/dev/null || "
+                                  "gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/vanilux/ binding \"['" + new_key + "']\" 2>/dev/null || true";
+                int rc = std::system(cmd.c_str());
+                (void)rc;
+            }
+        }
     }
 }
 
@@ -1424,6 +1464,21 @@ void LauncherWindow::setup_ui() {
     add_shortcut("↵", "abrir");
     add_shortcut("f", "favorito");
     add_shortcut("esc", "cerrar");
+
+    // ── Refresh & Settings buttons ────────────────────────────────────────
+    m_btn_refresh.set_label("↻");
+    m_btn_refresh.set_tooltip_text("Re-escanear aplicaciones instaladas");
+    m_btn_refresh.get_style_context()->add_class("view-btn");
+    m_btn_refresh.signal_clicked().connect([this]() { refresh_apps(); });
+    m_status_box.pack_end(m_btn_refresh, Gtk::PACK_SHRINK);
+    m_status_box.pack_end(*Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_VERTICAL)), Gtk::PACK_SHRINK);
+
+    m_btn_settings.set_label("⚙");
+    m_btn_settings.set_tooltip_text("Configurar tema y tecla rápida");
+    m_btn_settings.get_style_context()->add_class("view-btn");
+    m_btn_settings.signal_clicked().connect([this]() { show_settings_dialog(); });
+    m_status_box.pack_end(m_btn_settings, Gtk::PACK_SHRINK);
+    m_status_box.pack_end(*Gtk::manage(new Gtk::Separator(Gtk::ORIENTATION_VERTICAL)), Gtk::PACK_SHRINK);
 
     m_status_frame.add(m_status_box);
     m_outer_box.pack_start(m_status_frame, Gtk::PACK_SHRINK);
