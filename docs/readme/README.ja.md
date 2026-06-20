@@ -20,6 +20,8 @@
 ![Linux](https://img.shields.io/badge/Linux-X11-FCC624?style=flat-square&logo=linux&logoColor=black)
 ![i18n](https://img.shields.io/badge/i18n-7%E8%A8%80%E8%AA%9E-e09924?style=flat-square)
 
+### 🌐 [ライブデモを見る →](https://facilized-pbustamante.github.io/vanilux/)
+
 </div>
 
 ---

@@ -20,6 +20,8 @@
 ![Linux](https://img.shields.io/badge/Linux-X11-FCC624?style=flat-square&logo=linux&logoColor=black)
 ![i18n](https://img.shields.io/badge/i18n-7%20%E7%A7%8D%E8%AF%AD%E8%A8%80-e09924?style=flat-square)
 
+### 🌐 [查看在线演示 →](https://facilized-pbustamante.github.io/vanilux/)
+
 </div>
 
 ---
