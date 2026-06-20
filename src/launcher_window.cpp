@@ -1037,6 +1037,17 @@ bool LauncherWindow::set_theme_color(const std::string& hex_color) {
     // Bump the version so themed-pixbuf and CSS caches treat this as a new theme.
     g_theme_svg_ver++;
     clear_theme_cache();
+    // Pre-compute bright variant immediately so inline star SVG (make_star_pixbuf)
+    // gets a non-empty color without going through themed_svg_data.
+    {
+        int hr = std::min(255, (int)(g_theme_ri * 1.3 + 30));
+        int hg = std::min(255, (int)(g_theme_gi * 1.3 + 30));
+        int hb = std::min(255, (int)(g_theme_bi * 1.3 + 30));
+        std::ostringstream hx;
+        hx << "#" << std::hex << std::setfill('0') << std::setw(2) << hr
+           << std::setw(2) << hg << std::setw(2) << hb;
+        g_theme_bright_color = hx.str();
+    }
     return true;
 }
 
