@@ -365,68 +365,68 @@ scrollbar.vertical slider:hover {
 .settings-card colorsel colorchooser * {
     color: #f2e9e1;
 }
-.settings-card colorselection button,
-.settings-card colorsel button {
-    background-color: #1a1a24 !important;
+#launcher-window .settings-card colorselection button,
+#launcher-window .settings-card colorsel button {
+    background-color: #1a1a24;
     border: 1px solid rgba(224,153,36,0.25);
     border-radius: 4px;
-    color: #f2e9e1 !important;
+    color: #f2e9e1;
 }
-.settings-card colorselection entry,
-.settings-card colorsel entry {
-    background-color: #1a1a24 !important;
-    color: #f2e9e1 !important;
+#launcher-window .settings-card colorselection entry,
+#launcher-window .settings-card colorsel entry {
+    background-color: #1a1a24;
+    color: #f2e9e1;
     border: 1px solid rgba(224,153,36,0.25);
     border-radius: 3px;
     padding: 2px 4px;
 }
-.settings-card colorselection label,
-.settings-card colorsel label {
-    color: rgba(255,255,255,0.7) !important;
+#launcher-window .settings-card colorselection label,
+#launcher-window .settings-card colorsel label {
+    color: rgba(255,255,255,0.7);
 }
-.settings-card colorselection scale,
-.settings-card colorsel scale {
+#launcher-window .settings-card colorselection scale,
+#launcher-window .settings-card colorsel scale {
     background-color: transparent;
 }
-.settings-card colorselection scale trough,
-.settings-card colorsel scale trough {
-    background-color: #1a1a24 !important;
+#launcher-window .settings-card colorselection scale trough,
+#launcher-window .settings-card colorsel scale trough {
+    background-color: #1a1a24;
 }
-.settings-card colorselection scale slider,
-.settings-card colorsel scale slider {
-    background-color: #e09924 !important;
+#launcher-window .settings-card colorselection scale slider,
+#launcher-window .settings-card colorsel scale slider {
+    background-color: #e09924;
     border: none;
     border-radius: 4px;
     min-width: 8px;
     min-height: 8px;
 }
-.settings-card colorselection spinbutton,
-.settings-card colorsel spinbutton,
-.settings-card colorsel colorchooser spinbutton,
-.settings-card colorsel colorchooser notebook spinbutton {
-    background-color: #1a1a24 !important;
-    color: #f2e9e1 !important;
+#launcher-window .settings-card colorselection spinbutton,
+#launcher-window .settings-card colorsel spinbutton,
+#launcher-window .settings-card colorsel colorchooser spinbutton,
+#launcher-window .settings-card colorsel colorchooser notebook spinbutton {
+    background-color: #1a1a24;
+    color: #f2e9e1;
     border: 1px solid rgba(224,153,36,0.25);
     border-radius: 3px;
 }
-.settings-card colorselection spinbutton *,
-.settings-card colorsel spinbutton *,
-.settings-card colorsel colorchooser spinbutton * {
-    background-color: #1a1a24 !important;
-    color: #f2e9e1 !important;
+#launcher-window .settings-card colorselection spinbutton *,
+#launcher-window .settings-card colorsel spinbutton *,
+#launcher-window .settings-card colorsel colorchooser spinbutton * {
+    background-color: #1a1a24;
+    color: #f2e9e1;
 }
-.settings-card colorselection spinbutton button,
-.settings-card colorsel spinbutton button,
-.settings-card colorsel colorchooser spinbutton button {
-    background-color: #1a1a24 !important;
-    color: #f2e9e1 !important;
+#launcher-window .settings-card colorselection spinbutton button,
+#launcher-window .settings-card colorsel spinbutton button,
+#launcher-window .settings-card colorsel colorchooser spinbutton button {
+    background-color: #1a1a24;
+    color: #f2e9e1;
     border: none;
 }
-.settings-card colorselection spinbutton button *,
-.settings-card colorsel spinbutton button *,
-.settings-card colorsel colorchooser spinbutton button * {
-    background-color: #1a1a24 !important;
-    color: #f2e9e1 !important;
+#launcher-window .settings-card colorselection spinbutton button *,
+#launcher-window .settings-card colorsel spinbutton button *,
+#launcher-window .settings-card colorsel colorchooser spinbutton button * {
+    background-color: #1a1a24;
+    color: #f2e9e1;
 }
 
 /* Hotkey mode selector (F key / Super + key) styled as pill toggles. */
