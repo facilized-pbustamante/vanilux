@@ -6,6 +6,8 @@
 
 ### A fullscreen application launcher for Linux — with a terminal soul.
 
+[![See the live demo](https://img.shields.io/badge/%E2%96%B6%20See%20the%20live%20demo-e09924?style=for-the-badge)](https://facilized-pbustamante.github.io/vanilux/)
+
 [Español](../../README.md) ·
 **English** ·
 [Português](README.pt.md) ·
@@ -19,14 +21,9 @@
 ![version](https://img.shields.io/badge/version-1.0-e09924?style=flat-square)
 ![C++17](https://img.shields.io/badge/C%2B%2B-17-00599C?style=flat-square&logo=cplusplus&logoColor=white)
 ![gtkmm3](https://img.shields.io/badge/GTK-gtkmm%203-7AAD0C?style=flat-square&logo=gnome&logoColor=white)
-![Linux](https://img.shields.io/badge/Linux-X11-FCC624?style=flat-square&logo=linux&logoColor=black)
 ![Ubuntu](https://img.shields.io/badge/Ubuntu-%E2%9C%93-E95420?style=flat-square&logo=ubuntu&logoColor=white)
 ![Linux Mint](https://img.shields.io/badge/Linux_Mint-%E2%9C%93-86C440?style=flat-square&logo=linuxmint&logoColor=white)
 ![i18n](https://img.shields.io/badge/i18n-7%20languages-e09924?style=flat-square)
-
-[![See the live demo](https://img.shields.io/badge/%E2%96%B6%20See%20the%20live%20demo-e09924?style=for-the-badge)](https://facilized-pbustamante.github.io/vanilux/)
-&nbsp;&nbsp;
-[![Leave a star](https://img.shields.io/badge/%E2%AD%90%20Leave%20a%20star-ffb000?style=for-the-badge&logo=github&logoColor=14141c)](https://github.com/facilized-pbustamante/vanilux)
 
 </div>
 
@@ -38,20 +35,22 @@ open is instant, like `rofi`— and it's **customizable down to the pixel**: cha
 theme color, the hotkey and the language… live. Written in **C++17 + gtkmm 3**: native,
 lightweight and fast. No Electron, no heavy runtime.
 
-## ✨ Features
+## Features
 
-- 🖥️ **Fullscreen, TUI aesthetic** — `[ search ]`, `[ tags ]`, `[ apps ]` and `[ status ]` panels with amber borders.
-- 🔍 **Automatic discovery** of apps by parsing the system and user `.desktop` files (honors `NoDisplay`, `Hidden` and `TryExec`).
-- ⚡ **Incremental search** by name, case-insensitive, with Unicode case-folding.
-- 🏷️ **Categories**, ⭐ **Favorites** and 🕘 **Recents**, persisted on disk.
-- 🌟 **Amber glow** around the selected icon, hand-drawn with Cairo (crisp edge + uniform halo via a real blur).
-- 🎨 **Live theme color** — a color picker recolors the entire UI instantly.
-- 🌐 **7 languages** with an on-screen keyboard that adapts its layout to each (QWERTY · AZERTY · kana · hangul · zhuyin).
-- ⌨️ **Full keyboard navigation** (arrows, Enter, `f`, Esc) plus mouse, with a single selection at a time (*focus-follows-mouse*).
-- 🚀 **Resident process** → the first open loads the icons; the next ones are immediate.
-- 🪶 **C++17 + gtkmm 3** — native and lightweight.
+| Feature | Description |
+|---|---|
+| Fullscreen, TUI aesthetic | `[ search ]`, `[ tags ]`, `[ apps ]` and `[ status ]` panels with amber borders. |
+| Automatic discovery | Parses the system and user `.desktop` files (honors `NoDisplay`, `Hidden`, `TryExec`). |
+| Incremental search | Filters by name, case-insensitive, with Unicode case-folding. |
+| Favorites & Recents | Persisted on disk across sessions. |
+| Amber glow in Cairo | The selected icon's halo is hand-drawn with a real blur. |
+| Live theme color | A color picker recolors the whole UI instantly. |
+| 7 languages | On-screen keyboard that adapts its layout (QWERTY · AZERTY · kana · hangul · zhuyin). |
+| Keyboard navigation | Arrows, Enter, `f`, Esc — plus the mouse. |
+| Resident process | The first open loads the icons; the next ones are immediate. |
+| C++17 + gtkmm 3 | Native and lightweight, no Electron. |
 
-## 📸 Screenshots
+## Screenshots
 
 ### Grid view
 ![Grid view](../screenshots/grid.png)
@@ -59,7 +58,7 @@ lightweight and fast. No Electron, no heavy runtime.
 ### Settings — theme, hotkey and language
 ![Settings menu](../screenshots/settings.png)
 
-## 🚀 Installation
+## Installation
 
 **`.deb` package (recommended · Ubuntu / Linux Mint)** — download `vanilux_1.0_amd64.deb` from [Releases](https://github.com/facilized-pbustamante/vanilux/releases) and install it:
 
@@ -76,14 +75,16 @@ cd vanilux
 ```
 
 The installer resolves dependencies, builds, copies the binary + CSS + icons,
-creates the application-menu entry and **sets up the `F4` hotkey** for you
+creates the application-menu entry and sets up the `F4` hotkey for you
 (it detects Cinnamon, GNOME or XFCE).
 
-> **Manual build:** `make && sudo make install`
-> **Dependencies:** `build-essential` · `libgtkmm-3.0-dev` · `pkg-config` · `make`
-> Tested on **Linux Mint 22.3** (Ubuntu 24.04, X11) with g++ 13.3, gtkmm 3.24 and GTK 3.24.
+| | |
+|---|---|
+| Manual build | `make && sudo make install` |
+| Dependencies | `build-essential` · `libgtkmm-3.0-dev` · `pkg-config` · `make` |
+| Tested on | Ubuntu 24.04 · Linux Mint 22.3 (X11) — g++ 13.3, gtkmm 3.24, GTK 3.24 |
 
-## ⌨️ Usage
+## Usage
 
 | Action | Key / gesture |
 |---|---|
@@ -95,27 +96,35 @@ creates the application-menu entry and **sets up the `F4` hotkey** for you
 | Close | <kbd>Esc</kbd> |
 | All of the above | also with the mouse (hover = glow) |
 
-## 🎨 Customization (live)
+## Customization (live)
 
-Open settings via the 🔧 (top right):
+Open settings via the wrench button (top right):
 
-- **Theme color** — wheel + preset swatches + hex; recolors **everything** instantly.
-- **Hotkey** — pick <kbd>F1</kbd>–<kbd>F12</kbd> or **Super + key** on a chiclet-style on-screen keyboard.
-- **Language** — Español · English · Português · 中文 · Français · 日本語 · 한국어. Switches the whole UI instantly (and the keyboard adapts its layout).
+| Setting | What it does |
+|---|---|
+| Theme color | Wheel + preset swatches + hex; recolors **everything** instantly. |
+| Hotkey | Pick <kbd>F1</kbd>–<kbd>F12</kbd> or **Super + key** on a chiclet-style on-screen keyboard. |
+| Language | Español · English · Português · 中文 · Français · 日本語 · 한국어 — switches the whole UI instantly. |
 
-## 🧱 Tech
+## Tech
 
-**C++17** · **gtkmm 3** (GTK 3) · **Cairo** (hand-drawn glow) · **X11**.
-No heavy dependencies: just the system toolkit.
+| Component | Detail |
+|---|---|
+| Language | C++17 |
+| Toolkit | gtkmm 3 (GTK 3) |
+| Graphics | Cairo (hand-drawn glow) |
+| Display | X11 |
+| Tested on | Ubuntu · Linux Mint |
 
-## 🌐 Web demo
+## Web demo
 
 [`/landing`](../../landing/) hosts a presentation page with an **interactive simulator**
-of the launcher (made-up apps) where you can try the live color and language switching in your browser.
+of the launcher (made-up apps) where you can try the live color and language switching:
+**[facilized-pbustamante.github.io/vanilux](https://facilized-pbustamante.github.io/vanilux/)**
 
-## 🤝 Contributing
+## Contributing
 
-Issues and pull requests are welcome. If you like terminal aesthetics or Linux minimalism, drop a ⭐ on the repo.
+Issues and pull requests are welcome.
 
 ---
 
@@ -123,12 +132,12 @@ Issues and pull requests are welcome. If you like terminal aesthetics or Linux m
 
 ## ⭐ Enjoying Vanilux?
 
-### Leave a star — it's free and helps the project grow 🙌
+### Leave a star — it's free and helps the project grow
 
-[![star](https://img.shields.io/badge/%E2%AD%90%20Leave%20a%20star-ffb000?style=for-the-badge&logo=github&logoColor=14141c)](https://github.com/facilized-pbustamante/vanilux)
+[![Leave a star](https://img.shields.io/badge/%E2%AD%90%20Leave%20a%20star-ffb000?style=for-the-badge&logo=github&logoColor=14141c)](https://github.com/facilized-pbustamante/vanilux)
 &nbsp;
 [![GitHub stars](https://img.shields.io/github/stars/facilized-pbustamante/vanilux?style=for-the-badge&color=e09924&labelColor=14141c)](https://github.com/facilized-pbustamante/vanilux/stargazers)
 
-</div>
+<sub>vani<b>lux</b> · made with C++ and coffee · amber terminal aesthetic</sub>
 
-<div align="center"><sub>vani<b>lux</b> · made with C++ and coffee ☕ · amber terminal aesthetic</sub></div>
+</div>

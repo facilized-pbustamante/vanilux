@@ -6,6 +6,8 @@
 
 ### Un lanzador de aplicaciones a pantalla completa para Linux — con alma de terminal.
 
+[![Ver demo en vivo](https://img.shields.io/badge/%E2%96%B6%20Ver%20demo%20en%20vivo-e09924?style=for-the-badge)](https://facilized-pbustamante.github.io/vanilux/)
+
 **Español** ·
 [English](docs/readme/README.en.md) ·
 [Português](docs/readme/README.pt.md) ·
@@ -19,14 +21,9 @@
 ![versión](https://img.shields.io/badge/versi%C3%B3n-1.0-e09924?style=flat-square)
 ![C++17](https://img.shields.io/badge/C%2B%2B-17-00599C?style=flat-square&logo=cplusplus&logoColor=white)
 ![gtkmm3](https://img.shields.io/badge/GTK-gtkmm%203-7AAD0C?style=flat-square&logo=gnome&logoColor=white)
-![Linux](https://img.shields.io/badge/Linux-X11-FCC624?style=flat-square&logo=linux&logoColor=black)
 ![Ubuntu](https://img.shields.io/badge/Ubuntu-%E2%9C%93-E95420?style=flat-square&logo=ubuntu&logoColor=white)
 ![Linux Mint](https://img.shields.io/badge/Linux_Mint-%E2%9C%93-86C440?style=flat-square&logo=linuxmint&logoColor=white)
 ![i18n](https://img.shields.io/badge/i18n-7%20idiomas-e09924?style=flat-square)
-
-[![Ver demo en vivo](https://img.shields.io/badge/%E2%96%B6%20Ver%20demo%20en%20vivo-e09924?style=for-the-badge)](https://facilized-pbustamante.github.io/vanilux/)
-&nbsp;&nbsp;
-[![Dejá una estrella](https://img.shields.io/badge/%E2%AD%90%20Dej%C3%A1%20una%20estrella-ffb000?style=for-the-badge&logo=github&logoColor=14141c)](https://github.com/facilized-pbustamante/vanilux)
 
 </div>
 
@@ -38,20 +35,22 @@ la siguiente apertura sea instantánea, como `rofi`— y es **personalizable has
 cambiá el color del tema, la tecla rápida y el idioma… en vivo. Escrito en **C++17 + gtkmm 3**:
 nativo, liviano y rápido. Sin Electron, sin runtime pesado.
 
-## ✨ Características
+## Características
 
-- 🖥️ **Pantalla completa, estética TUI** — paneles `[ buscar ]`, `[ etiquetas ]`, `[ apps ]` y `[ estado ]` con bordes ámbar.
-- 🔍 **Descubrimiento automático** de apps parseando los `.desktop` del sistema y de tu usuario (respeta `NoDisplay`, `Hidden` y `TryExec`).
-- ⚡ **Búsqueda incremental** por nombre, sin distinguir mayúsculas, con *case-folding* Unicode.
-- 🏷️ **Categorías**, ⭐ **Favoritos** y 🕘 **Recientes** persistentes en disco.
-- 🌟 **Glow ámbar** alrededor del ícono seleccionado, dibujado a mano con Cairo (borde nítido + halo difuso por *blur* real).
-- 🎨 **Color del tema en vivo** — un *color picker* recolorea toda la interfaz al instante.
-- 🌐 **7 idiomas** con teclado en pantalla que adapta su *layout* a cada uno (QWERTY · AZERTY · kana · hangul · zhuyin).
-- ⌨️ **Navegación completa por teclado** (flechas, Enter, `f`, Esc) además de mouse, con una sola selección a la vez (*focus-follows-mouse*).
-- 🚀 **Proceso residente** → la primera apertura carga los íconos; las siguientes son inmediatas.
-- 🪶 **C++17 + gtkmm 3** — nativo y liviano.
+| Característica | Descripción |
+|---|---|
+| Pantalla completa, estética TUI | Paneles `[ buscar ]`, `[ etiquetas ]`, `[ apps ]` y `[ estado ]` con bordes ámbar. |
+| Descubrimiento automático | Parsea los `.desktop` del sistema y del usuario (respeta `NoDisplay`, `Hidden`, `TryExec`). |
+| Búsqueda incremental | Filtra por nombre, sin distinguir mayúsculas, con *case-folding* Unicode. |
+| Favoritos y Recientes | Persistentes en disco entre sesiones. |
+| Glow ámbar en Cairo | El halo del ícono seleccionado se dibuja a mano con un *blur* real. |
+| Color del tema en vivo | Un *color picker* recolorea toda la interfaz al instante. |
+| 7 idiomas | Teclado en pantalla que adapta su layout (QWERTY · AZERTY · kana · hangul · zhuyin). |
+| Navegación por teclado | Flechas, Enter, `f`, Esc — además del mouse. |
+| Proceso residente | La primera apertura carga los íconos; las siguientes son inmediatas. |
+| C++17 + gtkmm 3 | Nativo y liviano, sin Electron. |
 
-## 📸 Capturas
+## Capturas
 
 ### Vista de cuadrícula
 ![Vista de cuadrícula](docs/screenshots/grid.png)
@@ -59,7 +58,7 @@ nativo, liviano y rápido. Sin Electron, sin runtime pesado.
 ### Configuración — tema, tecla rápida e idioma
 ![Menú de configuración](docs/screenshots/settings.png)
 
-## 🚀 Instalación
+## Instalación
 
 **Paquete `.deb` (recomendado · Ubuntu / Linux Mint)** — descargá `vanilux_1.0_amd64.deb` desde [Releases](https://github.com/facilized-pbustamante/vanilux/releases) e instalalo:
 
@@ -76,14 +75,16 @@ cd vanilux
 ```
 
 El instalador resuelve las dependencias, compila, copia el binario + CSS + iconos,
-crea la entrada en el menú de aplicaciones y **configura el atajo `F4`** por vos
+crea la entrada en el menú de aplicaciones y configura el atajo `F4` por vos
 (detecta Cinnamon, GNOME o XFCE).
 
-> **Compilación manual:** `make && sudo make install`
-> **Dependencias:** `build-essential` · `libgtkmm-3.0-dev` · `pkg-config` · `make`
-> Probado en **Linux Mint 22.3** (Ubuntu 24.04, X11) con g++ 13.3, gtkmm 3.24 y GTK 3.24.
+| | |
+|---|---|
+| Compilación manual | `make && sudo make install` |
+| Dependencias | `build-essential` · `libgtkmm-3.0-dev` · `pkg-config` · `make` |
+| Probado en | Ubuntu 24.04 · Linux Mint 22.3 (X11) — g++ 13.3, gtkmm 3.24, GTK 3.24 |
 
-## ⌨️ Uso
+## Uso
 
 | Acción | Tecla / gesto |
 |---|---|
@@ -95,27 +96,35 @@ crea la entrada en el menú de aplicaciones y **configura el atajo `F4`** por vo
 | Cerrar | <kbd>Esc</kbd> |
 | Todo lo anterior | también con el mouse (hover = glow) |
 
-## 🎨 Personalización (en vivo)
+## Personalización (en vivo)
 
-Abrí la configuración con la 🔧 (arriba a la derecha):
+Abrí la configuración con el botón de la llave (arriba a la derecha):
 
-- **Color del tema** — rueda + colores predefinidos + hex; recolorea **todo** al instante.
-- **Tecla rápida** — elegí entre <kbd>F1</kbd>–<kbd>F12</kbd> o **Súper + tecla** en un teclado en pantalla estilo chiclet.
-- **Idioma** — Español · English · Português · 中文 · Français · 日本語 · 한국어. Cambia toda la UI al instante (y el teclado adapta su layout).
+| Ajuste | Qué hace |
+|---|---|
+| Color del tema | Rueda + colores predefinidos + hex; recolorea **todo** al instante. |
+| Tecla rápida | Elegí entre <kbd>F1</kbd>–<kbd>F12</kbd> o **Súper + tecla** en un teclado en pantalla estilo chiclet. |
+| Idioma | Español · English · Português · 中文 · Français · 日本語 · 한국어 — cambia toda la UI al instante. |
 
-## 🧱 Tecnología
+## Tecnología
 
-**C++17** · **gtkmm 3** (GTK 3) · **Cairo** (glow dibujado a mano) · **X11**.
-Sin dependencias pesadas: solo el toolkit del sistema.
+| Componente | Detalle |
+|---|---|
+| Lenguaje | C++17 |
+| Toolkit | gtkmm 3 (GTK 3) |
+| Gráficos | Cairo (glow dibujado a mano) |
+| Display | X11 |
+| Probado en | Ubuntu · Linux Mint |
 
-## 🌐 Demo web
+## Demo web
 
 En [`/landing`](landing/) hay una página de presentación con un **simulador interactivo**
-del lanzador (apps inventadas) donde podés probar el cambio de color y de idioma en el navegador.
+del lanzador (apps inventadas) donde podés probar el cambio de color y de idioma en el navegador:
+**[facilized-pbustamante.github.io/vanilux](https://facilized-pbustamante.github.io/vanilux/)**
 
-## 🤝 Contribuir
+## Contribuir
 
-Issues y *pull requests* son bienvenidos. Si te gusta la estética terminal o el minimalismo en Linux, dejá una ⭐ en el repo.
+Issues y *pull requests* son bienvenidos.
 
 ---
 
@@ -123,12 +132,12 @@ Issues y *pull requests* son bienvenidos. Si te gusta la estética terminal o el
 
 ## ⭐ ¿Te gustó Vanilux?
 
-### Dejá una estrella — es gratis y ayuda a que el proyecto crezca 🙌
+### Dejá una estrella — es gratis y ayuda a que el proyecto crezca
 
-[![star](https://img.shields.io/badge/%E2%AD%90%20Dej%C3%A1%20una%20estrella-ffb000?style=for-the-badge&logo=github&logoColor=14141c)](https://github.com/facilized-pbustamante/vanilux)
+[![Dejá una estrella](https://img.shields.io/badge/%E2%AD%90%20Dej%C3%A1%20una%20estrella-ffb000?style=for-the-badge&logo=github&logoColor=14141c)](https://github.com/facilized-pbustamante/vanilux)
 &nbsp;
 [![GitHub stars](https://img.shields.io/github/stars/facilized-pbustamante/vanilux?style=for-the-badge&color=e09924&labelColor=14141c)](https://github.com/facilized-pbustamante/vanilux/stargazers)
 
-</div>
+<sub>vani<b>lux</b> · hecho con C++ y café · estética terminal ámbar</sub>
 
-<div align="center"><sub>vani<b>lux</b> · hecho con C++ y café ☕ · estética terminal ámbar</sub></div>
+</div>
