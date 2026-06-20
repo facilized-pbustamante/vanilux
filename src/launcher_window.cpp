@@ -1599,6 +1599,7 @@ void LauncherWindow::setup_ui() {
 
     // ── Search Frame ──────────────────────────────────────────────────────────
     m_search_frame.set_label(" [ " + tr("frame_search") + " ] ");
+    m_search_frame.set_shadow_type(Gtk::SHADOW_NONE);
     m_search_box.set_spacing(8);
     m_search_box.set_margin_top(4);
     m_search_box.set_margin_bottom(4);
@@ -1656,6 +1657,7 @@ void LauncherWindow::setup_ui() {
 
     // ── Sidebar Frame (Tags) ──────────────────────────────────────────────────
     m_sidebar_frame.set_label(" [ " + tr("frame_tags") + " ] ");
+    m_sidebar_frame.set_shadow_type(Gtk::SHADOW_NONE);
     m_sidebar_box.set_spacing(2);
     m_sidebar_box.set_margin_start(4);
     m_sidebar_box.set_margin_end(4);
@@ -1721,6 +1723,7 @@ void LauncherWindow::setup_ui() {
 
     // ── Apps Frame ───────────────────────────────────────────────────────────
     m_apps_frame.set_label(" [ " + tr("frame_apps") + " ] ");
+    m_apps_frame.set_shadow_type(Gtk::SHADOW_NONE);
     m_apps_scrolled.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
     m_apps_scrolled.add(m_apps_scroll_content);
     m_apps_frame.add(m_apps_scrolled);
@@ -1805,6 +1808,7 @@ void LauncherWindow::setup_ui() {
 
     // ── Status Frame ─────────────────────────────────────────────────────────
     m_status_frame.set_label(" [ " + tr("frame_status") + " ] ");
+    m_status_frame.set_shadow_type(Gtk::SHADOW_NONE);
     m_status_box.set_spacing(16);
     m_status_box.set_margin_start(12);
     m_status_box.set_margin_end(12);
