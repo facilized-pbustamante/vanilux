@@ -39,6 +39,10 @@ void KeyboardWidget::build_layout() {
         l2 = {"ㄆ","ㄊ","ㄍ","ㄐ","ㄔ","ㄗ","ㄧ","ㄛ","ㄌ","ㄨ"};
         l3 = {"ㄇ","ㄋ","ㄎ","ㄑ","ㄓ","ㄕ","ㄖ","ㄘ","ㄙ"};
         l4 = {"ㄅ","ㄉ","ㄏ","ㄒ","ㄚ","ㄠ","ㄥ"};
+    } else if (m_layout == "cyrillic") {        // Russian ЙЦУКЕН
+        l2 = {"й","ц","у","к","е","н","г","ш","щ","з"};
+        l3 = {"ф","ы","в","а","п","р","о","л","д"};
+        l4 = {"я","ч","с","м","и","т","ь"};
     } else {                                   // qwerty (also ES/PT base)
         l2 = split(kn2); l3 = split(kn3); l4 = split(kn4);
     }
@@ -108,6 +112,7 @@ void KeyboardWidget::set_layout(const std::string& code) {
     else if (code == "JA") layout  = "jis";
     else if (code == "KO") layout  = "hangul";
     else if (code == "ZH") layout  = "zhuyin";
+    else if (code == "RU") layout  = "cyrillic";
     else if (code == "ES") special = "ntilde";
     else if (code == "PT") special = "ccedilla";
     if (layout == m_layout && special == m_special) return;

@@ -7,8 +7,8 @@
 #include <array>
 #include <unordered_map>
 
-enum class Lang { ES = 0, EN, PT, ZH, FR, JA, KO };
-static constexpr int LANG_COUNT = 7;
+enum class Lang { ES = 0, EN, PT, ZH, FR, JA, KO, HI, RU };
+static constexpr int LANG_COUNT = 9;
 
 struct LangMeta {
     Lang        lang;
@@ -26,6 +26,8 @@ static const LangMeta LANGS[LANG_COUNT] = {
     {Lang::FR, "FR", "Français",   "flag_fr.svg"},
     {Lang::JA, "JA", "日本語",     "flag_ja.svg"},
     {Lang::KO, "KO", "한국어",     "flag_ko.svg"},
+    {Lang::HI, "HI", "हिन्दी",      "flag_in.svg"},
+    {Lang::RU, "RU", "Русский",    "flag_ru.svg"},
 };
 
 inline Lang& current_lang() { static Lang l = Lang::EN; return l; }
@@ -43,63 +45,63 @@ inline const char* lang_code(Lang l) {
 // key → { ES, EN, PT, ZH, FR, JA, KO }
 inline const std::unordered_map<std::string, std::array<const char*, LANG_COUNT>>& i18n_table() {
     static const std::unordered_map<std::string, std::array<const char*, LANG_COUNT>> T = {
-        {"search_placeholder", {"Escribe para filtrar", "Type to filter", "Digite para filtrar", "输入以筛选", "Tapez pour filtrer", "入力して絞り込み", "입력하여 필터"}},
-        {"apps_word",          {"aplicaciones", "apps", "aplicativos", "个应用", "applications", "個のアプリ", "개 앱"}},
+        {"search_placeholder", {"Escribe para filtrar", "Type to filter", "Digite para filtrar", "输入以筛选", "Tapez pour filtrer", "入力して絞り込み", "입력하여 필터", "फ़िल्टर करने के लिए टाइप करें", "Введите для фильтрации"}},
+        {"apps_word",          {"aplicaciones", "apps", "aplicativos", "个应用", "applications", "個のアプリ", "개 앱", "ऐप्स", "приложений"}},
 
-        {"cat_all",      {"Todas", "All", "Todas", "全部", "Toutes", "すべて", "전체"}},
-        {"cat_internet", {"Internet", "Internet", "Internet", "网络", "Internet", "インターネット", "인터넷"}},
-        {"cat_dev",      {"Programación", "Development", "Programação", "开发", "Développement", "開発", "개발"}},
-        {"cat_media",    {"Multimedia", "Media", "Multimídia", "多媒体", "Multimédia", "メディア", "미디어"}},
-        {"cat_system",   {"Sistema", "System", "Sistema", "系统", "Système", "システム", "시스템"}},
-        {"cat_android",  {"Android", "Android", "Android", "安卓", "Android", "Android", "안드로이드"}},
-        {"cat_office",   {"Oficina", "Office", "Escritório", "办公", "Bureau", "オフィス", "오피스"}},
-        {"cat_games",    {"Juegos", "Games", "Jogos", "游戏", "Jeux", "ゲーム", "게임"}},
-        {"cat_other",    {"Otros", "Other", "Outros", "其他", "Autres", "その他", "기타"}},
+        {"cat_all",      {"Todas", "All", "Todas", "全部", "Toutes", "すべて", "전체", "सभी", "Все"}},
+        {"cat_internet", {"Internet", "Internet", "Internet", "网络", "Internet", "インターネット", "인터넷", "इंटरनेट", "Интернет"}},
+        {"cat_dev",      {"Programación", "Development", "Programação", "开发", "Développement", "開発", "개발", "विकास", "Разработка"}},
+        {"cat_media",    {"Multimedia", "Media", "Multimídia", "多媒体", "Multimédia", "メディア", "미디어", "मीडिया", "Медиа"}},
+        {"cat_system",   {"Sistema", "System", "Sistema", "系统", "Système", "システム", "시스템", "सिस्टम", "Система"}},
+        {"cat_android",  {"Android", "Android", "Android", "安卓", "Android", "Android", "안드로이드", "एंड्रॉइड", "Android"}},
+        {"cat_office",   {"Oficina", "Office", "Escritório", "办公", "Bureau", "オフィス", "오피스", "ऑफ़िस", "Офис"}},
+        {"cat_games",    {"Juegos", "Games", "Jogos", "游戏", "Jeux", "ゲーム", "게임", "गेम्स", "Игры"}},
+        {"cat_other",    {"Otros", "Other", "Outros", "其他", "Autres", "その他", "기타", "अन्य", "Другое"}},
 
-        {"tag_favorites", {"Favoritos", "Favorites", "Favoritos", "收藏", "Favoris", "お気に入り", "즐겨찾기"}},
-        {"tag_recents",   {"Recientes", "Recent", "Recentes", "最近", "Récents", "最近", "최근"}},
+        {"tag_favorites", {"Favoritos", "Favorites", "Favoritos", "收藏", "Favoris", "お気に入り", "즐겨찾기", "पसंदीदा", "Избранное"}},
+        {"tag_recents",   {"Recientes", "Recent", "Recentes", "最近", "Récents", "最近", "최근", "हाल ही के", "Недавние"}},
 
-        {"sc_navigate", {"navegar", "navigate", "navegar", "导航", "naviguer", "移動", "이동"}},
-        {"sc_open",     {"abrir", "open", "abrir", "打开", "ouvrir", "開く", "열기"}},
-        {"sc_favorite", {"favorito", "favorite", "favorito", "收藏", "favori", "お気に入り", "즐겨찾기"}},
-        {"sc_close",    {"cerrar", "close", "fechar", "关闭", "fermer", "閉じる", "닫기"}},
+        {"sc_navigate", {"navegar", "navigate", "navegar", "导航", "naviguer", "移動", "이동", "नेविगेट करें", "навигация"}},
+        {"sc_open",     {"abrir", "open", "abrir", "打开", "ouvrir", "開く", "열기", "खोलें", "открыть"}},
+        {"sc_favorite", {"favorito", "favorite", "favorito", "收藏", "favori", "お気に入り", "즐겨찾기", "पसंदीदा", "избранное"}},
+        {"sc_close",    {"cerrar", "close", "fechar", "关闭", "fermer", "閉じる", "닫기", "बंद करें", "закрыть"}},
 
-        {"frame_search", {"buscar", "search", "buscar", "搜索", "rechercher", "検索", "검색"}},
-        {"frame_tags",   {"etiquetas", "tags", "etiquetas", "标签", "étiquettes", "タグ", "태그"}},
-        {"frame_apps",   {"apps", "apps", "apps", "应用", "apps", "アプリ", "앱"}},
-        {"frame_status", {"estado", "status", "estado", "状态", "statut", "状態", "상태"}},
+        {"frame_search", {"buscar", "search", "buscar", "搜索", "rechercher", "検索", "검색", "खोज", "поиск"}},
+        {"frame_tags",   {"etiquetas", "tags", "etiquetas", "标签", "étiquettes", "タグ", "태그", "टैग", "теги"}},
+        {"frame_apps",   {"apps", "apps", "apps", "应用", "apps", "アプリ", "앱", "ऐप्स", "приложения"}},
+        {"frame_status", {"estado", "status", "estado", "状态", "statut", "状態", "상태", "स्थिति", "статус"}},
 
-        {"tt_settings", {"Configurar tema, tecla e idioma", "Configure theme, hotkey & language", "Configurar tema, atalho e idioma", "配置主题、快捷键和语言", "Configurer thème, raccourci et langue", "テーマ・ショートカット・言語を設定", "테마, 단축키, 언어 설정"}},
-        {"tt_classify", {"Clasificar en categorías", "Classify into categories", "Classificar em categorias", "归类到类别", "Classer par catégories", "カテゴリに分類", "카테고리로 분류"}},
-        {"lbl_categories", {"Categorías", "Categories", "Categorias", "类别", "Catégories", "カテゴリ", "카테고리"}},
-        {"auto_suffix", {"(auto)", "(auto)", "(auto)", "(自动)", "(auto)", "(自動)", "(자동)"}},
+        {"tt_settings", {"Configurar tema, tecla e idioma", "Configure theme, hotkey & language", "Configurar tema, atalho e idioma", "配置主题、快捷键和语言", "Configurer thème, raccourci et langue", "テーマ・ショートカット・言語を設定", "테마, 단축키, 언어 설정", "थीम, हॉटकी और भाषा कॉन्फ़िगर करें", "Настроить тему, клавишу и язык"}},
+        {"tt_classify", {"Clasificar en categorías", "Classify into categories", "Classificar em categorias", "归类到类别", "Classer par catégories", "カテゴリに分類", "카테고리로 분류", "श्रेणियों में वर्गीकृत करें", "Распределить по категориям"}},
+        {"lbl_categories", {"Categorías", "Categories", "Categorias", "类别", "Catégories", "カテゴリ", "카테고리", "श्रेणियाँ", "Категории"}},
+        {"auto_suffix", {"(auto)", "(auto)", "(auto)", "(自动)", "(auto)", "(自動)", "(자동)", "(स्वतः)", "(авто)"}},
 
-        {"cfg_title",    {"Configuración", "Settings", "Configurações", "设置", "Paramètres", "設定", "설정"}},
-        {"cfg_color",    {"Color del tema", "Theme color", "Cor do tema", "主题颜色", "Couleur du thème", "テーマカラー", "테마 색상"}},
-        {"cfg_hotkey",   {"Tecla rápida", "Hotkey", "Atalho", "快捷键", "Raccourci", "ショートカット", "단축키"}},
-        {"cfg_language", {"Idioma", "Language", "Idioma", "语言", "Langue", "言語", "언어"}},
+        {"cfg_title",    {"Configuración", "Settings", "Configurações", "设置", "Paramètres", "設定", "설정", "सेटिंग्स", "Настройки"}},
+        {"cfg_color",    {"Color del tema", "Theme color", "Cor do tema", "主题颜色", "Couleur du thème", "テーマカラー", "테마 색상", "थीम रंग", "Цвет темы"}},
+        {"cfg_hotkey",   {"Tecla rápida", "Hotkey", "Atalho", "快捷键", "Raccourci", "ショートカット", "단축키", "हॉटकी", "Горячая клавиша"}},
+        {"cfg_language", {"Idioma", "Language", "Idioma", "语言", "Langue", "言語", "언어", "भाषा", "Язык"}},
 
-        {"mode_f",     {"Tecla F", "F key", "Tecla F", "F 键", "Touche F", "F キー", "F 키"}},
-        {"mode_super", {"Súper + tecla", "Super + key", "Super + tecla", "Super + 键", "Super + touche", "Super + キー", "Super + 키"}},
+        {"mode_f",     {"Tecla F", "F key", "Tecla F", "F 键", "Touche F", "F キー", "F 키", "F कुंजी", "Клавиша F"}},
+        {"mode_super", {"Súper + tecla", "Super + key", "Super + tecla", "Super + 键", "Super + touche", "Super + キー", "Super + 키", "Super + कुंजी", "Super + клавиша"}},
 
-        {"btn_cancel", {"Cancelar", "Cancel", "Cancelar", "取消", "Annuler", "キャンセル", "취소"}},
-        {"btn_save",   {"Guardar", "Save", "Salvar", "保存", "Enregistrer", "保存", "저장"}},
-        {"cfg_combo",  {"Combinación", "Combination", "Combinação", "组合", "Combinaison", "組み合わせ", "조합"}},
-        {"cfg_pick",   {"Elegí una tecla", "Pick a key", "Escolha uma tecla", "选择一个键", "Choisissez une touche", "キーを選択", "키를 선택하세요"}},
+        {"btn_cancel", {"Cancelar", "Cancel", "Cancelar", "取消", "Annuler", "キャンセル", "취소", "रद्द करें", "Отмена"}},
+        {"btn_save",   {"Guardar", "Save", "Salvar", "保存", "Enregistrer", "保存", "저장", "सहेजें", "Сохранить"}},
+        {"cfg_combo",  {"Combinación", "Combination", "Combinação", "组合", "Combinaison", "組み合わせ", "조합", "संयोजन", "Комбинация"}},
+        {"cfg_pick",   {"Elegí una tecla", "Pick a key", "Escolha uma tecla", "选择一个键", "Choisissez une touche", "キーを選択", "키를 선택하세요", "एक कुंजी चुनें", "Выберите клавишу"}},
 
-        {"cp_hue",        {"Matiz", "Hue", "Matiz", "色相", "Teinte", "色相", "색조"}},
-        {"cp_saturation", {"Saturación", "Saturation", "Saturação", "饱和度", "Saturation", "彩度", "채도"}},
-        {"cp_value",      {"Valor", "Value", "Valor", "明度", "Valeur", "明度", "명도"}},
-        {"cp_red",        {"Rojo", "Red", "Vermelho", "红", "Rouge", "赤", "빨강"}},
-        {"cp_green",      {"Verde", "Green", "Verde", "绿", "Vert", "緑", "초록"}},
-        {"cp_blue",       {"Azul", "Blue", "Azul", "蓝", "Bleu", "青", "파랑"}},
-        {"cp_wheel",      {"Rueda", "Wheel", "Roda", "色轮", "Roue", "カラーホイール", "색상환"}},
-        {"cp_palette",    {"Paleta", "Palette", "Paleta", "调色板", "Palette", "パレット", "팔레트"}},
-        {"cp_color_name", {"Nombre de color", "Color name", "Nome da cor", "颜色名称", "Nom de la couleur", "色の名前", "색상 이름"}},
+        {"cp_hue",        {"Matiz", "Hue", "Matiz", "色相", "Teinte", "色相", "색조", "रंग", "Оттенок"}},
+        {"cp_saturation", {"Saturación", "Saturation", "Saturação", "饱和度", "Saturation", "彩度", "채도", "संतृप्ति", "Насыщенность"}},
+        {"cp_value",      {"Valor", "Value", "Valor", "明度", "Valeur", "明度", "명도", "मान", "Яркость"}},
+        {"cp_red",        {"Rojo", "Red", "Vermelho", "红", "Rouge", "赤", "빨강", "लाल", "Красный"}},
+        {"cp_green",      {"Verde", "Green", "Verde", "绿", "Vert", "緑", "초록", "हरा", "Зелёный"}},
+        {"cp_blue",       {"Azul", "Blue", "Azul", "蓝", "Bleu", "青", "파랑", "नीला", "Синий"}},
+        {"cp_wheel",      {"Rueda", "Wheel", "Roda", "色轮", "Roue", "カラーホイール", "색상환", "रंग चक्र", "Круг"}},
+        {"cp_palette",    {"Paleta", "Palette", "Paleta", "调色板", "Palette", "パレット", "팔레트", "पैलेट", "Палитра"}},
+        {"cp_color_name", {"Nombre de color", "Color name", "Nome da cor", "颜色名称", "Nom de la couleur", "色の名前", "색상 이름", "रंग का नाम", "Название цвета"}},
         // Status-bar shortcut key caps. 'f' (favorite) mirrors that physical key
         // on the localized keyboard; 'esc' is localized where a term exists (FR).
-        {"kc_fav",     {"f", "f", "f", "f", "f", "は", "ㄹ"}},
-        {"kc_esc",     {"esc", "esc", "esc", "esc", "échap", "esc", "esc"}},
+        {"kc_fav",     {"f", "f", "f", "f", "f", "は", "ㄹ", "f", "а"}},
+        {"kc_esc",     {"esc", "esc", "esc", "esc", "échap", "esc", "esc", "esc", "esc"}},
     };
     return T;
 }
@@ -108,5 +110,6 @@ inline std::string tr(const std::string& key) {
     const auto& T = i18n_table();
     auto it = T.find(key);
     if (it == T.end()) return key;   // missing key → show the key (dev aid)
-    return it->second[static_cast<int>(current_lang())];
+    const char* v = it->second[static_cast<int>(current_lang())];
+    return v ? v : it->second[1];    // fall back to English if a translation is missing
 }
