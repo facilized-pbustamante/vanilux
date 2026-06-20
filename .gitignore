@@ -7,3 +7,4 @@ tests/*.o
 
 # Release packages
 *.tar.gz
+*.deb

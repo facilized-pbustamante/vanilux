@@ -2,11 +2,13 @@
 #
 # vanilux — instalador todo-en-uno (release 0.1)
 #
-#   ./install.sh            instala en /usr/local
-#   PREFIX=/usr ./install.sh  cambia el prefijo
+#   ./install.sh                 instala en /usr/local, pregunta tecla
+#   ./install.sh --key F4        instala con F4 (sin preguntar)
+#   ./install.sh --key '<Alt>F1' instala con Alt+F1
+#   PREFIX=/usr ./install.sh     cambia el prefijo
 #
 # Hace: instala dependencias, compila, instala binario+CSS+iconos,
-# crea la entrada en el menú de aplicaciones y configura la tecla F4.
+# crea la entrada en el menú de aplicaciones y configura la tecla rápida.
 #
 set -euo pipefail
 
@@ -16,6 +18,16 @@ PREFIX="${PREFIX:-/usr/local}"
 APPS_DIR="/usr/share/applications"
 BIN="$PREFIX/bin/$APP"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+# ── argumentos ──────────────────────────────────────────────────────────────
+HOTKEY=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --key) shift; HOTKEY="$1" ;;
+    *) die "Argumento desconocido: $1. Uso: ./install.sh [--key <tecla>]" ;;
+  esac
+  shift
+done
 
 # ── colores ──────────────────────────────────────────────────────────────────
 if [ -t 1 ]; then
@@ -28,23 +40,21 @@ ok()   { printf "${G}✔${N} %s\n" "$*"; }
 warn() { printf "${Y}!${N} %s\n" "$*"; }
 die()  { printf "${R}✘${N} %s\n" "$*" >&2; exit 1; }
 
-# ── sudo ───────────────────────────────────────────────────────────────────--
+# ── sudo ─────────────────────────────────────────────────────────────────────
 if [ "$(id -u)" -eq 0 ]; then
-  SUDO=""
-  RUNNING_AS_ROOT=1
+  SUDO="" RUNNING_AS_ROOT=1
 else
   command -v sudo >/dev/null 2>&1 || die "Se necesita 'sudo' (o correr como root)."
-  SUDO="sudo"
-  RUNNING_AS_ROOT=0
+  SUDO="sudo"; RUNNING_AS_ROOT=0
 fi
 
-printf "${B}┌──────────────────────────────────────────────┐${N}\n"
-printf "${B}│   vanilux — instalador  (release %s)  │${N}\n" "$VERSION"
-printf "${B}└──────────────────────────────────────────────┘${N}\n"
+printf "${B}┌──────────────────────────────────────────────────┐${N}\n"
+printf "${B}│   vanilux — instalador  (release %s)    │${N}\n" "$VERSION"
+printf "${B}└──────────────────────────────────────────────────┘${N}\n"
 
 cd "$SCRIPT_DIR"
 
-# ── 1) dependencias ───────────────────────────────────────────────────────────
+# ── 1) dependencias ─────────────────────────────────────────────────────────
 say "Instalando dependencias…"
 if [ -x "./$APP" ] && file "./$APP" | grep -qi "ELF.*executable" >/dev/null 2>&1; then
   PREBUILT=1
@@ -76,7 +86,7 @@ fi
 command -v ldconfig >/dev/null 2>&1 && ldconfig 2>/dev/null || true
 ok "Dependencias listas."
 
-# ── 2) compilar (o usar binario pre-compilado) ────────────────────────────────
+# ── 2) compilar (o usar binario pre-compilado) ──────────────────────────────
 if [ "$PREBUILT" = "1" ]; then
   say "Binario pre-compilado detectado, saltando compilación…"
 else
@@ -86,12 +96,12 @@ else
 fi
 ok "Listo: ./$APP $(./$APP --version 2>/dev/null || echo "v$VERSION")"
 
-# ── 3) instalar binario + CSS + iconos ────────────────────────────────────────
+# ── 3) instalar binario + CSS + iconos ──────────────────────────────────────
 say "Instalando en $PREFIX (requiere privilegios)…"
 $SUDO make install PREFIX="$PREFIX"
 ok "Instalado en $BIN"
 
-# ── 4) entrada en el menú de aplicaciones ─────────────────────────────────────
+# ── 4) entrada en el menú de aplicaciones ───────────────────────────────────
 say "Creando entrada en el menú de aplicaciones…"
 $SUDO mkdir -p "$APPS_DIR"
 $SUDO tee "$APPS_DIR/$APP.desktop" >/dev/null <<EOF
@@ -111,12 +121,31 @@ EOF
 $SUDO update-desktop-database "$APPS_DIR" >/dev/null 2>&1 || true
 ok "Entrada de menú creada (buscá 'Vanilux' en el menú)."
 
-# ── 5) atajo F4 ───────────────────────────────────────────────────────────────
+# ── 5) elegir tecla rápida ──────────────────────────────────────────────────
+if [ -z "$HOTKEY" ] && [ -t 1 ]; then
+  echo
+  say "Elegí la tecla rápida para abrir Vanilux (Enter = F4):"
+  say "Ejemplos: F4, <Alt>F1, <Super>space, <Ctrl><Alt>T"
+  printf "  ${C}➜${N} "
+  read -r HOTKEY_INPUT
+  if [ -z "$HOTKEY_INPUT" ]; then
+    HOTKEY="F4"
+  else
+    HOTKEY="$HOTKEY_INPUT"
+  fi
+fi
+if [ -z "$HOTKEY" ]; then
+  HOTKEY="F4"
+fi
+ok "Tecla rápida seleccionada: ${B}$HOTKEY${N}"
+
+# ── 6) configurar atajo ─────────────────────────────────────────────────────
 setup_keybind() {
+  local key="$1"
   command -v gsettings >/dev/null 2>&1 || return 1
   local schemas; schemas="$(gsettings list-schemas 2>/dev/null || true)"
 
-  # Cinnamon (Linux Mint)
+  # Limpiar atajo previo (si existe)
   if printf '%s\n' "$schemas" | grep -qx "org.cinnamon.desktop.keybindings"; then
     local s="org.cinnamon.desktop.keybindings"
     local relo="org.cinnamon.desktop.keybindings.custom-keybinding"
@@ -129,11 +158,10 @@ setup_keybind() {
     esac
     gsettings set "$relo:$p" name "'Vanilux'"
     gsettings set "$relo:$p" command "'$BIN'"
-    gsettings set "$relo:$p" binding "['F4']"
+    gsettings set "$relo:$p" binding "['$key']"
     echo "cinnamon"; return 0
   fi
 
-  # GNOME
   if printf '%s\n' "$schemas" | grep -qx "org.gnome.settings-daemon.plugins.media-keys"; then
     local s="org.gnome.settings-daemon.plugins.media-keys"
     local relo="org.gnome.settings-daemon.plugins.media-keys.custom-keybinding"
@@ -146,31 +174,39 @@ setup_keybind() {
     esac
     gsettings set "$relo:$p" name 'Vanilux'
     gsettings set "$relo:$p" command "$BIN"
-    gsettings set "$relo:$p" binding 'F4'
+    gsettings set "$relo:$p" binding "['$key']"
     echo "gnome"; return 0
+  fi
+
+  # XFCE (xfconf)
+  if command -v xfconf-query >/dev/null 2>&1; then
+    local existing; existing=$(xfconf-query -c xfce4-keyboard-shortcuts -p /commands/custom 2>/dev/null || echo "")
+    xfconf-query -c xfce4-keyboard-shortcuts -n -t string -p "/commands/custom/$key" -s "$BIN" 2>/dev/null || \
+    xfconf-query -c xfce4-keyboard-shortcuts -t string -p "/commands/custom/$key" -s "$BIN" 2>/dev/null || true
+    echo "xfce"; return 0
   fi
 
   return 1
 }
 
-say "Configurando la tecla F4…"
+say "Configurando tecla rápida ${B}$HOTKEY${N}…"
 if [ "$RUNNING_AS_ROOT" -eq 1 ]; then
   warn "Corriendo como root: el atajo es por-usuario, no se puede setear aquí."
-  warn "Ejecutá esto como tu usuario:  gsettings ... (o asignalo a mano en Teclado → Atajos)."
+  warn "Corré esto como tu usuario para configurarlo:"
+  warn "  gsettings ... (o asignalo a mano en Teclado → Atajos)."
 else
-  KB="$(setup_keybind || true)"
+  KB="$(setup_keybind "$HOTKEY" || true)"
   if [ -n "${KB:-}" ]; then
-    ok "Atajo F4 configurado ($KB). Si no responde, cerrá y volvé a entrar a la sesión."
+    ok "Atajo $HOTKEY configurado ($KB). Si no responde, cerrá y volvé a entrar a la sesión."
   else
-    warn "No pude configurar F4 automáticamente en este entorno."
-    warn "Asignalo a mano: Atajos de teclado → comando '$BIN' → tecla F4."
+    warn "No pude configurar $HOTKEY automáticamente en este entorno."
+    warn "Asignalo a mano: Atajos de teclado → comando '$BIN' → tecla $HOTKEY."
   fi
 fi
 
-# ── listo ─────────────────────────────────────────────────────────────────────
-# Si quedó una instancia residente vieja, matarla para cargar la nueva.
+# ── listo ────────────────────────────────────────────────────────────────────
 killall "$APP" 2>/dev/null || true
 
 printf "\n${G}${B}¡Instalación completa! (vanilux %s)${N}\n" "$VERSION"
-echo   "  • Lanzá con F4, o desde el menú de aplicaciones ('vanilux')."
+echo   "  • Lanzá con ${B}$HOTKEY${N}, o desde el menú de aplicaciones ('Vanilux')."
 echo   "  • Para desinstalar:  ./uninstall.sh"

@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+#
+# vanilux — cambiar tecla rápida después de instalar
+#
+#   configure-vanilux              pregunta interactivamente
+#   configure-vanilux F4           fija F4
+#   configure-vanilux '<Alt>F1'    fija Alt+F1
+#
+set -euo pipefail
+
+BIN="/usr/local/bin/vanilux"
+if [ ! -x "$BIN" ]; then
+  BIN="/usr/bin/vanilux"
+fi
+if [ ! -x "$BIN" ]; then
+  echo "✘ vanilux no está instalado. Corré install.sh primero."
+  exit 1
+fi
+
+if [ -t 1 ]; then
+  B="\033[1m"; G="\033[32m"; Y="\033[33m"; C="\033[36m"; R="\033[31m"; N="\033[0m"
+else
+  B=""; G=""; Y=""; C=""; R=""; N=""
+fi
+say()  { printf "${C}»${N} %s\n" "$*"; }
+ok()   { printf "${G}✔${N} %s\n" "$*"; }
+
+HOTKEY="${1:-}"
+if [ -z "$HOTKEY" ]; then
+  echo
+  say "Tecla rápida actual. Ingresá una nueva (Enter = F4):"
+  say "Ejemplos: F4, <Alt>F1, <Super>space, <Ctrl><Alt>T"
+  printf "  ${C}➜${N} "
+  read -r INPUT
+  HOTKEY="${INPUT:-F4}"
+fi
+
+setup_keybind() {
+  local key="$1"
+  command -v gsettings >/dev/null 2>&1 || return 1
+  local schemas; schemas="$(gsettings list-schemas 2>/dev/null || true)"
+
+  if printf '%s\n' "$schemas" | grep -qx "org.cinnamon.desktop.keybindings"; then
+    local s="org.cinnamon.desktop.keybindings"
+    local relo="org.cinnamon.desktop.keybindings.custom-keybinding"
+    local p="/org/cinnamon/desktop/keybindings/custom-keybindings/vanilux/"
+    local cur; cur="$(gsettings get "$s" custom-list 2>/dev/null || echo '@as []')"
+    case "$cur" in
+      *"'vanilux'"*) : ;;
+      "@as []"|"[]"|"") gsettings set "$s" custom-list "['vanilux']" ;;
+      *) gsettings set "$s" custom-list "${cur%]}, 'vanilux']" ;;
+    esac
+    gsettings set "$relo:$p" name "'Vanilux'"
+    gsettings set "$relo:$p" command "'$BIN'"
+    gsettings set "$relo:$p" binding "['$key']"
+    echo "cinnamon"; return 0
+  fi
+
+  if printf '%s\n' "$schemas" | grep -qx "org.gnome.settings-daemon.plugins.media-keys"; then
+    local s="org.gnome.settings-daemon.plugins.media-keys"
+    local relo="org.gnome.settings-daemon.plugins.media-keys.custom-keybinding"
+    local p="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/vanilux/"
+    local cur; cur="$(gsettings get "$s" custom-keybindings 2>/dev/null || echo '@as []')"
+    case "$cur" in
+      *"$p"*) : ;;
+      "@as []"|"[]"|"") gsettings set "$s" custom-keybindings "['$p']" ;;
+      *) gsettings set "$s" custom-keybindings "${cur%]}, '$p']" ;;
+    esac
+    gsettings set "$relo:$p" name 'Vanilux'
+    gsettings set "$relo:$p" command "$BIN"
+    gsettings set "$relo:$p" binding "['$key']"
+    echo "gnome"; return 0
+  fi
+
+  if command -v xfconf-query >/dev/null 2>&1; then
+    xfconf-query -c xfce4-keyboard-shortcuts -n -t string -p "/commands/custom/$key" -s "$BIN" 2>/dev/null || \
+    xfconf-query -c xfce4-keyboard-shortcuts -t string -p "/commands/custom/$key" -s "$BIN" 2>/dev/null || true
+    echo "xfce"; return 0
+  fi
+
+  return 1
+}
+
+KB="$(setup_keybind "$HOTKEY" || true)"
+if [ -n "${KB:-}" ]; then
+  ok "Tecla rápida cambiada a ${B}$HOTKEY${N} ($KB)."
+else
+  echo "! No se pudo configurar automáticamente. Asignalo a mano en Teclado → Atajos."
+fi
