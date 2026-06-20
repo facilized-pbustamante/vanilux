@@ -1498,16 +1498,14 @@ void LauncherWindow::retranslate() {
 // ── translate all labels inside GtkColorSelection ──────────────────────────
 // The GtkColorSelection widget tree is opaque, so we traverse it via the C API
 // to reach its internal GtkNotebook, GtkLabel children, and color hex entry.
+// We match labels against all 7 supported languages because GTK may have already
+// localized them based on the system locale.
 static void relabel_cb(GtkWidget* w, gpointer data) {
-    // data is the parent widget that started the traversal; we unset it once
-    // the hex-box row has been found so we don't descend into it again.
     if (!data) return;
     if (GTK_IS_NOTEBOOK(w)) {
         // Translate notebook tab labels.
-        // For each page: get the tab label widget and replace its text.
         GtkNotebook* nb = GTK_NOTEBOOK(w);
         int n = gtk_notebook_get_n_pages(nb);
-        // Tab 0 → wheel, tab 1 → palette
         if (n > 0) {
             GtkWidget* p0 = gtk_notebook_get_nth_page(nb, 0);
             if (p0) gtk_notebook_set_tab_label_text(nb, p0, ::tr("cp_wheel").c_str());
@@ -1516,30 +1514,36 @@ static void relabel_cb(GtkWidget* w, gpointer data) {
             GtkWidget* p1 = gtk_notebook_get_nth_page(nb, 1);
             if (p1) gtk_notebook_set_tab_label_text(nb, p1, ::tr("cp_palette").c_str());
         }
-        // Don't descend further — the notebook's sub-labels are handled by label matching.
-        return;
+        // Fall through to recurse into notebook children (labels live inside pages).
     }
     if (GTK_IS_LABEL(w)) {
         const char* txt = gtk_label_get_text(GTK_LABEL(w));
         if (!txt || !*txt) return;
-        // Map known English / locale-default labels to translated strings.
-        struct { const char* src; const char* key; } map[] = {
-            {"Hue:",         "cp_hue"},
-            {"Saturation:",  "cp_saturation"},
-            {"Value:",       "cp_value"},
-            {"Red:",         "cp_red"},
-            {"Green:",       "cp_green"},
-            {"Blue:",        "cp_blue"},
-            {"Color name:",  "cp_color_name"},
-            {"Color name",   "cp_color_name"},
+        // Remove trailing colon and whitespace for matching.
+        std::string s(txt);
+        while (!s.empty() && (s.back() == ':' || s.back() == ' ')) s.pop_back();
+        if (s.empty()) return;
+        // Map label text (without colon) in ALL 7 supported languages.
+        // Index by Lang enum: 0=ES,1=EN,2=PT,3=ZH,4=FR,5=JA,6=KO
+        struct { const char* lang_labels[7]; const char* key; } map[] = {
+            {{"Matiz", "Hue", "Matiz", "色相", "Teinte", "色相", "색조"},                   "cp_hue"},
+            {{"Saturación", "Saturation", "Saturação", "饱和度", "Saturation", "彩度", "채도"}, "cp_saturation"},
+            {{"Valor", "Value", "Valor", "明度", "Valeur", "明度", "명도"},                   "cp_value"},
+            {{"Rojo", "Red", "Vermelho", "红", "Rouge", "赤", "빨강"},                       "cp_red"},
+            {{"Verde", "Green", "Verde", "绿", "Vert", "緑", "초록"},                         "cp_green"},
+            {{"Azul", "Blue", "Azul", "蓝", "Bleu", "青", "파랑"},                            "cp_blue"},
+            {{"Nombre de color", "Color name", "Nome da cor", "颜色名称", "Nom de la couleur", "色の名前", "색상 이름"}, "cp_color_name"},
         };
         for (auto& m : map) {
-            if (strcmp(txt, m.src) == 0) {
-                gtk_label_set_text(GTK_LABEL(w), ::tr(m.key).c_str());
-                break;
+            for (int i = 0; i < 7; i++) {
+                if (strcmp(s.c_str(), m.lang_labels[i]) == 0) {
+                    gtk_label_set_text(GTK_LABEL(w), (::tr(m.key) + ":").c_str());
+                    goto next_label;
+                }
             }
         }
     }
+    next_label:
     // Recurse into container children.
     if (GTK_IS_CONTAINER(w))
         gtk_container_forall(GTK_CONTAINER(w), relabel_cb, data);
