@@ -56,14 +56,21 @@ static std::string get_config_dir() {
     return path;
 }
 
+static std::string find_installed(const std::string& rel_under_share) {
+    std::vector<std::string> prefixes = {"/usr/share/vanilux", "/usr/local/share/vanilux"};
+    for (const auto& prefix : prefixes) {
+        std::string path = prefix + "/" + rel_under_share;
+        if (std::filesystem::exists(path)) return path;
+    }
+    return "";
+}
+
 static std::string resolve_icon_path(const std::string& rel_path) {
     if (rel_path.empty()) return "";
     if (rel_path.rfind("src/icons/", 0) == 0) {
         std::string filename = rel_path.substr(10);
-        std::string installed_path = "/usr/local/share/vanilux/icons/" + filename;
-        if (std::filesystem::exists(installed_path)) {
-            return installed_path;
-        }
+        std::string installed = find_installed("icons/" + filename);
+        if (!installed.empty()) return installed;
     }
     return rel_path;
 }
@@ -151,10 +158,10 @@ AppIconButton::AppIconButton(const AppEntry& entry, bool is_favorite, bool list_
     static bool s_stars_loaded = false;
     if (!s_stars_loaded) {
         s_stars_loaded = true;
-        std::string path_empty = "/usr/local/share/vanilux/icons/star_empty_rounded.svg";
-        if (!std::filesystem::exists(path_empty)) path_empty = "src/icons/star_empty_rounded.svg";
-        std::string path_filled = "/usr/local/share/vanilux/icons/star_filled_rounded.svg";
-        if (!std::filesystem::exists(path_filled)) path_filled = "src/icons/star_filled_rounded.svg";
+        std::string path_empty = find_installed("icons/star_empty_rounded.svg");
+        if (path_empty.empty()) path_empty = "src/icons/star_empty_rounded.svg";
+        std::string path_filled = find_installed("icons/star_filled_rounded.svg");
+        if (path_filled.empty()) path_filled = "src/icons/star_filled_rounded.svg";
         try {
             s_pb_empty = Gdk::Pixbuf::create_from_file(path_empty, 14, 14, true);
             s_pb_filled = Gdk::Pixbuf::create_from_file(path_filled, 14, 14, true);
@@ -376,8 +383,8 @@ AppIconButton::AppIconButton(const AppEntry& entry, bool is_favorite, bool list_
             static bool s_cfg_loaded = false;
             if (!s_cfg_loaded) {
                 s_cfg_loaded = true;
-                std::string p = "/usr/local/share/vanilux/icons/settings_amber.svg";
-                if (!std::filesystem::exists(p)) p = "src/icons/settings_amber.svg";
+                std::string p = find_installed("icons/settings_amber.svg");
+                if (p.empty()) p = "src/icons/settings_amber.svg";
                 try { s_cfg_pb = Gdk::Pixbuf::create_from_file(p, 18, 18, true); } catch (...) {}
             }
             if (s_cfg_pb) m_config_icon_img.set(s_cfg_pb);
@@ -660,7 +667,11 @@ void LauncherWindow::load_css() {
     auto css_provider = Gtk::CssProvider::create();
     try {
         std::string css_data;
-        std::ifstream file("/usr/local/share/vanilux/style.css");
+        std::ifstream file;
+        std::string installed_css = find_installed("style.css");
+        if (!installed_css.empty()) {
+            file.open(installed_css);
+        }
         if (!file) {
             file.open("src/style.css");
         }
