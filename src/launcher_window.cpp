@@ -979,18 +979,19 @@ void LauncherWindow::load_css() {
 .settings-card { background-color: #14141c; border: 1px solid rgba(224,153,36,0.35); border-radius: 6px; padding: 29px 32px; margin: 29px; box-shadow: 0 11px 43px rgba(0,0,0,0.6), 0 0 22px rgba(224,153,36,0.12); }
 .settings-card label { color: #f2e9e1; }
 .settings-card separator { background-color: rgba(224,153,36,0.20); min-height: 1px; margin: 6px 0; }
-.settings-card colorselection,.settings-card colorsel,.settings-card colorsel colorchooser,
-.settings-card colorselection *,.settings-card colorsel *,.settings-card colorsel colorchooser * { color: #f2e9e1; }
-.settings-card colorselection button,.settings-card colorsel button { background-color: #1a1a24 !important; border: 1px solid rgba(224,153,36,0.25); border-radius: 4px; color: #f2e9e1 !important; }
-.settings-card colorselection entry,.settings-card colorsel entry { background-color: #1a1a24 !important; color: #f2e9e1 !important; border: 1px solid rgba(224,153,36,0.25); border-radius: 3px; padding: 2px 4px; }
-.settings-card colorselection label,.settings-card colorsel label { color: rgba(255,255,255,0.7) !important; }
-.settings-card colorselection scale,.settings-card colorsel scale { background-color: transparent; }
-.settings-card colorselection scale trough,.settings-card colorsel scale trough { background-color: #1a1a24 !important; }
-.settings-card colorselection scale slider,.settings-card colorsel scale slider { background-color: #e09924 !important; border: none; border-radius: 4px; min-width: 8px; min-height: 8px; }
-.settings-card colorselection spinbutton,.settings-card colorsel spinbutton,.settings-card colorsel colorchooser spinbutton,.settings-card colorsel colorchooser notebook spinbutton { background-color: #1a1a24 !important; color: #f2e9e1 !important; border: 1px solid rgba(224,153,36,0.25); border-radius: 3px; }
-.settings-card colorselection spinbutton *,.settings-card colorsel spinbutton *,.settings-card colorsel colorchooser spinbutton * { background-color: #1a1a24 !important; color: #f2e9e1 !important; }
-.settings-card colorselection spinbutton button,.settings-card colorsel spinbutton button,.settings-card colorsel colorchooser spinbutton button { background-color: #1a1a24 !important; color: #f2e9e1 !important; border: none; }
-.settings-card colorselection spinbutton button *,.settings-card colorsel spinbutton button *,.settings-card colorsel colorchooser spinbutton button * { background-color: #1a1a24 !important; color: #f2e9e1 !important; }
+#launcher-window .settings-card colorselection,#launcher-window .settings-card colorsel,
+#launcher-window .settings-card colorsel colorchooser,
+#launcher-window .settings-card colorselection *,#launcher-window .settings-card colorsel *,#launcher-window .settings-card colorsel colorchooser * { color: #f2e9e1; }
+#launcher-window .settings-card colorselection button,#launcher-window .settings-card colorsel button { background-color: #1a1a24; border: 1px solid rgba(224,153,36,0.25); border-radius: 4px; color: #f2e9e1; }
+#launcher-window .settings-card colorselection entry,#launcher-window .settings-card colorsel entry { background-color: #1a1a24; color: #f2e9e1; border: 1px solid rgba(224,153,36,0.25); border-radius: 3px; padding: 2px 4px; }
+#launcher-window .settings-card colorselection label,#launcher-window .settings-card colorsel label { color: rgba(255,255,255,0.7); }
+#launcher-window .settings-card colorselection scale,#launcher-window .settings-card colorsel scale { background-color: transparent; }
+#launcher-window .settings-card colorselection scale trough,#launcher-window .settings-card colorsel scale trough { background-color: #1a1a24; }
+#launcher-window .settings-card colorselection scale slider,#launcher-window .settings-card colorsel scale slider { background-color: #e09924; border: none; border-radius: 4px; min-width: 8px; min-height: 8px; }
+#launcher-window .settings-card colorselection spinbutton,#launcher-window .settings-card colorsel spinbutton,#launcher-window .settings-card colorsel colorchooser spinbutton,#launcher-window .settings-card colorsel colorchooser notebook spinbutton { background-color: #1a1a24; color: #f2e9e1; border: 1px solid rgba(224,153,36,0.25); border-radius: 3px; }
+#launcher-window .settings-card colorselection spinbutton *,#launcher-window .settings-card colorsel spinbutton *,#launcher-window .settings-card colorsel colorchooser spinbutton * { background-color: #1a1a24; color: #f2e9e1; }
+#launcher-window .settings-card colorselection spinbutton button,#launcher-window .settings-card colorsel spinbutton button,#launcher-window .settings-card colorsel colorchooser spinbutton button { background-color: #1a1a24; color: #f2e9e1; border: none; }
+#launcher-window .settings-card colorselection spinbutton button *,#launcher-window .settings-card colorsel spinbutton button *,#launcher-window .settings-card colorsel colorchooser spinbutton button * { background-color: #1a1a24; color: #f2e9e1; }
 .mode-toggle { color: rgba(255,255,255,0.7); padding: 2px 6px; }
 .mode-toggle radio { background-color: #1a1a24; border: 1px solid rgba(224,153,36,0.4); border-radius: 8px; min-width: 13px; min-height: 13px; -gtk-icon-source: none; }
 .mode-toggle radio:checked { background-color: #e09924; border-color: #e09924; box-shadow: 0 0 6px rgba(224,153,36,0.6); }
@@ -1224,6 +1225,12 @@ void LauncherWindow::build_settings_panel() {
     m_color_picker->set_has_palette(true);
     m_color_picker->set_halign(Gtk::ALIGN_CENTER);
     m_color_picker->set_size_request(340, 170);
+    m_color_picker->set_label_hue(tr("cp_hue"));
+    m_color_picker->set_label_saturation(tr("cp_saturation"));
+    m_color_picker->set_label_value(tr("cp_value"));
+    m_color_picker->set_label_red(tr("cp_red"));
+    m_color_picker->set_label_green(tr("cp_green"));
+    m_color_picker->set_label_blue(tr("cp_blue"));
 
     // ── Hotkey section: mode selector + combo display + on-screen keyboard ────
     auto key_label = Gtk::manage(new Gtk::Label());
@@ -1481,6 +1488,16 @@ void LauncherWindow::retranslate() {
     m_sidebar_frame.set_label(" [ " + tr("frame_tags")   + " ] ");
     m_apps_frame.set_label(" [ "    + tr("frame_apps")   + " ] ");
     m_status_frame.set_label(" [ "  + tr("frame_status") + " ] ");
+
+    // Color picker labels.
+    if (m_color_picker) {
+        m_color_picker->set_label_hue(tr("cp_hue"));
+        m_color_picker->set_label_saturation(tr("cp_saturation"));
+        m_color_picker->set_label_value(tr("cp_value"));
+        m_color_picker->set_label_red(tr("cp_red"));
+        m_color_picker->set_label_green(tr("cp_green"));
+        m_color_picker->set_label_blue(tr("cp_blue"));
+    }
 
     if (m_combo_value) update_combo_label();
 

@@ -86,6 +86,13 @@ inline const std::unordered_map<std::string, std::array<const char*, LANG_COUNT>
         {"btn_save",   {"Guardar", "Save", "Salvar", "保存", "Enregistrer", "保存", "저장"}},
         {"cfg_combo",  {"Combinación", "Combination", "Combinação", "组合", "Combinaison", "組み合わせ", "조합"}},
         {"cfg_pick",   {"Elegí una tecla", "Pick a key", "Escolha uma tecla", "选择一个键", "Choisissez une touche", "キーを選択", "키를 선택하세요"}},
+
+        {"cp_hue",        {"Matiz", "Hue", "Matiz", "色相", "Teinte", "色相", "색조"}},
+        {"cp_saturation", {"Saturación", "Saturation", "Saturação", "饱和度", "Saturation", "彩度", "채도"}},
+        {"cp_value",      {"Valor", "Value", "Valor", "明度", "Valeur", "明度", "명도"}},
+        {"cp_red",        {"Rojo", "Red", "Vermelho", "红", "Rouge", "赤", "빨강"}},
+        {"cp_green",      {"Verde", "Green", "Verde", "绿", "Vert", "緑", "초록"}},
+        {"cp_blue",       {"Azul", "Blue", "Azul", "蓝", "Bleu", "青", "파랑"}},
         // Status-bar shortcut key caps. 'f' (favorite) mirrors that physical key
         // on the localized keyboard; 'esc' is localized where a term exists (FR).
         {"kc_fav",     {"f", "f", "f", "f", "f", "は", "ㄹ"}},
