@@ -1,0 +1,11 @@
+#!/bin/sh
+set -e
+
+APP="vanilux"
+APPS_DIR="/usr/share/applications"
+
+rm -f "$APPS_DIR/$APP.desktop"
+update-desktop-database "$APPS_DIR" >/dev/null 2>&1 || true
+killall "$APP" 2>/dev/null || true
+
+exit 0

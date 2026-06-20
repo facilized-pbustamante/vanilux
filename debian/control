@@ -1,0 +1,23 @@
+Package: vanilux
+Version: 0.6
+Architecture: amd64
+Maintainer: facilized-pbustamante <facilized.pbustamante@gmail.com>
+Installed-Size: 1024
+Depends: libgtkmm-3.0-1v5 (>= 3.24), papirus-icon-theme
+Recommends: gtk-update-icon-cache
+Section: utils
+Priority: optional
+Homepage: https://github.com/facilized-pbustamante/vanilux
+Description: Lanzador de aplicaciones a pantalla completa (estilo Launchpad)
+ Vanilux es un lanzador de aplicaciones a pantalla completa para Linux,
+ estilo Launchpad de macOS, con estética de terminal oscuro/ámbar.
+ .
+ Características:
+  * Descubrimiento automático de apps via archivos .desktop
+  * Búsqueda incremental y filtro por categorías
+  * Favoritos y recientes persistentes
+  * Glow ámbar dibujado con Cairo (blur real)
+  * Proceso residente para apertura instantánea
+  * Atajo de teclado configurable
+  * Tema de color personalizable con selector de color
+  * Botón de refresco para re-escanear apps instaladas
