@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --accent:#e09924;          /* vanilux amber */
+  --accent:#e09924;
   --accent-bright:#ffb000;
   --accent-rgb:224,153,36;
   --bg:#0d0d12;
@@ -24,111 +24,87 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{
-  background:var(--bg);
-  color:var(--text);
-  font-family:var(--mono);
-  line-height:1.6;
-  overflow-x:hidden;
-  -webkit-font-smoothing:antialiased;
-}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
 ::selection{background:rgba(var(--accent-rgb),.3);color:#fff}
-
-/* scrollbar */
 ::-webkit-scrollbar{width:10px;height:10px}
 ::-webkit-scrollbar-track{background:var(--bg)}
 ::-webkit-scrollbar-thumb{background:rgba(var(--accent-rgb),.3);border-radius:5px}
 ::-webkit-scrollbar-thumb:hover{background:var(--accent)}
 
-/* ── TUI frame primitive (mirrors the app's [ label ] panels) ───────────── */
-.frame{
-  position:relative;
-  border:1px solid rgba(var(--accent-rgb),.35);
-  border-radius:6px;
-  padding:26px;
-  background:rgba(20,20,28,.5);
-}
-.frame > .frame-label{
-  position:absolute;top:-10px;left:18px;
-  background:var(--bg);
-  color:var(--accent);
-  font-size:12px;font-weight:700;
-  padding:0 8px;
-  letter-spacing:.05em;
-}
-
+/* ── TUI frame primitive ─────────────────────────────────────────────── */
+.frame{position:relative;border:1px solid rgba(var(--accent-rgb),.35);border-radius:6px;padding:26px;background:rgba(20,20,28,.5)}
+.frame > .frame-label{position:absolute;top:-10px;left:18px;background:var(--bg);color:var(--accent);font-size:12px;font-weight:700;padding:0 8px;letter-spacing:.05em}
 .amber{color:var(--accent)}
-.glow-text{text-shadow:0 0 12px rgba(var(--accent-rgb),.55)}
 
 /* ── Nav ─────────────────────────────────────────────────────────────── */
-nav{
-  position:fixed;top:0;left:0;right:0;z-index:50;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:14px clamp(16px,4vw,40px);
-  backdrop-filter:blur(10px);
-  background:rgba(13,13,18,.55);
-  border-bottom:1px solid rgba(var(--accent-rgb),.18);
-}
+nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:14px clamp(16px,4vw,40px);backdrop-filter:blur(10px);background:rgba(13,13,18,.55);border-bottom:1px solid rgba(var(--accent-rgb),.18)}
 .brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:18px;letter-spacing:.02em}
 .brand .logo{width:30px;height:30px;flex:none}
 .brand b{color:var(--accent)}
 .nav-links{display:flex;gap:8px;align-items:center}
-.nav-links a{
-  font-size:13px;color:var(--text-dim);
-  padding:7px 13px;border-radius:5px;transition:.18s;
-}
+.nav-links a{font-size:13px;color:var(--text-dim);padding:7px 13px;border-radius:5px;transition:.18s}
 .nav-links a:hover{color:var(--text);background:rgba(var(--accent-rgb),.08)}
-.nav-links a.cta{
-  border:1px solid rgba(var(--accent-rgb),.5);
-  color:var(--accent);
-}
+.nav-links a.cta{border:1px solid rgba(var(--accent-rgb),.5);color:var(--accent)}
 .nav-links a.cta:hover{background:rgba(var(--accent-rgb),.15);box-shadow:0 0 14px rgba(var(--accent-rgb),.3)}
 @media(max-width:680px){.nav-links a.hide-sm{display:none}}
 
-/* ── Hero ────────────────────────────────────────────────────────────── */
-#hero{
-  position:relative;min-height:100vh;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;padding:120px 20px 80px;overflow:hidden;
-}
+/* ── Hero (two columns) ──────────────────────────────────────────────── */
+#hero{position:relative;min-height:100vh;display:grid;align-items:center;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:clamp(28px,4vw,64px);padding:96px clamp(20px,5vw,56px) 70px;overflow:hidden}
 #bg-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0;display:block}
-#hero .hero-inner{position:relative;z-index:2;max-width:880px}
-.hero-badge{
-  display:inline-flex;align-items:center;gap:8px;
-  border:1px solid rgba(var(--accent-rgb),.4);
-  border-radius:999px;padding:5px 14px;font-size:12px;color:var(--accent);
-  margin-bottom:26px;background:rgba(var(--accent-rgb),.06);
-}
-.hero-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--accent-bright);box-shadow:0 0 8px var(--accent-bright);animation:pulse 2s infinite}
+#hero .hero-inner{position:relative;z-index:2;text-align:left}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-#hero h1{
-  font-size:clamp(40px,8vw,84px);font-weight:800;line-height:1.05;
-  letter-spacing:-.02em;margin-bottom:22px;
-}
+#hero h1{font-size:clamp(32px,4.4vw,58px);font-weight:800;line-height:1.06;letter-spacing:-.02em;margin-bottom:20px}
 #hero h1 .x{color:var(--accent);text-shadow:0 0 30px rgba(var(--accent-rgb),.5)}
-#hero .sub{
-  font-size:clamp(15px,2.2vw,20px);color:var(--text-dim);
-  max-width:620px;margin:0 auto 38px;line-height:1.7;
-}
-.hero-cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
-.btn{
-  display:inline-flex;align-items:center;gap:9px;
-  font-family:var(--mono);font-size:14px;font-weight:700;cursor:pointer;
-  padding:13px 24px;border-radius:6px;border:1px solid transparent;transition:.2s;
-}
+#hero .sub{font-size:clamp(14px,1.5vw,17px);color:var(--text-dim);max-width:480px;margin:0 0 30px;line-height:1.7}
+.hero-cta{display:flex;gap:14px;justify-content:flex-start;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:14px;font-weight:700;cursor:pointer;padding:13px 24px;border-radius:6px;border:1px solid transparent;transition:.2s}
 .btn-primary{background:var(--accent);color:#0a0a0f;box-shadow:0 0 28px rgba(var(--accent-rgb),.35)}
 .btn-primary:hover{background:var(--accent-bright);transform:translateY(-2px);box-shadow:0 6px 34px rgba(var(--accent-rgb),.5)}
 .btn-ghost{border-color:rgba(var(--accent-rgb),.45);color:var(--accent)}
 .btn-ghost:hover{background:rgba(var(--accent-rgb),.1);transform:translateY(-2px)}
-.hero-hint{margin-top:30px;font-size:12px;color:var(--text-faint)}
-.kbd{
-  display:inline-block;border:1px solid rgba(var(--accent-rgb),.5);
-  background:var(--bg-key);color:var(--accent);border-radius:4px;
-  padding:1px 7px;font-size:12px;font-weight:700;
+.hero-hint{margin-top:26px;font-size:12px;color:var(--text-faint)}
+.kbd{display:inline-block;border:1px solid rgba(var(--accent-rgb),.5);background:var(--bg-key);color:var(--accent);border-radius:4px;padding:1px 7px;font-size:12px;font-weight:700}
+
+/* ── Hero app preview (right 2/3) ────────────────────────────────────── */
+.hero-preview{position:relative;z-index:2;perspective:1600px}
+.hero-app{border-radius:11px;overflow:hidden;background:#0b0b10;border:1px solid rgba(var(--accent-rgb),.32);box-shadow:0 40px 100px rgba(0,0,0,.65),0 0 60px rgba(var(--accent-rgb),.08);transform:rotateY(-7deg) rotateX(3deg);transform-origin:left center;transition:transform .5s cubic-bezier(.2,.7,.2,1)}
+.hero-preview:hover .hero-app{transform:rotateY(-2deg) rotateX(1deg)}
+.ha-bar{display:flex;align-items:center;gap:7px;padding:9px 13px;border-bottom:1px solid rgba(var(--accent-rgb),.16);background:rgba(20,20,28,.7)}
+.ha-bar .d{width:10px;height:10px;border-radius:50%}
+.ha-bar .d.r{background:#ff5f57}.ha-bar .d.y{background:#febc2e}.ha-bar .d.g{background:#28c840}
+.ha-bar .ttl{margin-left:7px;font-size:11px;color:var(--text-faint)}
+.hero-app .tools{margin-left:auto;display:flex;gap:5px}
+.hero-app .tl{width:26px;height:22px;border:1px solid rgba(var(--accent-rgb),.35);border-radius:4px;display:grid;place-items:center;color:var(--text-dim);flex:none}
+.hero-app .tl.on{color:var(--accent);border-color:var(--accent);background:rgba(var(--accent-rgb),.18)}
+.hero-app .tl svg{width:13px;height:13px}
+.ha-body{padding:14px;display:flex;flex-direction:column;gap:11px}
+.ha-panel{position:relative;border:1px solid rgba(var(--accent-rgb),.32);border-radius:6px;padding:13px;background:rgba(20,20,28,.5)}
+.ha-panel > .lab{position:absolute;top:-9px;left:14px;background:var(--bg);color:var(--accent);font-size:10px;font-weight:700;padding:0 7px}
+.ha-search{display:flex;align-items:center;gap:9px;color:var(--text-faint);font-size:13px}
+.ha-search .p{color:var(--accent);font-weight:700;font-size:14px}
+.ha-cols{display:grid;grid-template-columns:150px 1fr;gap:11px}
+.ha-side .tg{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:5px;color:var(--text-dim);font-size:11px;border-left:3px solid transparent}
+.ha-side .tg.on{background:rgba(var(--accent-rgb),.15);color:var(--accent);border-left-color:var(--accent);font-weight:700}
+.ha-side .tg svg{width:13px;height:13px;flex:none}
+.ha-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;align-content:start}
+.ha-app{display:flex;flex-direction:column;align-items:center;gap:6px;padding:9px 4px;border-radius:7px;position:relative}
+.ha-app .ic{width:38px;height:38px;color:var(--accent);display:grid;place-items:center}
+.ha-app .ic svg{width:30px;height:30px}
+.ha-app.glow .ic{filter:drop-shadow(0 0 6px rgba(var(--accent-rgb),.85))}
+.ha-app.glow::after{content:"";position:absolute;top:5px;left:50%;transform:translateX(-50%);width:44px;height:44px;border:2px solid rgba(var(--accent-rgb),.5);border-radius:11px;box-shadow:0 0 14px rgba(var(--accent-rgb),.4)}
+.ha-app .nm{font-size:9px;color:rgba(255,255,255,.78);text-align:center;line-height:1.2}
+.ha-app.glow .nm{color:var(--accent);font-weight:700}
+.ha-app .st{position:absolute;top:3px;right:9px;width:12px;height:12px;color:var(--accent-bright);filter:drop-shadow(0 0 4px rgba(255,176,0,.8));z-index:4}
+.ha-status{display:flex;align-items:center;gap:12px;font-size:10px;color:var(--text-faint)}
+.ha-status .ws{color:var(--accent);font-weight:700}
+@media(max-width:900px){
+  #hero{grid-template-columns:1fr;text-align:center;padding-top:104px}
+  #hero .hero-inner{text-align:center}
+  #hero .sub{margin-left:auto;margin-right:auto}
+  .hero-cta{justify-content:center}
+  .hero-app{transform:none}
 }
-.scroll-down{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);z-index:2;color:var(--text-faint);font-size:11px;animation:bob 2.2s infinite}
-@keyframes bob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(7px)}}
 
 /* ── Section scaffolding ─────────────────────────────────────────────── */
 section{position:relative;z-index:2}
@@ -142,115 +118,58 @@ section{position:relative;z-index:2}
 
 /* ── Simulator ───────────────────────────────────────────────────────── */
 #sim-frame{margin-top:46px}
-.sim{
-  --pad:18px;
-  border-radius:10px;overflow:hidden;
-  background:#0b0b10;
-  border:1px solid rgba(var(--accent-rgb),.3);
-  box-shadow:0 30px 90px rgba(0,0,0,.6),0 0 50px rgba(var(--accent-rgb),.06);
-}
-.sim-titlebar{
-  display:flex;align-items:center;gap:8px;
-  padding:10px 14px;border-bottom:1px solid rgba(var(--accent-rgb),.16);
-  background:rgba(20,20,28,.7);
-}
+.sim{--pad:18px;border-radius:10px;overflow:hidden;background:#0b0b10;border:1px solid rgba(var(--accent-rgb),.3);box-shadow:0 30px 90px rgba(0,0,0,.6),0 0 50px rgba(var(--accent-rgb),.06)}
+.sim-titlebar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid rgba(var(--accent-rgb),.16);background:rgba(20,20,28,.7)}
 .sim-dot{width:11px;height:11px;border-radius:50%}
 .sim-dot.r{background:#ff5f57}.sim-dot.y{background:#febc2e}.sim-dot.g{background:#28c840}
 .sim-title{margin-left:8px;font-size:12px;color:var(--text-faint)}
-.sim-toolbar{margin-left:auto;display:flex;gap:6px}
-.sim-tool{
-  width:30px;height:26px;border:1px solid rgba(var(--accent-rgb),.35);
-  border-radius:5px;display:grid;place-items:center;color:var(--text-dim);cursor:pointer;transition:.15s;
-}
+.sim-toolbar{margin-left:auto;display:flex;gap:6px;flex:none}
+.sim-tool{width:30px;height:26px;border:1px solid rgba(var(--accent-rgb),.35);border-radius:5px;display:grid;place-items:center;color:var(--text-dim);cursor:pointer;transition:.15s}
 .sim-tool:hover{color:var(--accent);background:rgba(var(--accent-rgb),.1)}
 .sim-tool.active{color:var(--accent);border-color:var(--accent);background:rgba(var(--accent-rgb),.18);box-shadow:0 0 8px rgba(var(--accent-rgb),.35)}
 .sim-tool svg{width:15px;height:15px}
-
 .sim-body{padding:var(--pad);display:grid;grid-template-columns:auto 1fr;gap:14px;min-height:430px}
-
-/* search bar */
 .sim-search-frame{grid-column:1 / -1}
 .sim-search{display:flex;align-items:center;gap:10px}
 .sim-search .prompt{color:var(--accent);font-weight:700;font-size:16px}
-.sim-search input{
-  flex:1;background:transparent;border:none;outline:none;
-  color:var(--text);font-family:var(--mono);font-size:15px;
-}
+.sim-search input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:var(--mono);font-size:15px}
 .sim-search input::placeholder{color:var(--text-faint)}
-
-/* sidebar */
-.sim-side{width:150px}
-.tag{
-  display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:5px;
-  color:var(--text-dim);font-size:12.5px;cursor:pointer;transition:.13s;margin-bottom:1px;
-  border-left:3px solid transparent;
-}
+.sim-side{width:170px}
+.tag{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:5px;color:var(--text-dim);font-size:12.5px;cursor:pointer;transition:.13s;margin-bottom:1px;border-left:3px solid transparent}
 .tag svg{width:15px;height:15px;flex:none}
 .tag:hover{background:rgba(var(--accent-rgb),.08);color:var(--text)}
 .tag.active{background:rgba(var(--accent-rgb),.15);color:var(--accent);border-left-color:var(--accent);font-weight:700}
-
-/* app grid */
 .sim-main{min-height:300px}
 .app-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:6px;align-content:start}
-.app{
-  display:flex;flex-direction:column;align-items:center;gap:7px;
-  padding:12px 6px 9px;border-radius:8px;cursor:pointer;position:relative;
-  transition:background .15s;
-}
-.app .ico{
-  width:46px;height:46px;display:grid;place-items:center;border-radius:10px;
-  color:var(--accent);transition:.18s;position:relative;
-}
+.app{display:flex;flex-direction:column;align-items:center;gap:7px;padding:12px 6px 9px;border-radius:8px;cursor:pointer;position:relative;transition:background .15s}
+.app .ico{width:46px;height:46px;display:grid;place-items:center;border-radius:10px;color:var(--accent);transition:.18s;position:relative}
 .app .ico svg{width:34px;height:34px}
 .app .name{font-size:10.5px;color:rgba(255,255,255,.82);text-align:center;line-height:1.25;transition:.15s}
-.app:hover .ico{
-  transform:translateY(-2px);
-  filter:drop-shadow(0 0 7px rgba(var(--accent-rgb),.85));
-}
-.app:hover .ico::after{
-  content:"";position:absolute;inset:-5px;border:2px solid rgba(var(--accent-rgb),.55);
-  border-radius:12px;box-shadow:0 0 16px rgba(var(--accent-rgb),.45);
-}
+.app:hover .ico{transform:translateY(-2px);filter:drop-shadow(0 0 7px rgba(var(--accent-rgb),.85))}
+.app:hover .ico::after{content:"";position:absolute;inset:-5px;border:2px solid rgba(var(--accent-rgb),.55);border-radius:12px;box-shadow:0 0 16px rgba(var(--accent-rgb),.45)}
 .app:hover .name{color:var(--accent);font-weight:700}
-.app .star{
-  position:absolute;top:7px;right:11px;width:15px;height:15px;color:rgba(var(--accent-rgb),.35);
-  opacity:0;transition:.15s;
-}
+.app .star{position:absolute;top:3px;right:7px;width:15px;height:15px;color:rgba(var(--accent-rgb),.45);opacity:0;transition:.15s;z-index:4}
 .app:hover .star,.app.fav .star{opacity:1}
 .app.fav .star{color:var(--accent-bright);filter:drop-shadow(0 0 5px rgba(255,176,0,.8))}
 .app .star svg{width:100%;height:100%}
 .empty-msg{grid-column:1/-1;text-align:center;color:var(--text-faint);padding:50px 0;font-size:13px}
-
-/* status bar */
 .sim-status-frame{grid-column:1 / -1}
 .sim-status{display:flex;align-items:center;gap:16px;font-size:11.5px;color:var(--text-dim);flex-wrap:wrap}
 .sim-status .ws{color:var(--accent);font-weight:700}
 .sim-status .spacer{flex:1}
 .sim-status .sc{display:flex;align-items:center;gap:5px;color:var(--text-faint)}
-.sim-status .sc .kc{
-  border:1px solid rgba(var(--accent-rgb),.5);background:var(--bg-key);color:var(--accent);
-  border-radius:3px;padding:0 5px;font-size:9px;font-weight:700;
-}
-
-/* control deck under sim */
-.sim-controls{
-  display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;
-}
+.sim-status .sc .kc{border:1px solid rgba(var(--accent-rgb),.5);background:var(--bg-key);color:var(--accent);border-radius:3px;padding:0 5px;font-size:9px;font-weight:700}
+.sim-controls{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
 @media(max-width:720px){.sim-controls{grid-template-columns:1fr}}
 .ctl-title{font-size:12px;color:var(--accent);font-weight:700;margin-bottom:12px;letter-spacing:.04em}
 .swatches{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
-.sw{
-  width:30px;height:30px;border-radius:7px;cursor:pointer;border:2px solid transparent;transition:.15s;position:relative;
-}
+.sw{width:30px;height:30px;border-radius:7px;cursor:pointer;border:2px solid transparent;transition:.15s;position:relative}
 .sw:hover{transform:scale(1.12)}
 .sw.active{border-color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.15)}
 .sw-custom{display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#ff5f57,#febc2e,#28c840,#3b82f6,#a855f7)}
 .sw-custom input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
 .langs{display:flex;gap:8px;flex-wrap:wrap}
-.lang{
-  display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;
-  padding:5px 7px;border-radius:7px;border:1px solid transparent;transition:.15s;
-}
+.lang{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:5px 7px;border-radius:7px;border:1px solid transparent;transition:.15s}
 .lang:hover{background:rgba(var(--accent-rgb),.1)}
 .lang.active{border-color:var(--accent);background:rgba(var(--accent-rgb),.16);box-shadow:0 0 8px rgba(var(--accent-rgb),.3)}
 .lang .flag{width:26px;height:17px;border-radius:3px;overflow:hidden;display:block}
@@ -260,10 +179,7 @@ section{position:relative;z-index:2}
 
 /* ── Features ────────────────────────────────────────────────────────── */
 .feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:50px}
-.feat{
-  border:1px solid rgba(var(--accent-rgb),.2);border-radius:9px;padding:26px 24px;
-  background:rgba(20,20,28,.4);transition:.22s;position:relative;overflow:hidden;
-}
+.feat{border:1px solid rgba(var(--accent-rgb),.2);border-radius:9px;padding:26px 24px;background:rgba(20,20,28,.4);transition:.22s;position:relative;overflow:hidden}
 .feat::before{content:"";position:absolute;inset:0;background:radial-gradient(120px 120px at 90% -10%,rgba(var(--accent-rgb),.12),transparent);opacity:0;transition:.22s}
 .feat:hover{border-color:rgba(var(--accent-rgb),.5);transform:translateY(-4px)}
 .feat:hover::before{opacity:1}
@@ -271,6 +187,7 @@ section{position:relative;z-index:2}
 .feat .fico svg{width:100%;height:100%}
 .feat h3{font-size:17px;font-weight:700;margin-bottom:9px}
 .feat p{font-size:13.5px;color:var(--text-dim);line-height:1.65}
+.feat code{color:var(--accent);background:rgba(var(--accent-rgb),.1);padding:0 4px;border-radius:3px;font-size:.92em}
 
 /* ── Specs strip ─────────────────────────────────────────────────────── */
 .specs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;margin-top:46px;border:1px solid rgba(var(--accent-rgb),.2);border-radius:9px;overflow:hidden;background:rgba(var(--accent-rgb),.2)}
@@ -280,11 +197,7 @@ section{position:relative;z-index:2}
 
 /* ── CTA / download ──────────────────────────────────────────────────── */
 #download .frame{padding:clamp(34px,6vw,64px);text-align:center}
-.dl-cmd{
-  display:inline-flex;align-items:center;gap:12px;margin:26px 0 8px;
-  background:#08080c;border:1px solid rgba(var(--accent-rgb),.3);border-radius:7px;
-  padding:14px 18px;font-size:13.5px;max-width:100%;overflow-x:auto;
-}
+.dl-cmd{display:inline-flex;align-items:center;gap:12px;margin:26px 0 8px;background:#08080c;border:1px solid rgba(var(--accent-rgb),.3);border-radius:7px;padding:14px 18px;font-size:13.5px;max-width:100%;overflow-x:auto}
 .dl-cmd .pr{color:var(--accent)}
 .dl-cmd code{color:var(--text);white-space:nowrap}
 .dl-cmd .copy{margin-left:6px;color:var(--text-faint);cursor:pointer;border:none;background:none;font-family:var(--mono);font-size:12px;transition:.15s;flex:none}
@@ -309,10 +222,10 @@ footer{border-top:1px solid rgba(var(--accent-rgb),.16);padding:40px 0;margin-to
     <span>vani<b>lux</b></span>
   </a>
   <div class="nav-links">
-    <a href="#simulator" class="hide-sm">Demo</a>
-    <a href="#features" class="hide-sm">Características</a>
-    <a href="https://github.com/facilized-pbustamante/vanilux" target="_blank" rel="noopener" class="hide-sm">Código</a>
-    <a href="https://github.com/facilized-pbustamante/vanilux/releases" target="_blank" rel="noopener" class="cta">Releases ↗</a>
+    <a href="#simulator" class="hide-sm" data-i18n="nav_demo">Demo</a>
+    <a href="#features" class="hide-sm" data-i18n="nav_features">Características</a>
+    <a href="https://github.com/facilized-pbustamante/vanilux" target="_blank" rel="noopener" class="hide-sm" data-i18n="nav_code">Código</a>
+    <a href="https://github.com/facilized-pbustamante/vanilux/releases" target="_blank" rel="noopener" class="cta" data-i18n="nav_releases">Releases ↗</a>
   </div>
 </nav>
 
@@ -320,29 +233,29 @@ footer{border-top:1px solid rgba(var(--accent-rgb),.16);padding:40px 0;margin-to
 <header id="hero">
   <canvas id="bg-canvas"></canvas>
   <div class="hero-inner">
-    <span class="hero-badge"><span class="dot"></span>C++17 · gtkmm3 · v1.0</span>
-    <h1>El lanzador de apps<br>con alma de <span class="x">terminal</span>.</h1>
-    <p class="sub">
-      Vanilux es un lanzador a pantalla completa para Linux, estilo Launchpad,
-      con estética ámbar de terminal. Residente en memoria, instantáneo, y
-      personalizable hasta el último píxel.
+    <h1 data-i18n="hero_h1">El lanzador de apps con alma de <span class="x">terminal</span>.</h1>
+    <p class="sub" data-i18n="hero_sub">
+      Lanzador a pantalla completa para Linux, estilo Launchpad, con estética
+      ámbar de terminal. Residente, instantáneo y personalizable hasta el píxel.
     </p>
     <div class="hero-cta">
-      <a href="https://github.com/facilized-pbustamante/vanilux/releases" target="_blank" rel="noopener" class="btn btn-primary">↓ Descargar</a>
-      <a href="#simulator" class="btn btn-ghost">▶ Probar la demo</a>
+      <a href="https://github.com/facilized-pbustamante/vanilux/releases" target="_blank" rel="noopener" class="btn btn-primary" data-i18n="hero_dl">↓ Descargar</a>
+      <a href="#simulator" class="btn btn-ghost" data-i18n="hero_try">▶ Probar la demo</a>
     </div>
-    <p class="hero-hint">Se invoca con <span class="kbd">F4</span> y queda residente — la siguiente apertura es inmediata.</p>
+    <p class="hero-hint" data-i18n="hero_hint">Se invoca con <span class="kbd">F4</span> y queda residente — la siguiente apertura es inmediata.</p>
   </div>
-  <div class="scroll-down">▼ scroll</div>
+
+  <!-- Live app preview (built by buildHeroPreview in app.js) -->
+  <div class="hero-preview" id="heroPreview"></div>
 </header>
 
 <!-- ══ SIMULATOR ══ -->
 <section id="simulator" class="section-pad">
   <div class="wrap">
     <div class="center">
-      <span class="eyebrow">Simulador en vivo</span>
-      <h2 class="section-title">Tomale el peso. Acá mismo.</h2>
-      <p class="section-desc">
+      <span class="eyebrow" data-i18n="sim_eyebrow">Simulador en vivo</span>
+      <h2 class="section-title" data-i18n="sim_title">Tomale el peso. Acá mismo.</h2>
+      <p class="section-desc" data-i18n="sim_desc">
         Esto es Vanilux corriendo en tu navegador (con apps inventadas para la demo).
         Buscá, filtrá por categorías, marcá favoritos — y, sobre todo,
         <span class="amber">cambiá el color del tema y el idioma</span>: todo se recolorea y se
@@ -355,11 +268,6 @@ footer{border-top:1px solid rgba(var(--accent-rgb),.16);padding:40px 0;margin-to
         <div class="sim-titlebar">
           <span class="sim-dot r"></span><span class="sim-dot y"></span><span class="sim-dot g"></span>
           <span class="sim-title">vanilux — :: pantalla completa ::</span>
-          <div class="sim-toolbar">
-            <div class="sim-tool active" data-view="grid" title="Cuadrícula" id="vGrid"></div>
-            <div class="sim-tool" data-view="list" title="Lista" id="vList"></div>
-            <div class="sim-tool" id="vWrench" title="Configurar"></div>
-          </div>
         </div>
         <div class="sim-body">
           <div class="frame sim-search-frame">
@@ -367,6 +275,11 @@ footer{border-top:1px solid rgba(var(--accent-rgb),.16);padding:40px 0;margin-to
             <div class="sim-search">
               <span class="prompt">&gt;</span>
               <input type="text" id="simSearch" autocomplete="off" spellcheck="false">
+              <div class="sim-toolbar">
+                <div class="sim-tool active" data-view="grid" title="Cuadrícula" id="vGrid"></div>
+                <div class="sim-tool" data-view="list" title="Lista" id="vList"></div>
+                <div class="sim-tool" id="vWrench" title="Configurar"></div>
+              </div>
             </div>
           </div>
 
@@ -415,9 +328,9 @@ footer{border-top:1px solid rgba(var(--accent-rgb),.16);padding:40px 0;margin-to
 <!-- ══ FEATURES ══ -->
 <section id="features" class="section-pad">
   <div class="wrap">
-    <span class="eyebrow">Características</span>
-    <h2 class="section-title">Diseñado para no estorbar.</h2>
-    <p class="section-desc">Cada decisión apunta a lo mismo: que abras lo que buscás en milisegundos y vuelvas a lo tuyo.</p>
+    <span class="eyebrow" data-i18n="feat_eyebrow">Características</span>
+    <h2 class="section-title" data-i18n="feat_title">Diseñado para no estorbar.</h2>
+    <p class="section-desc" data-i18n="feat_desc">Cada decisión apunta a lo mismo: que abras lo que buscás en milisegundos y vuelvas a lo tuyo.</p>
     <div class="feat-grid" id="featGrid"></div>
   </div>
 </section>
@@ -426,10 +339,10 @@ footer{border-top:1px solid rgba(var(--accent-rgb),.16);padding:40px 0;margin-to
 <section class="section-pad" style="padding-top:0">
   <div class="wrap">
     <div class="specs reveal">
-      <div class="spec"><div class="num">&lt;1<span style="font-size:.5em"> ms</span></div><div class="lbl">apertura residente</div></div>
-      <div class="spec"><div class="num">7</div><div class="lbl">idiomas</div></div>
-      <div class="spec"><div class="num">∞</div><div class="lbl">colores de tema</div></div>
-      <div class="spec"><div class="num">100%</div><div class="lbl">teclado · sin mouse</div></div>
+      <div class="spec"><div class="num">&lt;1<span style="font-size:.5em"> ms</span></div><div class="lbl" data-i18n="spec_open">apertura residente</div></div>
+      <div class="spec"><div class="num">7</div><div class="lbl" data-i18n="spec_langs">idiomas</div></div>
+      <div class="spec"><div class="num">∞</div><div class="lbl" data-i18n="spec_colors">colores de tema</div></div>
+      <div class="spec"><div class="num">100%</div><div class="lbl" data-i18n="spec_kbd">teclado · sin mouse</div></div>
     </div>
   </div>
 </section>
@@ -439,17 +352,17 @@ footer{border-top:1px solid rgba(var(--accent-rgb),.16);padding:40px 0;margin-to
   <div class="wrap">
     <div class="frame reveal">
       <span class="frame-label">[ install ]</span>
-      <span class="eyebrow">Empezá ahora</span>
-      <h2 class="section-title" style="margin-bottom:6px">Llevátelo a tu Linux.</h2>
-      <p class="section-desc" style="margin:0 auto">Cloná, compilá e instalá. El instalador configura el atajo <span class="kbd">F4</span> por vos.</p>
+      <span class="eyebrow" data-i18n="dl_eyebrow">Empezá ahora</span>
+      <h2 class="section-title" style="margin-bottom:6px" data-i18n="dl_title">Llevátelo a tu Linux.</h2>
+      <p class="section-desc" style="margin:0 auto" data-i18n="dl_desc">Cloná, compilá e instalá. El instalador configura el atajo <span class="kbd">F4</span> por vos.</p>
       <div class="dl-cmd">
         <span class="pr">$</span>
         <code id="dlCmd">git clone https://github.com/facilized-pbustamante/vanilux &amp;&amp; cd vanilux &amp;&amp; ./install.sh</code>
-        <button class="copy" id="copyBtn">copiar</button>
+        <button class="copy" id="copyBtn" data-i18n="dl_copy">copiar</button>
       </div>
-      <div class="hero-cta" style="margin-top:26px">
-        <a href="https://github.com/facilized-pbustamante/vanilux/releases" target="_blank" rel="noopener" class="btn btn-primary">↓ Ver releases</a>
-        <a href="https://github.com/facilized-pbustamante/vanilux" target="_blank" rel="noopener" class="btn btn-ghost">★ Código en GitHub</a>
+      <div class="hero-cta" style="margin-top:26px;justify-content:center">
+        <a href="https://github.com/facilized-pbustamante/vanilux/releases" target="_blank" rel="noopener" class="btn btn-primary" data-i18n="dl_releases">↓ Ver releases</a>
+        <a href="https://github.com/facilized-pbustamante/vanilux" target="_blank" rel="noopener" class="btn btn-ghost" data-i18n="dl_code">★ Código en GitHub</a>
       </div>
     </div>
   </div>
@@ -457,11 +370,11 @@ footer{border-top:1px solid rgba(var(--accent-rgb),.16);padding:40px 0;margin-to
 
 <footer>
   <div class="wrap foot">
-    <div>vani<b class="amber">lux</b> · hecho con C++ y café ☕ · estética terminal ámbar</div>
+    <div data-i18n="foot_made">vani<b class="amber">lux</b> · hecho con C++ y café ☕ · estética terminal ámbar</div>
     <div class="foot-links">
       <a href="https://github.com/facilized-pbustamante/vanilux" target="_blank" rel="noopener">GitHub</a>
       <a href="https://github.com/facilized-pbustamante/vanilux/releases" target="_blank" rel="noopener">Releases</a>
-      <a href="#hero">Arriba ↑</a>
+      <a href="#hero" data-i18n="foot_top">Arriba ↑</a>
     </div>
   </div>
 </footer>
