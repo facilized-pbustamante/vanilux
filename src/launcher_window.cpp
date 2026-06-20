@@ -950,6 +950,25 @@ void LauncherWindow::load_css() {
                 scrollbar,scrollbar button,scrollbar slider { background-color: transparent; border: none; }
                 scrollbar.vertical slider { background-color: rgba(224,153,36,0.2); min-width: 5px; border-radius: 3px; }
                 scrollbar.vertical slider:hover { background-color: #e09924; }
+            )"
+            // Settings modal, language picker, hotkey mode — appended here so
+            // the fallback matches the file-based style.css (avoid transparent UI).
+            R"(
+.settings-backdrop { background-color: rgba(6,6,9,0.32); }
+.settings-card { background-color: #14141c; border: 1px solid rgba(224,153,36,0.35); border-radius: 6px; padding: 32px 36px; margin: 32px; box-shadow: 0 12px 48px rgba(0,0,0,0.6), 0 0 24px rgba(224,153,36,0.12); }
+.settings-card label { color: #f2e9e1; }
+.settings-card separator { background-color: rgba(224,153,36,0.20); min-height: 1px; margin: 6px 0; }
+.settings-card colorselection,.settings-card colorselection * { color: #f2e9e1; }
+.mode-toggle { color: rgba(255,255,255,0.7); padding: 2px 6px; }
+.mode-toggle radio { background-color: #1a1a24; border: 1px solid rgba(224,153,36,0.4); border-radius: 8px; min-width: 13px; min-height: 13px; -gtk-icon-source: none; }
+.mode-toggle radio:checked { background-color: #e09924; border-color: #e09924; box-shadow: 0 0 6px rgba(224,153,36,0.6); }
+.mode-toggle:hover { color: #f2e9e1; }
+.combo-value { color: #e09924; font-weight: bold; font-size: 13px; }
+.lang-btn,.lang-btn:backdrop { background-color: transparent; background-image: none; border: 1px solid rgba(224,153,36,0.0); border-radius: 8px; padding: 4px 6px; box-shadow: none; }
+.lang-btn:hover { background-color: rgba(224,153,36,0.10); }
+.lang-btn.active,.lang-btn.active:backdrop { background-color: rgba(224,153,36,0.18); border-color: #e09924; box-shadow: 0 0 6px rgba(224,153,36,0.35); }
+.lang-code { color: rgba(255,255,255,0.7); font-size: 10px; font-weight: bold; }
+.lang-btn.active .lang-code { color: #e09924; }
             )";
         }
         }   // m_css_template populated once
