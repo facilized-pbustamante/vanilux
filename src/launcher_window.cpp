@@ -982,6 +982,7 @@ void LauncherWindow::load_css() {
 #launcher-window .settings-card colorselection,#launcher-window .settings-card colorsel,
 #launcher-window .settings-card colorsel colorchooser,
 #launcher-window .settings-card colorselection *,#launcher-window .settings-card colorsel *,#launcher-window .settings-card colorsel colorchooser * { color: #f2e9e1; }
+#launcher-window#launcher-window .settings-card colorselection *,#launcher-window#launcher-window .settings-card colorsel *,#launcher-window#launcher-window .settings-card colorsel colorchooser * { color: #f2e9e1; }
 #launcher-window .settings-card colorselection button,#launcher-window .settings-card colorsel button { background-color: #1a1a24; border: 1px solid rgba(224,153,36,0.25); border-radius: 4px; color: #f2e9e1; }
 #launcher-window .settings-card colorselection entry,#launcher-window .settings-card colorsel entry { background-color: #1a1a24; color: #f2e9e1; border: 1px solid rgba(224,153,36,0.25); border-radius: 3px; padding: 2px 4px; }
 #launcher-window .settings-card colorselection label,#launcher-window .settings-card colorsel label { color: rgba(255,255,255,0.7); }
@@ -1225,12 +1226,7 @@ void LauncherWindow::build_settings_panel() {
     m_color_picker->set_has_palette(true);
     m_color_picker->set_halign(Gtk::ALIGN_CENTER);
     m_color_picker->set_size_request(340, 170);
-    m_color_picker->set_label_hue(tr("cp_hue"));
-    m_color_picker->set_label_saturation(tr("cp_saturation"));
-    m_color_picker->set_label_value(tr("cp_value"));
-    m_color_picker->set_label_red(tr("cp_red"));
-    m_color_picker->set_label_green(tr("cp_green"));
-    m_color_picker->set_label_blue(tr("cp_blue"));
+    // Labels are set at open_settings time (post-realization) via C traversal
 
     // ── Hotkey section: mode selector + combo display + on-screen keyboard ────
     auto key_label = Gtk::manage(new Gtk::Label());
@@ -1363,11 +1359,10 @@ void LauncherWindow::build_settings_panel() {
 
         std::string new_key = m_keyboard->get_binding();
         bool key_changed = (!new_key.empty() && new_key != g_theme_hotkey);
-        std::string old_key = g_theme_hotkey;
+        std::string prev_key = g_theme_hotkey;
         if (key_changed) g_theme_hotkey = new_key;
         save_theme_config();
         if (!new_key.empty()) {
-            std::string old_key = key_changed ? g_theme_hotkey : new_key;
             std::string b = "/usr/local/bin/vanilux";
             if (!std::filesystem::exists(b)) b = "/usr/bin/vanilux";
             if (std::filesystem::exists(b)) {
@@ -1377,7 +1372,7 @@ void LauncherWindow::build_settings_panel() {
                 std::string cmd =
                   "if command -v xfconf-query >/dev/null 2>&1 && "
                      "xfconf-query -c xfce4-keyboard-shortcuts -l >/dev/null 2>&1; then "
-                    "xfconf-query -c xfce4-keyboard-shortcuts -p '/commands/custom/" + old_key + "' -r 2>/dev/null; "
+                    "xfconf-query -c xfce4-keyboard-shortcuts -p '/commands/custom/" + prev_key + "' -r 2>/dev/null; "
                     "xfconf-query -c xfce4-keyboard-shortcuts -n -t string -p '/commands/custom/" + k + "' -s '" + b + "' 2>/dev/null || "
                     "xfconf-query -c xfce4-keyboard-shortcuts -t string -p '/commands/custom/" + k + "' -s '" + b + "' 2>/dev/null; "
                   "elif gsettings list-schemas 2>/dev/null | grep -qx org.cinnamon.desktop.keybindings; then "
@@ -1432,6 +1427,7 @@ void LauncherWindow::open_settings() {
     m_settings_open = true;
     m_preview_dirty = false;
     m_settings_backdrop.show();
+    relabel_color_picker();   // translate colorsel labels after widget is realized
     m_color_picker->grab_focus();
 
     // Drive the live preview off the frame clock while the modal is open. The
@@ -1490,20 +1486,73 @@ void LauncherWindow::retranslate() {
     m_status_frame.set_label(" [ "  + tr("frame_status") + " ] ");
 
     // Color picker labels.
-    if (m_color_picker) {
-        m_color_picker->set_label_hue(tr("cp_hue"));
-        m_color_picker->set_label_saturation(tr("cp_saturation"));
-        m_color_picker->set_label_value(tr("cp_value"));
-        m_color_picker->set_label_red(tr("cp_red"));
-        m_color_picker->set_label_green(tr("cp_green"));
-        m_color_picker->set_label_blue(tr("cp_blue"));
-    }
+    if (m_color_picker) relabel_color_picker();
 
     if (m_combo_value) update_combo_label();
 
     // Rebuild the grids so category badges pick up the new language, and refresh
     // the status line (count + current category name).
     set_category(m_current_category);
+}
+
+// ── translate all labels inside GtkColorSelection ──────────────────────────
+// The GtkColorSelection widget tree is opaque, so we traverse it via the C API
+// to reach its internal GtkNotebook, GtkLabel children, and color hex entry.
+static void relabel_cb(GtkWidget* w, gpointer data) {
+    // data is the parent widget that started the traversal; we unset it once
+    // the hex-box row has been found so we don't descend into it again.
+    if (!data) return;
+    if (GTK_IS_NOTEBOOK(w)) {
+        // Translate notebook tab labels.
+        // For each page: get the tab label widget and replace its text.
+        GtkNotebook* nb = GTK_NOTEBOOK(w);
+        int n = gtk_notebook_get_n_pages(nb);
+        // Tab 0 → wheel, tab 1 → palette
+        if (n > 0) {
+            GtkWidget* p0 = gtk_notebook_get_nth_page(nb, 0);
+            if (p0) gtk_notebook_set_tab_label_text(nb, p0, ::tr("cp_wheel").c_str());
+        }
+        if (n > 1) {
+            GtkWidget* p1 = gtk_notebook_get_nth_page(nb, 1);
+            if (p1) gtk_notebook_set_tab_label_text(nb, p1, ::tr("cp_palette").c_str());
+        }
+        // Don't descend further — the notebook's sub-labels are handled by label matching.
+        return;
+    }
+    if (GTK_IS_LABEL(w)) {
+        const char* txt = gtk_label_get_text(GTK_LABEL(w));
+        if (!txt || !*txt) return;
+        // Map known English / locale-default labels to translated strings.
+        struct { const char* src; const char* key; } map[] = {
+            {"Hue:",         "cp_hue"},
+            {"Saturation:",  "cp_saturation"},
+            {"Value:",       "cp_value"},
+            {"Red:",         "cp_red"},
+            {"Green:",       "cp_green"},
+            {"Blue:",        "cp_blue"},
+            {"Color name:",  "cp_color_name"},
+            {"Color name",   "cp_color_name"},
+        };
+        for (auto& m : map) {
+            if (strcmp(txt, m.src) == 0) {
+                gtk_label_set_text(GTK_LABEL(w), ::tr(m.key).c_str());
+                break;
+            }
+        }
+    }
+    // Recurse into container children.
+    if (GTK_IS_CONTAINER(w))
+        gtk_container_forall(GTK_CONTAINER(w), relabel_cb, data);
+}
+
+void LauncherWindow::relabel_color_picker() {
+    if (!m_color_picker) return;
+    // Traverse from the ColorSelection widget itself.
+    relabel_cb(GTK_WIDGET(m_color_picker->gobj()), m_color_picker->gobj());
+    // Also find the hex entry row (usually a direct child of the color selection)
+    // and make its label white if the traversal missed it.
+    // Force a redraw so the new labels show up.
+    m_color_picker->queue_draw();
 }
 
 void LauncherWindow::apply_language(Lang l) {

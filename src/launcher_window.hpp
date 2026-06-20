@@ -117,6 +117,7 @@ protected:
     // i18n: register a label for retranslation, switch language, re-apply strings.
     void register_tr(Gtk::Label* lbl, const std::string& key, bool markup = false);
     void retranslate();
+    void relabel_color_picker();   // traverse GtkColorSelection and translate all labels
     void apply_language(Lang l);
     bool set_theme_color(const std::string& hex_color);   // updates globals only
     void recolor_theme_live(const std::string& hex_color); // cheap live preview

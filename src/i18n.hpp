@@ -93,6 +93,9 @@ inline const std::unordered_map<std::string, std::array<const char*, LANG_COUNT>
         {"cp_red",        {"Rojo", "Red", "Vermelho", "红", "Rouge", "赤", "빨강"}},
         {"cp_green",      {"Verde", "Green", "Verde", "绿", "Vert", "緑", "초록"}},
         {"cp_blue",       {"Azul", "Blue", "Azul", "蓝", "Bleu", "青", "파랑"}},
+        {"cp_wheel",      {"Rueda", "Wheel", "Roda", "色轮", "Roue", "カラーホイール", "색상환"}},
+        {"cp_palette",    {"Paleta", "Palette", "Paleta", "调色板", "Palette", "パレット", "팔레트"}},
+        {"cp_color_name", {"Nombre de color:", "Color name:", "Nome da cor:", "颜色名称:", "Nom de la couleur:", "色の名前:", "색상 이름:"}},
         // Status-bar shortcut key caps. 'f' (favorite) mirrors that physical key
         // on the localized keyboard; 'esc' is localized where a term exists (FR).
         {"kc_fav",     {"f", "f", "f", "f", "f", "は", "ㄹ"}},

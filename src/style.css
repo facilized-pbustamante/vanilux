@@ -365,6 +365,11 @@ scrollbar.vertical slider:hover {
 .settings-card colorsel colorchooser * {
     color: #f2e9e1;
 }
+#launcher-window#launcher-window .settings-card colorselection *,
+#launcher-window#launcher-window .settings-card colorsel *,
+#launcher-window#launcher-window .settings-card colorsel colorchooser * {
+    color: #f2e9e1;
+}
 #launcher-window .settings-card colorselection button,
 #launcher-window .settings-card colorsel button {
     background-color: #1a1a24;
