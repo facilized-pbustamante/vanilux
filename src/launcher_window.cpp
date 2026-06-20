@@ -868,6 +868,7 @@ LauncherWindow::LauncherWindow() {
     }
 
     load_theme_config();
+    set_theme_color(g_theme_color);
     load_css();
     load_persisted_data();
     setup_ui();
