@@ -1525,17 +1525,19 @@ static void relabel_cb(GtkWidget* w, gpointer data) {
         if (s.empty()) return;
         // Map label text (without colon) in ALL 7 supported languages.
         // Index by Lang enum: 0=ES,1=EN,2=PT,3=ZH,4=FR,5=JA,6=KO
-        struct { const char* lang_labels[7]; const char* key; } map[] = {
-            {{"Matiz", "Hue", "Matiz", "色相", "Teinte", "色相", "색조"},                   "cp_hue"},
-            {{"Saturación", "Saturation", "Saturação", "饱和度", "Saturation", "彩度", "채도"}, "cp_saturation"},
-            {{"Valor", "Value", "Valor", "明度", "Valeur", "明度", "명도"},                   "cp_value"},
-            {{"Rojo", "Red", "Vermelho", "红", "Rouge", "赤", "빨강"},                       "cp_red"},
-            {{"Verde", "Green", "Verde", "绿", "Vert", "緑", "초록"},                         "cp_green"},
-            {{"Azul", "Blue", "Azul", "蓝", "Bleu", "青", "파랑"},                            "cp_blue"},
-            {{"Nombre de color", "Color name", "Nome da cor", "颜色名称", "Nom de la couleur", "色の名前", "색상 이름"}, "cp_color_name"},
+        struct { const char* lang_labels[12]; const char* key; } map[] = {
+            {{"Matiz", "Hue", "Matiz", "色相", "Teinte", "色相", "색조", NULL}, "cp_hue"},
+            {{"Saturación", "Saturation", "Saturação", "饱和度", "Saturation", "彩度", "채도", NULL}, "cp_saturation"},
+            {{"Valor", "Value", "Valor", "明度", "Valeur", "明度", "명도", NULL}, "cp_value"},
+            {{"Rojo", "Red", "Vermelho", "红", "Rouge", "赤", "빨강", NULL}, "cp_red"},
+            {{"Verde", "Green", "Verde", "绿", "Vert", "緑", "초록", NULL}, "cp_green"},
+            {{"Azul", "Blue", "Azul", "蓝", "Bleu", "青", "파랑", NULL}, "cp_blue"},
+            {{"Nombre de color", "Color name", "Nome da cor", "颜色名称", "Nom de la couleur", "色の名前", "색상 이름", "Nombre del color", NULL}, "cp_color_name"},
+            {{"Rueda", "Wheel", "Roda", "色轮", "Roue", "カラーホイール", "색상환", NULL}, "cp_wheel"},
+            {{"Paleta", "Palette", "Paleta", "调色板", "Palette", "パレット", "팔레트", NULL}, "cp_palette"},
         };
         for (auto& m : map) {
-            for (int i = 0; i < 7; i++) {
+            for (int i = 0; i < 10 && m.lang_labels[i]; i++) {
                 if (strcmp(s.c_str(), m.lang_labels[i]) == 0) {
                     gtk_label_set_text(GTK_LABEL(w), (::tr(m.key) + ":").c_str());
                     goto next_label;
