@@ -142,6 +142,8 @@ Issues and pull requests are welcome.
 &nbsp;
 [![GitHub stars](https://img.shields.io/github/stars/facilized-pbustamante/vanilux?style=for-the-badge&color=e09924&labelColor=14141c)](https://github.com/facilized-pbustamante/vanilux/stargazers)
 
+[![Star History Chart](https://api.star-history.com/svg?repos=facilized-pbustamante/vanilux&type=Date)](https://star-history.com/#facilized-pbustamante/vanilux&Date)
+
 <sub>vani<b>lux</b> · made with C++ and coffee · amber terminal aesthetic</sub>
 
 </div>

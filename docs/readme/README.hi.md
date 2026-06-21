@@ -140,6 +140,8 @@ Issues और pull requests का स्वागत है।
 &nbsp;
 [![GitHub stars](https://img.shields.io/github/stars/facilized-pbustamante/vanilux?style=for-the-badge&color=e09924&labelColor=14141c)](https://github.com/facilized-pbustamante/vanilux/stargazers)
 
+[![Star History Chart](https://api.star-history.com/svg?repos=facilized-pbustamante/vanilux&type=Date)](https://star-history.com/#facilized-pbustamante/vanilux&Date)
+
 <sub>vani<b>lux</b> · C++ और कॉफ़ी से बना ☕ · एम्बर टर्मिनल सौंदर्य</sub>
 
 </div>

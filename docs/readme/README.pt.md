@@ -142,6 +142,8 @@ Issues e pull requests são bem-vindos.
 &nbsp;
 [![GitHub stars](https://img.shields.io/github/stars/facilized-pbustamante/vanilux?style=for-the-badge&color=e09924&labelColor=14141c)](https://github.com/facilized-pbustamante/vanilux/stargazers)
 
+[![Star History Chart](https://api.star-history.com/svg?repos=facilized-pbustamante/vanilux&type=Date)](https://star-history.com/#facilized-pbustamante/vanilux&Date)
+
 <sub>vani<b>lux</b> · feito com C++ e café · estética terminal âmbar</sub>
 
 </div>
