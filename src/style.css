@@ -357,91 +357,84 @@ scrollbar.vertical slider:hover {
     margin: 6px 0;
 }
 
-.settings-card colorselection,
-.settings-card colorsel,
-.settings-card colorsel colorchooser,
-.settings-card colorselection *,
-.settings-card colorsel *,
-.settings-card colorsel colorchooser * {
+/* ── Color picker (deprecated GtkColorSelection) ──────────────────────────────
+   Scoped under the `.vanilux-colorsel` class added to the widget in C++ so the
+   descendant selectors below match EVERY internal node regardless of its CSS
+   node name. Each visible node gets an EXPLICIT vanilux color, so the picker
+   looks identical on any host GTK theme instead of leaking black-on-black
+   through the system theme on dark desktops. */
+
+/* Container chrome: paint all wrapper nodes dark. The hue/sat wheel and the
+   color-sample swatch are GtkDrawingAreas that paint themselves opaquely on
+   top, so a dark background behind them is harmless. */
+.vanilux-colorsel,
+.vanilux-colorsel box,
+.vanilux-colorsel grid,
+.vanilux-colorsel notebook,
+.vanilux-colorsel notebook stack,
+.vanilux-colorsel notebook header,
+.vanilux-colorsel notebook tab {
+    background-color: #14141c;
     color: #f2e9e1;
 }
-#launcher-window#launcher-window .settings-card colorselection *,
-#launcher-window#launcher-window .settings-card colorsel *,
-#launcher-window#launcher-window .settings-card colorsel colorchooser * {
-    color: #f2e9e1;
-}
-#launcher-window .settings-card colorselection button,
-#launcher-window .settings-card colorsel button {
+.vanilux-colorsel notebook tab:checked { background-color: #1a1a24; }
+
+.vanilux-colorsel label { color: #f2e9e1; }
+
+/* Hex entry */
+.vanilux-colorsel entry,
+.vanilux-colorsel entry text {
     background-color: #1a1a24;
-    border: 1px solid rgba(224,153,36,0.25);
-    border-radius: 4px;
     color: #f2e9e1;
-}
-#launcher-window .settings-card colorselection entry,
-#launcher-window .settings-card colorsel entry {
-    background-color: #1a1a24;
-    color: #f2e9e1;
-    border: 1px solid rgba(224,153,36,0.25);
+    caret-color: #e09924;
+    border: 1px solid rgba(224,153,36,0.30);
     border-radius: 3px;
     padding: 2px 4px;
 }
-#launcher-window .settings-card colorselection label,
-#launcher-window .settings-card colorsel label {
-    color: rgba(255,255,255,0.7);
-}
-#launcher-window .settings-card colorselection scale,
-#launcher-window .settings-card colorsel scale {
-    background-color: transparent;
-}
-#launcher-window .settings-card colorselection scale trough,
-#launcher-window .settings-card colorsel scale trough {
+
+/* Eyedropper / palette / "custom" buttons */
+.vanilux-colorsel button {
     background-color: #1a1a24;
-}
-#launcher-window .settings-card colorselection scale slider,
-#launcher-window .settings-card colorsel scale slider {
-    background-color: #e09924;
-    border: none;
-    border-radius: 4px;
-    min-width: 8px;
-    min-height: 8px;
-}
-/* Spinbuttons (Hue/Sat/Val · R/G/B): black field, white numbers, white +/- */
-#launcher-window .settings-card colorselection spinbutton,
-#launcher-window .settings-card colorsel spinbutton,
-#launcher-window .settings-card colorsel colorchooser spinbutton,
-#launcher-window .settings-card colorsel colorchooser notebook spinbutton {
-    background-color: #000000;
-    color: #ffffff;
-    border: 1px solid rgba(224,153,36,0.35);
-    border-radius: 4px;
-}
-#launcher-window .settings-card colorselection spinbutton *,
-#launcher-window .settings-card colorsel spinbutton *,
-#launcher-window .settings-card colorsel colorchooser spinbutton * {
-    background-color: #000000;
-    color: #ffffff;
-}
-/* the +/- stepper "pseudo-buttons": black background, white glyphs */
-#launcher-window .settings-card colorselection spinbutton button,
-#launcher-window .settings-card colorsel spinbutton button,
-#launcher-window .settings-card colorsel colorchooser spinbutton button {
-    background-color: #000000;
     background-image: none;
-    color: #ffffff;
+    color: #f2e9e1;
+    border: 1px solid rgba(224,153,36,0.30);
+    border-radius: 4px;
+    box-shadow: none;
+    text-shadow: none;
+}
+.vanilux-colorsel button:hover { background-color: #24242e; }
+
+/* Hue/Sat/Val · R/G/B spinbuttons: dark field, light numbers, light +/- glyphs */
+.vanilux-colorsel spinbutton,
+.vanilux-colorsel spinbutton text {
+    background-color: #1a1a24;
+    color: #f2e9e1;
+    border: 1px solid rgba(224,153,36,0.30);
+    border-radius: 4px;
+}
+.vanilux-colorsel spinbutton button {
+    background-color: #1a1a24;
+    background-image: none;
+    color: #f2e9e1;
     border: none;
     -gtk-icon-shadow: none;
     box-shadow: none;
 }
-#launcher-window .settings-card colorselection spinbutton button *,
-#launcher-window .settings-card colorsel spinbutton button *,
-#launcher-window .settings-card colorsel colorchooser spinbutton button * {
-    background-color: #000000;
-    color: #ffffff;
+.vanilux-colorsel spinbutton button:hover { background-color: #24242e; color: #ffffff; }
+
+/* Sliders */
+.vanilux-colorsel scale { background-color: transparent; }
+.vanilux-colorsel scale trough {
+    background-color: #1a1a24;
+    border: 1px solid rgba(224,153,36,0.20);
+    border-radius: 4px;
 }
-#launcher-window .settings-card colorselection spinbutton button:hover,
-#launcher-window .settings-card colorsel spinbutton button:hover {
-    background-color: #111111;
-    color: #ffffff;
+.vanilux-colorsel scale slider {
+    background-color: #e09924;
+    border: none;
+    border-radius: 4px;
+    min-width: 10px;
+    min-height: 10px;
 }
 
 /* Hotkey mode selector (F key / Super + key) styled as pill toggles. */

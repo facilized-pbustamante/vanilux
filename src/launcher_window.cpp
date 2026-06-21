@@ -979,20 +979,18 @@ void LauncherWindow::load_css() {
 .settings-card { background-color: #14141c; border: 1px solid rgba(224,153,36,0.35); border-radius: 6px; padding: 29px 32px; margin: 29px; box-shadow: 0 11px 43px rgba(0,0,0,0.6), 0 0 22px rgba(224,153,36,0.12); }
 .settings-card label { color: #f2e9e1; }
 .settings-card separator { background-color: rgba(224,153,36,0.20); min-height: 1px; margin: 6px 0; }
-#launcher-window .settings-card colorselection,#launcher-window .settings-card colorsel,
-#launcher-window .settings-card colorsel colorchooser,
-#launcher-window .settings-card colorselection *,#launcher-window .settings-card colorsel *,#launcher-window .settings-card colorsel colorchooser * { color: #f2e9e1; }
-#launcher-window#launcher-window .settings-card colorselection *,#launcher-window#launcher-window .settings-card colorsel *,#launcher-window#launcher-window .settings-card colorsel colorchooser * { color: #f2e9e1; }
-#launcher-window .settings-card colorselection button,#launcher-window .settings-card colorsel button { background-color: #1a1a24; border: 1px solid rgba(224,153,36,0.25); border-radius: 4px; color: #f2e9e1; }
-#launcher-window .settings-card colorselection entry,#launcher-window .settings-card colorsel entry { background-color: #1a1a24; color: #f2e9e1; border: 1px solid rgba(224,153,36,0.25); border-radius: 3px; padding: 2px 4px; }
-#launcher-window .settings-card colorselection label,#launcher-window .settings-card colorsel label { color: rgba(255,255,255,0.7); }
-#launcher-window .settings-card colorselection scale,#launcher-window .settings-card colorsel scale { background-color: transparent; }
-#launcher-window .settings-card colorselection scale trough,#launcher-window .settings-card colorsel scale trough { background-color: #1a1a24; }
-#launcher-window .settings-card colorselection scale slider,#launcher-window .settings-card colorsel scale slider { background-color: #e09924; border: none; border-radius: 4px; min-width: 8px; min-height: 8px; }
-#launcher-window .settings-card colorselection spinbutton,#launcher-window .settings-card colorsel spinbutton,#launcher-window .settings-card colorsel colorchooser spinbutton,#launcher-window .settings-card colorsel colorchooser notebook spinbutton { background-color: #1a1a24; color: #f2e9e1; border: 1px solid rgba(224,153,36,0.25); border-radius: 3px; }
-#launcher-window .settings-card colorselection spinbutton *,#launcher-window .settings-card colorsel spinbutton *,#launcher-window .settings-card colorsel colorchooser spinbutton * { background-color: #1a1a24; color: #f2e9e1; }
-#launcher-window .settings-card colorselection spinbutton button,#launcher-window .settings-card colorsel spinbutton button,#launcher-window .settings-card colorsel colorchooser spinbutton button { background-color: #1a1a24; color: #f2e9e1; border: none; }
-#launcher-window .settings-card colorselection spinbutton button *,#launcher-window .settings-card colorsel spinbutton button *,#launcher-window .settings-card colorsel colorchooser spinbutton button * { background-color: #1a1a24; color: #f2e9e1; }
+.vanilux-colorsel,.vanilux-colorsel box,.vanilux-colorsel grid,.vanilux-colorsel notebook,.vanilux-colorsel notebook stack,.vanilux-colorsel notebook header,.vanilux-colorsel notebook tab { background-color: #14141c; color: #f2e9e1; }
+.vanilux-colorsel notebook tab:checked { background-color: #1a1a24; }
+.vanilux-colorsel label { color: #f2e9e1; }
+.vanilux-colorsel entry,.vanilux-colorsel entry text { background-color: #1a1a24; color: #f2e9e1; caret-color: #e09924; border: 1px solid rgba(224,153,36,0.30); border-radius: 3px; padding: 2px 4px; }
+.vanilux-colorsel button { background-color: #1a1a24; background-image: none; color: #f2e9e1; border: 1px solid rgba(224,153,36,0.30); border-radius: 4px; box-shadow: none; text-shadow: none; }
+.vanilux-colorsel button:hover { background-color: #24242e; }
+.vanilux-colorsel spinbutton,.vanilux-colorsel spinbutton text { background-color: #1a1a24; color: #f2e9e1; border: 1px solid rgba(224,153,36,0.30); border-radius: 4px; }
+.vanilux-colorsel spinbutton button { background-color: #1a1a24; background-image: none; color: #f2e9e1; border: none; -gtk-icon-shadow: none; box-shadow: none; }
+.vanilux-colorsel spinbutton button:hover { background-color: #24242e; color: #ffffff; }
+.vanilux-colorsel scale { background-color: transparent; }
+.vanilux-colorsel scale trough { background-color: #1a1a24; border: 1px solid rgba(224,153,36,0.20); border-radius: 4px; }
+.vanilux-colorsel scale slider { background-color: #e09924; border: none; border-radius: 4px; min-width: 10px; min-height: 10px; }
 .mode-toggle { color: rgba(255,255,255,0.7); padding: 2px 6px; }
 .mode-toggle radio { background-color: #1a1a24; border: 1px solid rgba(224,153,36,0.4); border-radius: 8px; min-width: 13px; min-height: 13px; -gtk-icon-source: none; }
 .mode-toggle radio:checked { background-color: #e09924; border-color: #e09924; box-shadow: 0 0 6px rgba(224,153,36,0.6); }
@@ -1226,6 +1224,12 @@ void LauncherWindow::build_settings_panel() {
     m_color_picker->set_has_palette(true);
     m_color_picker->set_halign(Gtk::ALIGN_CENTER);
     m_color_picker->set_size_request(340, 170);
+    // Own style class so the CSS can paint EVERY descendant (entries, spinbuttons,
+    // steppers, scales, container chrome) with explicit vanilux colors via
+    // `.vanilux-colorsel <node>` selectors. Without this the deprecated
+    // GtkColorSelection leaks unstyled internal nodes to the host GTK theme, which
+    // renders them black-on-black on dark system themes (theme-dependent bug).
+    m_color_picker->get_style_context()->add_class("vanilux-colorsel");
     // Labels are set at open_settings time (post-realization) via C traversal
 
     // ── Hotkey section: mode selector + combo display + on-screen keyboard ────
@@ -1498,8 +1502,9 @@ void LauncherWindow::retranslate() {
 // ── translate all labels inside GtkColorSelection ──────────────────────────
 // The GtkColorSelection widget tree is opaque, so we traverse it via the C API
 // to reach its internal GtkNotebook, GtkLabel children, and color hex entry.
-// We match labels against all 7 supported languages because GTK may have already
-// localized them based on the system locale.
+// We match labels against ALL supported languages (straight from the i18n table)
+// because GTK may have already localized them based on the system locale, and
+// because the user can switch between any two languages at runtime.
 static void relabel_cb(GtkWidget* w, gpointer data) {
     if (!data) return;
     if (GTK_IS_NOTEBOOK(w)) {
@@ -1523,29 +1528,44 @@ static void relabel_cb(GtkWidget* w, gpointer data) {
         std::string s(txt);
         while (!s.empty() && (s.back() == ':' || s.back() == ' ')) s.pop_back();
         if (s.empty()) return;
-        // Map label text (without colon) in ALL 7 supported languages.
-        // Index by Lang enum: 0=ES,1=EN,2=PT,3=ZH,4=FR,5=JA,6=KO
-        struct { const char* lang_labels[12]; const char* key; } map[] = {
-            {{"Matiz", "Hue", "Matiz", "色相", "Teinte", "色相", "색조", NULL}, "cp_hue"},
-            {{"Saturación", "Saturation", "Saturação", "饱和度", "Saturation", "彩度", "채도", NULL}, "cp_saturation"},
-            {{"Valor", "Value", "Valor", "明度", "Valeur", "明度", "명도", NULL}, "cp_value"},
-            {{"Rojo", "Red", "Vermelho", "红", "Rouge", "赤", "빨강", NULL}, "cp_red"},
-            {{"Verde", "Green", "Verde", "绿", "Vert", "緑", "초록", NULL}, "cp_green"},
-            {{"Azul", "Blue", "Azul", "蓝", "Bleu", "青", "파랑", NULL}, "cp_blue"},
-            {{"Nombre de color", "Color name", "Nome da cor", "颜色名称", "Nom de la couleur", "色の名前", "색상 이름", "Nombre del color", NULL}, "cp_color_name"},
-            {{"Rueda", "Wheel", "Roda", "色轮", "Roue", "カラーホイール", "색상환", NULL}, "cp_wheel"},
-            {{"Paleta", "Palette", "Paleta", "调色板", "Palette", "パレット", "팔레트", NULL}, "cp_palette"},
+        // Match the current label text against EVERY translation of each
+        // color-picker key in the i18n table (all supported languages), then
+        // relabel in the active language. Driving this off i18n_table() instead
+        // of a hand-maintained parallel list means new languages (e.g. RU, HI)
+        // work automatically and a label never gets "stuck" when its current
+        // text is in a language the matcher didn't happen to know about — the
+        // exact bug where cycling through Russian froze the picker labels.
+        static const char* const kKeys[] = {
+            "cp_hue", "cp_saturation", "cp_value",
+            "cp_red", "cp_green", "cp_blue",
+            "cp_color_name", "cp_wheel", "cp_palette",
         };
-        for (auto& m : map) {
-            for (int i = 0; i < 10 && m.lang_labels[i]; i++) {
-                if (strcmp(s.c_str(), m.lang_labels[i]) == 0) {
-                    gtk_label_set_text(GTK_LABEL(w), (::tr(m.key) + ":").c_str());
-                    goto next_label;
+        const auto& T = i18n_table();
+        for (const char* key : kKeys) {
+            auto it = T.find(key);
+            if (it == T.end()) continue;
+            for (const char* cand : it->second) {
+                if (cand && strcmp(s.c_str(), cand) == 0) {
+                    gtk_label_set_text(GTK_LABEL(w), (::tr(key) + ":").c_str());
+                    return;
                 }
             }
         }
+        // GTK ships its OWN translations for the built-in color selection, a few
+        // of which differ from ours — e.g. on a Spanish locale GTK localizes
+        // "Color name" to "Nombre del color", while our table uses "Nombre de
+        // color". Recognize those native variants too so the label is never left
+        // untranslated on locales where GTK localized it before we ran.
+        static const struct { const char* text; const char* key; } kNative[] = {
+            {"Nombre del color", "cp_color_name"},
+        };
+        for (const auto& a : kNative) {
+            if (strcmp(s.c_str(), a.text) == 0) {
+                gtk_label_set_text(GTK_LABEL(w), (::tr(a.key) + ":").c_str());
+                return;
+            }
+        }
     }
-    next_label:
     // Recurse into container children.
     if (GTK_IS_CONTAINER(w))
         gtk_container_forall(GTK_CONTAINER(w), relabel_cb, data);
