@@ -14,16 +14,18 @@
 **中文** ·
 [Français](README.fr.md) ·
 [日本語](README.ja.md) ·
-[한국어](README.ko.md)
+[한국어](README.ko.md) ·
+[हिन्दी](README.hi.md) ·
+[Русский](README.ru.md)
 
 ![Vanilux 演示](../media/vanilux_real.gif)
 
-![版本](https://img.shields.io/badge/%E7%89%88%E6%9C%AC-1.0-e09924?style=flat-square)
+![版本](https://img.shields.io/badge/%E7%89%88%E6%9C%AC-1.1-e09924?style=flat-square)
 ![C++17](https://img.shields.io/badge/C%2B%2B-17-00599C?style=flat-square&logo=cplusplus&logoColor=white)
 ![gtkmm3](https://img.shields.io/badge/GTK-gtkmm%203-7AAD0C?style=flat-square&logo=gnome&logoColor=white)
 ![Ubuntu](https://img.shields.io/badge/Ubuntu-%E2%9C%93-E95420?style=flat-square&logo=ubuntu&logoColor=white)
 ![Linux Mint](https://img.shields.io/badge/Linux_Mint-%E2%9C%93-86C440?style=flat-square&logo=linuxmint&logoColor=white)
-![i18n](https://img.shields.io/badge/i18n-7%20%E7%A7%8D%E8%AF%AD%E8%A8%80-e09924?style=flat-square)
+![i18n](https://img.shields.io/badge/i18n-9%20%E7%A7%8D%E8%AF%AD%E8%A8%80-e09924?style=flat-square)
 
 </div>
 
@@ -44,7 +46,7 @@
 | 收藏与最近 | 跨会话持久化到磁盘。 |
 | Cairo 琥珀辉光 | 选中图标的光晕用真实模糊手工绘制。 |
 | 实时主题颜色 | 取色器即时为整个界面重新着色。 |
-| 7 种语言 | 屏幕键盘按语言适配布局（QWERTY · AZERTY · 假名 · 谚文 · 注音）。 |
+| 9 种语言 | 屏幕键盘按语言适配布局（QWERTY · AZERTY · 假名 · 谚文 · 注音 · 西里尔 · 天城文）。 |
 | 键盘导航 | 方向键、Enter、`f`、Esc —— 也支持鼠标。 |
 | 常驻进程 | 首次打开加载图标，之后即时显示。 |
 | C++17 + gtkmm 3 | 原生且轻量，没有 Electron。 |
@@ -59,10 +61,10 @@
 
 ## 安装
 
-**`.deb` 安装包（推荐 · Ubuntu / Linux Mint）** —— 从 [Releases](https://github.com/facilized-pbustamante/vanilux/releases) 下载 `vanilux_1.0_amd64.deb` 并安装：
+**`.deb` 安装包（推荐 · Ubuntu / Linux Mint）** —— 从 [Releases](https://github.com/facilized-pbustamante/vanilux/releases) 下载 `vanilux_1.1_amd64.deb` 并安装：
 
 ```bash
-sudo apt install ./vanilux_1.0_amd64.deb
+sudo apt install ./vanilux_1.1_amd64.deb
 ```
 
 **或从源码编译：**
@@ -98,11 +100,13 @@ cd vanilux
 
 通过扳手按钮（右上角）打开设置：
 
+![实时主题颜色与多语言](../media/vanilux_tema_idioma.gif)
+
 | 设置 | 作用 |
 |---|---|
 | 主题颜色 | 色轮 + 预设色块 + 十六进制；**即时**为一切重新着色。 |
 | 快捷键 | 在 chiclet 风格的屏幕键盘上选择 <kbd>F1</kbd>–<kbd>F12</kbd> 或 **Super + 键**。 |
-| 语言 | Español · English · Português · 中文 · Français · 日本語 · 한국어 —— 即时切换整个界面。 |
+| 语言 | Español · English · Português · 中文 · Français · 日本語 · 한국어 · हिन्दी · Русский —— 即时切换整个界面。 |
 
 ## 技术
 

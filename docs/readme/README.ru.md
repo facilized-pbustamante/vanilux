@@ -20,7 +20,7 @@
 
 ![Vanilux](../media/vanilux_real.gif)
 
-![version](https://img.shields.io/badge/version-1.0-e09924?style=flat-square)
+![version](https://img.shields.io/badge/version-1.1-e09924?style=flat-square)
 ![C++17](https://img.shields.io/badge/C%2B%2B-17-00599C?style=flat-square&logo=cplusplus&logoColor=white)
 ![gtkmm3](https://img.shields.io/badge/GTK-gtkmm%203-7AAD0C?style=flat-square&logo=gnome&logoColor=white)
 ![Ubuntu](https://img.shields.io/badge/Ubuntu-%E2%9C%93-E95420?style=flat-square&logo=ubuntu&logoColor=white)
@@ -62,10 +62,10 @@
 
 ## Установка
 
-**Пакет `.deb` (рекомендуется · Ubuntu / Linux Mint)** — скачайте `vanilux_1.0_amd64.deb` со страницы [Releases](https://github.com/facilized-pbustamante/vanilux/releases) и установите:
+**Пакет `.deb` (рекомендуется · Ubuntu / Linux Mint)** — скачайте `vanilux_1.1_amd64.deb` со страницы [Releases](https://github.com/facilized-pbustamante/vanilux/releases) и установите:
 
 ```bash
-sudo apt install ./vanilux_1.0_amd64.deb
+sudo apt install ./vanilux_1.1_amd64.deb
 ```
 
 **Или соберите из исходников:**
@@ -100,6 +100,8 @@ cd vanilux
 ## Настройка (вживую)
 
 Откройте настройки кнопкой-гаечным ключом (вверху справа):
+
+![Цвет темы и языки вживую](../media/vanilux_tema_idioma.gif)
 
 | Параметр | Что делает |
 |---|---|

@@ -20,7 +20,7 @@
 
 ![Vanilux](../media/vanilux_real.gif)
 
-![version](https://img.shields.io/badge/version-1.0-e09924?style=flat-square)
+![version](https://img.shields.io/badge/version-1.1-e09924?style=flat-square)
 ![C++17](https://img.shields.io/badge/C%2B%2B-17-00599C?style=flat-square&logo=cplusplus&logoColor=white)
 ![gtkmm3](https://img.shields.io/badge/GTK-gtkmm%203-7AAD0C?style=flat-square&logo=gnome&logoColor=white)
 ![Ubuntu](https://img.shields.io/badge/Ubuntu-%E2%9C%93-E95420?style=flat-square&logo=ubuntu&logoColor=white)
@@ -61,10 +61,10 @@
 
 ## इंस्टॉलेशन
 
-**`.deb` पैकेज (अनुशंसित · Ubuntu / Linux Mint)** — [Releases](https://github.com/facilized-pbustamante/vanilux/releases) से `vanilux_1.0_amd64.deb` डाउनलोड करें और इंस्टॉल करें:
+**`.deb` पैकेज (अनुशंसित · Ubuntu / Linux Mint)** — [Releases](https://github.com/facilized-pbustamante/vanilux/releases) से `vanilux_1.1_amd64.deb` डाउनलोड करें और इंस्टॉल करें:
 
 ```bash
-sudo apt install ./vanilux_1.0_amd64.deb
+sudo apt install ./vanilux_1.1_amd64.deb
 ```
 
 **या स्रोत से बिल्ड करें:**
@@ -99,6 +99,8 @@ cd vanilux
 ## अनुकूलन (लाइव)
 
 रेंच बटन (ऊपर दाएँ) से सेटिंग्स खोलें:
+
+![लाइव थीम रंग और भाषाएँ](../media/vanilux_tema_idioma.gif)
 
 | सेटिंग | क्या करता है |
 |---|---|

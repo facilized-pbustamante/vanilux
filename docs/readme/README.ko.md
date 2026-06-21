@@ -14,16 +14,18 @@
 [中文](README.zh.md) ·
 [Français](README.fr.md) ·
 [日本語](README.ja.md) ·
-**한국어**
+**한국어** ·
+[हिन्दी](README.hi.md) ·
+[Русский](README.ru.md)
 
 ![Vanilux 실행 모습](../media/vanilux_real.gif)
 
-![버전](https://img.shields.io/badge/version-1.0-e09924?style=flat-square)
+![버전](https://img.shields.io/badge/version-1.1-e09924?style=flat-square)
 ![C++17](https://img.shields.io/badge/C%2B%2B-17-00599C?style=flat-square&logo=cplusplus&logoColor=white)
 ![gtkmm3](https://img.shields.io/badge/GTK-gtkmm%203-7AAD0C?style=flat-square&logo=gnome&logoColor=white)
 ![Ubuntu](https://img.shields.io/badge/Ubuntu-%E2%9C%93-E95420?style=flat-square&logo=ubuntu&logoColor=white)
 ![Linux Mint](https://img.shields.io/badge/Linux_Mint-%E2%9C%93-86C440?style=flat-square&logo=linuxmint&logoColor=white)
-![i18n](https://img.shields.io/badge/i18n-7%EA%B0%9C%20%EC%96%B8%EC%96%B4-e09924?style=flat-square)
+![i18n](https://img.shields.io/badge/i18n-9%EA%B0%9C%20%EC%96%B8%EC%96%B4-e09924?style=flat-square)
 
 </div>
 
@@ -44,7 +46,7 @@
 | 즐겨찾기와 최근 | 세션 간 디스크에 영구 저장. |
 | Cairo 앰버 글로우 | 선택된 아이콘의 후광을 실제 블러로 직접 그림. |
 | 실시간 테마 색상 | 색상 선택기가 전체 UI를 즉시 다시 칠함. |
-| 7개 언어 | 화면 키보드가 레이아웃을 적응(QWERTY · AZERTY · 가나 · 한글 · 주음). |
+| 9개 언어 | 화면 키보드가 레이아웃을 적응(QWERTY · AZERTY · 가나 · 한글 · 주음 · 키릴 · 데바나가리). |
 | 키보드 내비게이션 | 화살표, Enter, `f`, Esc — 마우스도 가능. |
 | 상주 프로세스 | 첫 실행에서 아이콘 로드, 이후에는 즉시. |
 | C++17 + gtkmm 3 | 네이티브하고 가벼움, Electron 없음. |
@@ -59,10 +61,10 @@
 
 ## 설치
 
-**`.deb` 패키지 (권장 · Ubuntu / Linux Mint)** — [Releases](https://github.com/facilized-pbustamante/vanilux/releases) 에서 `vanilux_1.0_amd64.deb` 를 받아 설치:
+**`.deb` 패키지 (권장 · Ubuntu / Linux Mint)** — [Releases](https://github.com/facilized-pbustamante/vanilux/releases) 에서 `vanilux_1.1_amd64.deb` 를 받아 설치:
 
 ```bash
-sudo apt install ./vanilux_1.0_amd64.deb
+sudo apt install ./vanilux_1.1_amd64.deb
 ```
 
 **또는 소스에서 빌드:**
@@ -98,11 +100,13 @@ cd vanilux
 
 렌치 버튼(오른쪽 위)으로 설정을 엽니다:
 
+![실시간 테마 색상 및 언어](../media/vanilux_tema_idioma.gif)
+
 | 설정 | 동작 |
 |---|---|
 | 테마 색상 | 휠 + 프리셋 + hex; **모든 것**을 즉시 다시 칠함. |
 | 단축키 | 치클릿 스타일 화면 키보드에서 <kbd>F1</kbd>–<kbd>F12</kbd> 또는 **Super + 키** 선택. |
-| 언어 | Español · English · Português · 中文 · Français · 日本語 · 한국어 — 전체 UI를 즉시 전환. |
+| 언어 | Español · English · Português · 中文 · Français · 日本語 · 한국어 · हिन्दी · Русский — 전체 UI를 즉시 전환. |
 
 ## 기술
 

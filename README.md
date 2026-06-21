@@ -14,16 +14,18 @@
 [中文](docs/readme/README.zh.md) ·
 [Français](docs/readme/README.fr.md) ·
 [日本語](docs/readme/README.ja.md) ·
-[한국어](docs/readme/README.ko.md)
+[한국어](docs/readme/README.ko.md) ·
+[हिन्दी](docs/readme/README.hi.md) ·
+[Русский](docs/readme/README.ru.md)
 
 ![Vanilux en acción](docs/media/vanilux_real.gif)
 
-![versión](https://img.shields.io/badge/versi%C3%B3n-1.0-e09924?style=flat-square)
+![versión](https://img.shields.io/badge/versi%C3%B3n-1.1-e09924?style=flat-square)
 ![C++17](https://img.shields.io/badge/C%2B%2B-17-00599C?style=flat-square&logo=cplusplus&logoColor=white)
 ![gtkmm3](https://img.shields.io/badge/GTK-gtkmm%203-7AAD0C?style=flat-square&logo=gnome&logoColor=white)
 ![Ubuntu](https://img.shields.io/badge/Ubuntu-%E2%9C%93-E95420?style=flat-square&logo=ubuntu&logoColor=white)
 ![Linux Mint](https://img.shields.io/badge/Linux_Mint-%E2%9C%93-86C440?style=flat-square&logo=linuxmint&logoColor=white)
-![i18n](https://img.shields.io/badge/i18n-7%20idiomas-e09924?style=flat-square)
+![i18n](https://img.shields.io/badge/i18n-9%20idiomas-e09924?style=flat-square)
 
 </div>
 
@@ -45,7 +47,7 @@ nativo, liviano y rápido. Sin Electron, sin runtime pesado.
 | Favoritos y Recientes | Persistentes en disco entre sesiones. |
 | Glow ámbar en Cairo | El halo del ícono seleccionado se dibuja a mano con un *blur* real. |
 | Color del tema en vivo | Un *color picker* recolorea toda la interfaz al instante. |
-| 7 idiomas | Teclado en pantalla que adapta su layout (QWERTY · AZERTY · kana · hangul · zhuyin). |
+| 9 idiomas | Teclado en pantalla que adapta su layout (QWERTY · AZERTY · kana · hangul · zhuyin · cirílico · devanagari). |
 | Navegación por teclado | Flechas, Enter, `f`, Esc — además del mouse. |
 | Proceso residente | La primera apertura carga los íconos; las siguientes son inmediatas. |
 | C++17 + gtkmm 3 | Nativo y liviano, sin Electron. |
@@ -60,10 +62,10 @@ nativo, liviano y rápido. Sin Electron, sin runtime pesado.
 
 ## Instalación
 
-**Paquete `.deb` (recomendado · Ubuntu / Linux Mint)** — descargá `vanilux_1.0_amd64.deb` desde [Releases](https://github.com/facilized-pbustamante/vanilux/releases) e instalalo:
+**Paquete `.deb` (recomendado · Ubuntu / Linux Mint)** — descargá `vanilux_1.1_amd64.deb` desde [Releases](https://github.com/facilized-pbustamante/vanilux/releases) e instalalo:
 
 ```bash
-sudo apt install ./vanilux_1.0_amd64.deb
+sudo apt install ./vanilux_1.1_amd64.deb
 ```
 
 **O compilá desde el código fuente:**
@@ -100,11 +102,13 @@ crea la entrada en el menú de aplicaciones y configura el atajo `F4` por vos
 
 Abrí la configuración con el botón de la llave (arriba a la derecha):
 
+![Color del tema en vivo e idiomas](docs/media/vanilux_tema_idioma.gif)
+
 | Ajuste | Qué hace |
 |---|---|
 | Color del tema | Rueda + colores predefinidos + hex; recolorea **todo** al instante. |
 | Tecla rápida | Elegí entre <kbd>F1</kbd>–<kbd>F12</kbd> o **Súper + tecla** en un teclado en pantalla estilo chiclet. |
-| Idioma | Español · English · Português · 中文 · Français · 日本語 · 한국어 — cambia toda la UI al instante. |
+| Idioma | Español · English · Português · 中文 · Français · 日本語 · 한국어 · हिन्दी · Русский — cambia toda la UI al instante. |
 
 ## Tecnología
 

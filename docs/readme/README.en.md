@@ -14,16 +14,18 @@
 [中文](README.zh.md) ·
 [Français](README.fr.md) ·
 [日本語](README.ja.md) ·
-[한국어](README.ko.md)
+[한국어](README.ko.md) ·
+[हिन्दी](README.hi.md) ·
+[Русский](README.ru.md)
 
 ![Vanilux in action](../media/vanilux_real.gif)
 
-![version](https://img.shields.io/badge/version-1.0-e09924?style=flat-square)
+![version](https://img.shields.io/badge/version-1.1-e09924?style=flat-square)
 ![C++17](https://img.shields.io/badge/C%2B%2B-17-00599C?style=flat-square&logo=cplusplus&logoColor=white)
 ![gtkmm3](https://img.shields.io/badge/GTK-gtkmm%203-7AAD0C?style=flat-square&logo=gnome&logoColor=white)
 ![Ubuntu](https://img.shields.io/badge/Ubuntu-%E2%9C%93-E95420?style=flat-square&logo=ubuntu&logoColor=white)
 ![Linux Mint](https://img.shields.io/badge/Linux_Mint-%E2%9C%93-86C440?style=flat-square&logo=linuxmint&logoColor=white)
-![i18n](https://img.shields.io/badge/i18n-7%20languages-e09924?style=flat-square)
+![i18n](https://img.shields.io/badge/i18n-9%20languages-e09924?style=flat-square)
 
 </div>
 
@@ -45,7 +47,7 @@ lightweight and fast. No Electron, no heavy runtime.
 | Favorites & Recents | Persisted on disk across sessions. |
 | Amber glow in Cairo | The selected icon's halo is hand-drawn with a real blur. |
 | Live theme color | A color picker recolors the whole UI instantly. |
-| 7 languages | On-screen keyboard that adapts its layout (QWERTY · AZERTY · kana · hangul · zhuyin). |
+| 9 languages | On-screen keyboard that adapts its layout (QWERTY · AZERTY · kana · hangul · zhuyin · cyrillic · devanagari). |
 | Keyboard navigation | Arrows, Enter, `f`, Esc — plus the mouse. |
 | Resident process | The first open loads the icons; the next ones are immediate. |
 | C++17 + gtkmm 3 | Native and lightweight, no Electron. |
@@ -60,10 +62,10 @@ lightweight and fast. No Electron, no heavy runtime.
 
 ## Installation
 
-**`.deb` package (recommended · Ubuntu / Linux Mint)** — download `vanilux_1.0_amd64.deb` from [Releases](https://github.com/facilized-pbustamante/vanilux/releases) and install it:
+**`.deb` package (recommended · Ubuntu / Linux Mint)** — download `vanilux_1.1_amd64.deb` from [Releases](https://github.com/facilized-pbustamante/vanilux/releases) and install it:
 
 ```bash
-sudo apt install ./vanilux_1.0_amd64.deb
+sudo apt install ./vanilux_1.1_amd64.deb
 ```
 
 **Or build from source:**
@@ -100,11 +102,13 @@ creates the application-menu entry and sets up the `F4` hotkey for you
 
 Open settings via the wrench button (top right):
 
+![Live theme color and languages](../media/vanilux_tema_idioma.gif)
+
 | Setting | What it does |
 |---|---|
 | Theme color | Wheel + preset swatches + hex; recolors **everything** instantly. |
 | Hotkey | Pick <kbd>F1</kbd>–<kbd>F12</kbd> or **Super + key** on a chiclet-style on-screen keyboard. |
-| Language | Español · English · Português · 中文 · Français · 日本語 · 한국어 — switches the whole UI instantly. |
+| Language | Español · English · Português · 中文 · Français · 日本語 · 한국어 · हिन्दी · Русский — switches the whole UI instantly. |
 
 ## Tech
 

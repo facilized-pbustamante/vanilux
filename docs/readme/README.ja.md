@@ -14,16 +14,18 @@
 [中文](README.zh.md) ·
 [Français](README.fr.md) ·
 **日本語** ·
-[한국어](README.ko.md)
+[한국어](README.ko.md) ·
+[हिन्दी](README.hi.md) ·
+[Русский](README.ru.md)
 
 ![Vanilux の動作](../media/vanilux_real.gif)
 
-![バージョン](https://img.shields.io/badge/version-1.0-e09924?style=flat-square)
+![バージョン](https://img.shields.io/badge/version-1.1-e09924?style=flat-square)
 ![C++17](https://img.shields.io/badge/C%2B%2B-17-00599C?style=flat-square&logo=cplusplus&logoColor=white)
 ![gtkmm3](https://img.shields.io/badge/GTK-gtkmm%203-7AAD0C?style=flat-square&logo=gnome&logoColor=white)
 ![Ubuntu](https://img.shields.io/badge/Ubuntu-%E2%9C%93-E95420?style=flat-square&logo=ubuntu&logoColor=white)
 ![Linux Mint](https://img.shields.io/badge/Linux_Mint-%E2%9C%93-86C440?style=flat-square&logo=linuxmint&logoColor=white)
-![i18n](https://img.shields.io/badge/i18n-7%E8%A8%80%E8%AA%9E-e09924?style=flat-square)
+![i18n](https://img.shields.io/badge/i18n-9%E8%A8%80%E8%AA%9E-e09924?style=flat-square)
 
 </div>
 
@@ -44,7 +46,7 @@
 | お気に入りと最近 | ディスクに永続化、セッションをまたいで保持。 |
 | Cairo のアンバーグロー | 選択アイコンのハローを実ブラーで手描き。 |
 | ライブのテーマカラー | カラーピッカーが UI 全体を即座に再着色。 |
-| 7 言語 | オンスクリーンキーボードがレイアウトを適応（QWERTY · AZERTY · かな · ハングル · 注音）。 |
+| 9 言語 | オンスクリーンキーボードがレイアウトを適応（QWERTY · AZERTY · かな · ハングル · 注音 · キリル · デーヴァナーガリー）。 |
 | キーボード操作 | 矢印・Enter・`f`・Esc — マウスも可。 |
 | 常駐プロセス | 初回起動でアイコンを読み込み、以降は即時。 |
 | C++17 + gtkmm 3 | ネイティブで軽量、Electron なし。 |
@@ -59,10 +61,10 @@
 
 ## インストール
 
-**`.deb` パッケージ（推奨 · Ubuntu / Linux Mint）** — [Releases](https://github.com/facilized-pbustamante/vanilux/releases) から `vanilux_1.0_amd64.deb` をダウンロードしてインストール：
+**`.deb` パッケージ（推奨 · Ubuntu / Linux Mint）** — [Releases](https://github.com/facilized-pbustamante/vanilux/releases) から `vanilux_1.1_amd64.deb` をダウンロードしてインストール：
 
 ```bash
-sudo apt install ./vanilux_1.0_amd64.deb
+sudo apt install ./vanilux_1.1_amd64.deb
 ```
 
 **またはソースからビルド：**
@@ -98,11 +100,13 @@ cd vanilux
 
 レンチボタン（右上）から設定を開きます：
 
+![テーマカラーと言語のライブ切り替え](../media/vanilux_tema_idioma.gif)
+
 | 設定 | はたらき |
 |---|---|
 | テーマカラー | ホイール＋プリセット＋ hex。**すべて**を即座に再着色。 |
 | ショートカット | チクレット風のオンスクリーンキーボードで <kbd>F1</kbd>–<kbd>F12</kbd> または **Super + キー** を選択。 |
-| 言語 | Español · English · Português · 中文 · Français · 日本語 · 한국어 — UI 全体を即座に切り替え。 |
+| 言語 | Español · English · Português · 中文 · Français · 日本語 · 한국어 · हिन्दी · Русский — UI 全体を即座に切り替え。 |
 
 ## 技術
 
