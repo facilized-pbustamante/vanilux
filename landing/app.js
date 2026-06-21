@@ -65,7 +65,7 @@ const TR = {
   nav_releases:["Releases ↗","Releases ↗","Releases ↗","版本 ↗","Versions ↗","リリース ↗","릴리스 ↗", "रिलीज़ ↗", "Релизы ↗"],
 
   hero_h1:[
-    'El lanzador de apps con alma de <span class="x">terminal</span>.',
+    'El Launcher de apps con alma de <span class="x">terminal</span>.',
     'The app launcher with a <span class="x">terminal</span> soul.',
     'O lançador de apps com alma de <span class="x">terminal</span>.',
     '拥有<span class="x">终端</span>之魂的应用启动器。',
@@ -73,7 +73,7 @@ const TR = {
     '<span class="x">ターミナル</span>の魂を持つアプリランチャー。',
     '<span class="x">터미널</span>의 영혼을 가진 앱 런처.', "एक <span class=\"x\">टर्मिनल</span> की आत्मा वाला ऐप लॉन्चर।", "Лаунчер приложений с душой <span class=\"x\">терминала</span>."],
   hero_sub:[
-    "Lanzador a pantalla completa para Linux, estilo Launchpad, con estética ámbar de terminal. Residente, instantáneo y personalizable hasta el píxel.",
+    "Launcher a pantalla completa para Linux, estilo Launchpad, con estética ámbar de terminal. Residente, instantáneo y personalizable hasta el píxel.",
     "A fullscreen app launcher for Linux, Launchpad-style, with an amber terminal aesthetic. Resident, instant, and customizable down to the pixel.",
     "Lançador em tela cheia para Linux, estilo Launchpad, com estética âmbar de terminal. Residente, instantâneo e personalizável até o pixel.",
     "面向 Linux 的全屏应用启动器，Launchpad 风格，琥珀色终端美学。常驻、即时，可定制到每个像素。",
@@ -92,9 +92,9 @@ const TR = {
     '<span class="kbd">F4</span> 로 호출하면 상주합니다 — 다음 실행은 즉시.', "<span class=\"kbd\">F4</span> से बुलाएँ; यह रेज़िडेंट रहता है — अगली बार तुरंत खुलता है।", "Вызывается по <span class=\"kbd\">F4</span>; остаётся резидентным — следующее открытие мгновенно."],
 
   sim_eyebrow:["Simulador en vivo","Live simulator","Simulador ao vivo","实时模拟器","Simulateur en direct","ライブシミュレーター","라이브 시뮬레이터", "लाइव सिम्युलेटर", "Живой симулятор"],
-  sim_title:["Tomale el peso. Acá mismo.","Take it for a spin. Right here.","Experimente. Aqui mesmo.","现在就来试试。","Essayez-le. Ici même.","ここで触ってみて。","지금 여기서 체험해 보세요.", "अभी आज़माएँ। यहीं।", "Попробуйте прямо здесь."],
+  sim_title:["Pruébalo. Aquí mismo.","Take it for a spin. Right here.","Experimente. Aqui mesmo.","现在就来试试。","Essayez-le. Ici même.","ここで触ってみて。","지금 여기서 체험해 보세요.", "अभी आज़माएँ। यहीं।", "Попробуйте прямо здесь."],
   sim_desc:[
-    'Esto es Vanilux corriendo en tu navegador (con apps inventadas para la demo). Buscá, filtrá por categorías, marcá favoritos — y, sobre todo, <span class="amber">cambiá el color del tema y el idioma</span>: todo se recolorea y se retraduce al instante, igual que en la app real.',
+    'Esto es Vanilux corriendo en tu navegador (con apps inventadas para la demo). Busca, filtra por categorías, marca favoritos — y, sobre todo, <span class="amber">cambia el color del tema y el idioma</span>: todo se recolorea y se retraduce al instante, igual que en la app real.',
     'This is Vanilux running in your browser (with made-up apps for the demo). Search, filter by category, star favorites — and above all, <span class="amber">change the theme color and the language</span>: everything recolors and re-translates instantly, just like the real app.',
     'Isto é o Vanilux rodando no seu navegador (com apps fictícios para a demo). Busque, filtre por categorias, marque favoritos — e, acima de tudo, <span class="amber">mude a cor do tema e o idioma</span>: tudo se recolore e se retraduz na hora, como no app real.',
     '这是在你浏览器中运行的 Vanilux（演示用的是虚构应用）。搜索、按类别筛选、收藏——更重要的是，<span class="amber">更改主题颜色和语言</span>：一切都会即时变色并重新翻译，和真实应用一样。',
@@ -105,7 +105,7 @@ const TR = {
   feat_eyebrow:["Características","Features","Recursos","特性","Fonctionnalités","機能","기능", "विशेषताएँ", "Возможности"],
   feat_title:["Diseñado para no estorbar.","Built to stay out of your way.","Feito para não atrapalhar.","为不打扰你而设计。","Conçu pour ne pas vous gêner.","邪魔をしない設計。","방해하지 않도록 설계했습니다.", "रास्ते से हटकर काम करने के लिए बनाया गया।", "Создан, чтобы не мешать."],
   feat_desc:[
-    "Cada decisión apunta a lo mismo: que abras lo que buscás en milisegundos y vuelvas a lo tuyo.",
+    "Cada decisión apunta a lo mismo: que abras lo que buscas en milisegundos y vuelvas a lo tuyo.",
     "Every decision serves one goal: open what you need in milliseconds and get back to work.",
     "Cada decisão serve a um objetivo: abrir o que você precisa em milissegundos e voltar ao que importa.",
     "每个决定都指向同一目标：在毫秒内打开你要的，然后回到正事。",
@@ -133,7 +133,7 @@ const TR = {
     "시스템과 사용자의 .desktop 파일을 파싱합니다. NoDisplay, Hidden, TryExec 준수. 설정 불필요.", "सिस्टम और उपयोगकर्ता की .desktop फ़ाइलों को पार्स करता है (NoDisplay, Hidden, TryExec का सम्मान)।", "Разбирает системные и пользовательские .desktop (учитывает NoDisplay, Hidden, TryExec)."],
   f3t:["Búsqueda incremental","Incremental search","Busca incremental","增量搜索","Recherche incrémentale","インクリメンタル検索","점진적 검색", "इंक्रीमेंटल खोज", "Инкрементальный поиск"],
   f3d:[
-    "Filtra por nombre al instante, sin distinguir mayúsculas, con case-folding Unicode. Empezá a escribir y listo.",
+    "Filtra por nombre al instante, sin distinguir mayúsculas, con case-folding Unicode. Empieza a escribir y listo.",
     "Filters by name instantly, case-insensitive with Unicode case-folding. Just start typing.",
     "Filtra por nome na hora, sem diferenciar maiúsculas, com case-folding Unicode. É só começar a digitar.",
     "按名称即时筛选，不区分大小写，支持 Unicode 大小写折叠。开始输入即可。",
@@ -142,7 +142,7 @@ const TR = {
     "이름으로 즉시 필터링, 대소문자 구분 없이 유니코드 케이스 폴딩 지원. 입력만 하면 됩니다.", "नाम से छानें, केस-असंवेदनशील, Unicode केस-फ़ोल्डिंग के साथ।", "Фильтр по имени, без учёта регистра, с Unicode case-folding."],
   f4t:["Favoritos y Recientes","Favorites & Recents","Favoritos e Recentes","收藏与最近","Favoris et Récents","お気に入りと最近","즐겨찾기와 최근", "पसंदीदा और हाल के", "Избранное и недавние"],
   f4d:[
-    "Marcá lo que más usás; Vanilux recuerda lo último que abriste. Persistente en disco entre sesiones.",
+    "Marca lo que más usas; Vanilux recuerda lo último que abriste. Persistente en disco entre sesiones.",
     "Star what you use most; Vanilux remembers what you opened last. Persisted on disk across sessions.",
     "Marque o que mais usa; o Vanilux lembra o que você abriu por último. Persistente em disco entre sessões.",
     "收藏常用应用；Vanilux 记住你最近打开的。跨会话持久保存到磁盘。",
@@ -160,7 +160,7 @@ const TR = {
     "선택된 아이콘의 후광을 실제 블러로 직접 그립니다 — 선명한 가장자리, 균일한 광채.", "चयनित आइकन का प्रभामंडल असली ब्लर के साथ हाथ से बनाया गया।", "Ореол выбранного значка нарисован вручную с настоящим размытием."],
   f6t:["Tema en vivo · 9 idiomas","Live theme · 9 languages","Tema ao vivo · 9 idiomas","实时主题 · 9 种语言","Thème en direct · 9 langues","ライブテーマ・9言語","실시간 테마 · 9개 언어", "लाइव थीम · 9 भाषाएँ", "Живая тема · 9 языков"],
   f6d:[
-    "Color picker que recolorea todo en tiempo real y un teclado en pantalla para el atajo. Español, inglés, portugués, 中文, français, 日本語, 한국어.",
+    "Color picker que recolorea todo en tiempo real y un teclado en pantalla para el atajo. Español, inglés, portugués, 中文, français, 日本語, 한국어, हिन्दी, Русский.",
     "A color picker that recolors everything in real time and an on-screen keyboard for the hotkey. Spanish, English, Portuguese, 中文, français, 日本語, 한국어.",
     "Um seletor de cor que recolore tudo em tempo real e um teclado na tela para o atalho. Espanhol, inglês, português, 中文, français, 日本語, 한국어.",
     "实时为所有元素变色的取色器，以及用于设置快捷键的屏幕键盘。西班牙语、英语、葡萄牙语、中文、法语、日语、韩语。",
@@ -191,10 +191,10 @@ const TR = {
   spec_colors:["colores de tema","theme colors","cores de tema","主题颜色","couleurs de thème","テーマカラー","테마 색상", "थीम रंग", "цветов темы"],
   spec_kbd:["teclado · sin mouse","keyboard · no mouse","teclado · sem mouse","键盘 · 无需鼠标","clavier · sans souris","キーボード・マウス不要","키보드 · 마우스 불필요", "कीबोर्ड · बिना माउस", "клавиатура · без мыши"],
 
-  dl_eyebrow:["Empezá ahora","Get started","Comece agora","现在开始","Commencez","今すぐ始める","지금 시작하기", "शुरू करें", "Начать"],
-  dl_title:["Llevátelo a tu Linux.","Get it on your Linux.","Leve para o seu Linux.","装到你的 Linux 上。","Installez-le sur votre Linux.","あなたの Linux へ。","당신의 Linux에 설치하세요.", "इसे अपने Linux पर लें।", "Поставьте на свой Linux."],
+  dl_eyebrow:["Empieza ahora","Get started","Comece agora","现在开始","Commencez","今すぐ始める","지금 시작하기", "शुरू करें", "Начать"],
+  dl_title:["Llévalo a tu Linux.","Get it on your Linux.","Leve para o seu Linux.","装到你的 Linux 上。","Installez-le sur votre Linux.","あなたの Linux へ。","당신의 Linux에 설치하세요.", "इसे अपने Linux पर लें।", "Поставьте на свой Linux."],
   dl_desc:[
-    'Cloná, compilá e instalá. El instalador configura el atajo <span class="kbd">F4</span> por vos.',
+    'Clona, compila e instala. El instalador configura el atajo <span class="kbd">F4</span> por ti.',
     'Clone, build and install. The installer sets up the <span class="kbd">F4</span> hotkey for you.',
     'Clone, compile e instale. O instalador configura o atalho <span class="kbd">F4</span> para você.',
     '克隆、编译、安装。安装脚本会为你配置 <span class="kbd">F4</span> 快捷键。',
